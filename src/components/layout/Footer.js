@@ -1,0 +1,107 @@
+// =============================================================================
+// src/components/layout/Footer.js — Site Footer
+// Footer พร้อม links, social icons, และ branding
+// ใช้งานร่วมกับ: src/app/layout.js, src/app/globals.css
+// =============================================================================
+
+import Link from 'next/link'
+
+const FOOTER_LINKS = {
+  'Menu': [
+    { label: 'Main', href: '#hero' },
+    { label: 'Projects', href: '#projects' },
+    { label: 'Contact Me', href: '#contact' },
+  ],
+  'Information': [
+    { label: 'About Me', href: '/about' },
+    { label: 'Privacy Policy', href: '/privacy' },
+    { label: 'Terms of Service', href: '/terms' },
+  ],
+}
+
+export default function Footer() {
+  const currentYear = new Date().getFullYear()
+
+  return (
+    <footer className="relative border-t border-white/5" style={{ background: 'linear-gradient(180deg, #0a0a0f 0%, #0d0d1a 100%)' }}>
+
+      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-500/50 to-transparent" />
+
+      <div className="section-container py-16">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+
+          {/* ------------------- Brand Column ------------------- */}
+          <div className="md:col-span-2 space-y-4">
+            {/* Logo */}
+            <Link href="/" className="inline-flex items-center gap-3 group">
+              <div className="w-10 h-10 rounded-xl bg-gradient-brand flex items-center justify-center">
+                <span className="text-white font-bold text-lg" style={{ fontFamily: 'Outfit, sans-serif' }}>P</span>
+              </div>
+              <span className="text-xl font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                Port<span className="gradient-text">Me</span>
+              </span>
+            </Link>
+
+            {/* Description */}
+            <p className="text-gray-500 text-sm leading-relaxed max-w-sm">
+              Personal website with Admin Dashboard that can manage projects and images.
+            </p>
+
+            {/* Social Icons */}
+            <div className="flex items-center gap-3 pt-2">
+              {[
+                { label: 'Facebook', icon: 'F', href: '#' },
+                { label: 'Twitter/X', icon: 'X', href: '#' },
+                { label: 'Instagram', icon: 'IG', href: '#' },
+                { label: 'Line', icon: 'L', href: '#' },
+              ].map(({ label, icon, href }) => (
+                <a
+                  key={label}
+                  href={href}
+                  aria-label={label}
+                  className="w-9 h-9 rounded-lg border border-white/10 flex items-center justify-center text-xs font-bold text-gray-400 hover:text-white hover:border-brand-500/50 hover:bg-brand-500/10 transition-all duration-200"
+                >
+                  {icon}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* ------------------- Links Columns ------------------- */}
+          {Object.entries(FOOTER_LINKS).map(([title, links]) => (
+            <div key={title} className="space-y-4">
+              <h3 className="text-white font-semibold text-sm uppercase tracking-wider">{title}</h3>
+              <ul className="space-y-2.5">
+                {links.map(({ label, href }) => (
+                  <li key={href}>
+                    <a
+                      href={href}
+                      className="text-gray-500 text-sm hover:text-gray-300 transition-colors duration-200 flex items-center gap-2 group"
+                    >
+                      <span className="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-brand-500 transition-colors" />
+                      {label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+
+        {/* ------------------- Bottom Bar ------------------- */}
+        <div className="mt-12 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p className="text-gray-600 text-xs">
+            © {currentYear} PortMe. สงวนลิขสิทธิ์ทุกประการ
+          </p>
+          <div className="flex items-center gap-4">
+            <span className="text-gray-700 text-xs">Built with Next.js 16 + Tailwind CSS</span>
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-gray-600 text-xs">All systems operational</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </footer>
+  )
+}
