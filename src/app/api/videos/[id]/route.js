@@ -14,6 +14,15 @@ export async function PUT(request, { params }) {
     // ลบ id ออกจาก body เพื่อไม่ให้ถูก update
     const { id: _, createdAt, updatedAt, ...updateData } = body
 
+    // ตรวจสอบว่า video มีอยู่
+    const existingVideo = await prisma.video.findUnique({
+      where: { id },
+    })
+
+    if (!existingVideo) {
+      return NextResponse.json({ error: 'Video not found' }, { status: 404 })
+    }
+
     const video = await prisma.video.update({
       where: { id },
       data: updateData,
@@ -21,6 +30,9 @@ export async function PUT(request, { params }) {
 
     return NextResponse.json(video)
   } catch (error) {
+    if (error.message?.includes('Unauthorized')) {
+      return NextResponse.json({ error: 'Forbidden: Admin only' }, { status: 403 })
+    }
     console.error('[API] Update video error:', error)
     return NextResponse.json({ error: error.message || 'Failed to update video' }, { status: 500 })
   }

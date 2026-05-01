@@ -18,6 +18,18 @@ export default function DeleteVideoButtonClient({ videoId }) {
         method: 'DELETE',
       })
 
+      if (res.status === 403) {
+        alert('คุณไม่มีสิทธิ์ลบวิดีโอนี้ (เฉพาะ Admin เท่านั้น)')
+        setIsDeleting(false)
+        return
+      }
+
+      if (res.status === 404) {
+        alert('ไม่พบวิดีโอที่ต้องการลบ')
+        setIsDeleting(false)
+        return
+      }
+
       if (res.ok) {
         router.push('/admin/videos')
         router.refresh()
@@ -27,7 +39,7 @@ export default function DeleteVideoButtonClient({ videoId }) {
         setIsDeleting(false)
       }
     } catch (e) {
-      alert('เกิดข้อผิดพลาดในการลบ')
+      alert('เกิดข้อผิดพลาดในการลบ: ' + e.message)
       setIsDeleting(false)
     }
   }

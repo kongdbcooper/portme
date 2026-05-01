@@ -22,11 +22,17 @@ const ALLOWED_TYPES = [
 
 export async function POST(request) {
   try {
-      console.log('R2_ACCOUNT_ID:', process.env.CLOUDFLARE_ACCOUNT_ID)
-      console.log('R2_ACCESS_KEY:', process.env.R2_ACCESS_KEY_ID)
-      console.log('R2_SECRET_KEY:', process.env.R2_SECRET_ACCESS_KEY)
-      console.log('R2_BUCKET_NAME:', process.env.R2_BUCKET_NAME)
-      console.log('R2_PUBLIC_URL:', process.env.R2_PUBLIC_URL)
+    console.log('[ENV CHECK]', {
+      accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
+      hasKey: !!process.env.R2_ACCESS_KEY_ID,
+      hasSecret: !!process.env.R2_SECRET_ACCESS_KEY,
+      bucket: process.env.R2_BUCKET_NAME,
+    })
+    console.log('R2_ACCOUNT_ID:', process.env.CLOUDFLARE_ACCOUNT_ID)
+    console.log('R2_ACCESS_KEY:', process.env.R2_ACCESS_KEY_ID)
+    console.log('R2_SECRET_KEY:', process.env.R2_SECRET_ACCESS_KEY)
+    console.log('R2_BUCKET_NAME:', process.env.R2_BUCKET_NAME)
+    console.log('R2_PUBLIC_URL:', process.env.R2_PUBLIC_URL)
       console.log('R2_ENDPOINT:', process.env.R2_ENDPOINT)
       console.log('FINAL ENDPOINT:', `https://${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`)
     // ตรวจสอบว่าเป็น Admin เท่านั้นที่อัปโหลดได้
@@ -51,6 +57,11 @@ export async function POST(request) {
       console.warn('[Upload] No file provided')
       return NextResponse.json({ error: 'กรุณาเลือกไฟล์รูปภาพ' }, { status: 400 })
     }
+    if (!file.type) {
+      console.warn('[Upload] Missing file type')
+      return NextResponse.json({ error: 'ไฟล์ประเภทไม่ถูกต้อง' }, { status: 400 })
+
+    }
 
     // ตรวจสอบประเภทไฟล์
     if (!ALLOWED_TYPES.includes(file.type)) {
@@ -69,6 +80,13 @@ export async function POST(request) {
         { status: 400 }
       )
     }
+
+    console.log('[Upload Debug]', {
+        endpoint: `https://${process.env.CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com`,
+        bucket: process.env.R2_BUCKET_NAME,
+        fileType: file.type,
+       fileSize: file.size,
+    })
 
     // ------------------- Upload to R2 -------------------
     console.log('[Upload] Uploading to R2...')

@@ -13,6 +13,7 @@ import { prisma } from '@/lib/prisma'
 
 import HeroSection from '@/components/sections/HeroSection'
 import ProductSection from '@/components/sections/ProductSection'
+import VideoSection from '@/components/sections/VideoSection'
 import ContactSection from '@/components/sections/ContactSection'
 
 // ------------------- SEO Metadata -------------------
@@ -54,7 +55,10 @@ export default async function HomePage() {
       {/* Section 2: Products */}
       <ProductSection abVariant={abVariant} settings={settingsMap} />
 
-      {/* Section 3: Contact / Video Showcase */}
+      {/* Section 3: Videos */}
+      <VideoSection />
+
+      {/* Section 4: Contact */}
       <ContactSection settings={settingsMap} videos={videos} />
     </>
   )

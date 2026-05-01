@@ -31,8 +31,8 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
     const category = searchParams.get('category')
-    const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '12')
+    const page = parseInt(searchParams.get('page') || '1')
     const adminView = searchParams.get('admin') === 'true'
 
     const where = {
@@ -40,11 +40,15 @@ export async function GET(request) {
       ...(category ? { category } : {}),
     }
 
+    // เมื่อมีการระบุ limit แบบเฉพาะเจาะจง (เช่น limit=1000 สำหรับ frontend carousel)
+    // จะไม่ใช้ pagination
+    const isPaginationEnabled = limit <= 100
+
     const [products, total] = await Promise.all([
       prisma.product.findMany({
         where,
         orderBy: { createdAt: 'desc' },
-        skip: (page - 1) * limit,
+        skip: isPaginationEnabled ? (page - 1) * limit : 0,
         take: limit,
       }),
       prisma.product.count({ where }),
@@ -52,12 +56,14 @@ export async function GET(request) {
 
     return NextResponse.json({
       products,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+      ...(isPaginationEnabled && {
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      }),
     })
 
   } catch (error) {
