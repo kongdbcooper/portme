@@ -2,7 +2,7 @@
 CREATE TYPE "UserRole" AS ENUM ('ADMIN', 'USER');
 
 -- CreateEnum
-CREATE TYPE "ABVariant" AS ENUM ('A', 'B');
+CREATE TYPE "ABVariant" AS ENUM ('A', 'B', 'C');
 
 -- CreateEnum
 CREATE TYPE "ABEventType" AS ENUM ('VIEW', 'CLICK', 'CONVERSION');
@@ -57,6 +57,21 @@ CREATE TABLE "site_settings" (
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "site_settings_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "videos" (
+    "id" TEXT NOT NULL,
+    "title" TEXT NOT NULL,
+    "description" TEXT,
+    "videoUrl" TEXT NOT NULL,
+    "videoKey" TEXT,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "order" INTEGER NOT NULL DEFAULT 0,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "videos_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex

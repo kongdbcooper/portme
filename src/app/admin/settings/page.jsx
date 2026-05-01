@@ -42,6 +42,15 @@ export default function AdminSettingsPage() {
         body: JSON.stringify({ key, value }),
       })
       
+      if (res.status === 403) {
+        throw new Error('คุณไม่มีสิทธิ์แก้ไขการตั้งค่า (เฉพาะ Admin เท่านั้น)')
+      }
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to save')
+      }
+
       const data = await res.json()
       if (data.success) {
         setSettings(prev => ({ ...prev, [key]: value }))

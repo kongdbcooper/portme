@@ -14,11 +14,12 @@ import {
   GetObjectCommand,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { NodeHttpHandler } from '@aws-sdk/node-http-handler'
 
 // ------------------- R2 Client Configuration -------------------
 // Cloudflare R2 endpoint รูปแบบ: https://{ACCOUNT_ID}.r2.cloudflarestorage.com
 const accountId = process.env.CLOUDFLARE_ACCOUNT_ID
-const R2_ENDPOINT = `https://${accountId}.r2.cloudflarestorage.com`
+const R2_ENDPOINT = process.env.R2_ENDPOINT || `https://${accountId}.r2.cloudflarestorage.com`
 
 if (!accountId) {
   console.warn('[R2] Warning: CLOUDFLARE_ACCOUNT_ID is not defined in environment variables')
@@ -31,7 +32,24 @@ export const r2Client = new S3Client({
     accessKeyId: process.env.R2_ACCESS_KEY_ID,
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
   },
-  forcePathStyle: true, // ช่วยให้การเชื่อมต่อกับ R2 เสถียรขึ้น
+  forcePathStyle: true,
+  tls: true,
+  requestTimeout: 30000,
+  connectionTimeout: 10000,
+  maxAttempts: 3,
+  // ใช้ Node.js native http handler เพื่อหลีกเลี่ยง SSL issues
+  requestHandler: new NodeHttpHandler({
+    httpAgent: new (require('http').Agent)({
+      keepAlive: true,
+      maxSockets: 25,
+    }),
+    httpsAgent: new (require('https').Agent)({
+      keepAlive: true,
+      maxSockets: 25,
+      // ปิด certificate verification เนื่องจาก R2 ใช้ self-signed cert
+      rejectUnauthorized: false,
+    }),
+  }),
 })
 
 // ------------------- Upload File to R2 -------------------

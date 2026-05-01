@@ -19,7 +19,26 @@ export default function DeleteProductButton({ productId, productName }) {
     setIsDeleting(true)
     try {
       const res = await fetch(`/api/products/${productId}`, { method: 'DELETE' })
-      if (!res.ok) throw new Error('Delete failed')
+      
+      if (res.status === 403) {
+        alert('คุณไม่มีสิทธิ์ลบโปรดักซ์นี้ (เฉพาะ Admin เท่านั้น)')
+        setIsDeleting(false)
+        setShowConfirm(false)
+        return
+      }
+
+      if (res.status === 404) {
+        alert('ไม่พบโปรดักซ์ที่ต้องการลบ')
+        setIsDeleting(false)
+        setShowConfirm(false)
+        return
+      }
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Delete failed')
+      }
+      
       router.refresh() // รีโหลด server data
     } catch (err) {
       alert('ลบโปรดักซ์ไม่สำเร็จ: ' + err.message)

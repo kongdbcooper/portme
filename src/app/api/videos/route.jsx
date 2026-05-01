@@ -6,9 +6,13 @@ import { requireAdmin } from '@/lib/auth'
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
-    const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit'), 10) : undefined
+    // ถ้า limit ระบุเป็นตัวเลขจะใช้นั้น, มิฉะนั้น ดึงทั้งหมด (unlimited)
+    const limit = searchParams.get('limit') 
+      ? parseInt(searchParams.get('limit'), 10) 
+      : undefined
 
     const videos = await prisma.video.findMany({
+      where: { isActive: true },
       orderBy: [
         { order: 'asc' },
         { createdAt: 'desc' },
@@ -46,6 +50,9 @@ export async function POST(request) {
 
     return NextResponse.json(video)
   } catch (error) {
+    if (error.message?.includes('Unauthorized')) {
+      return NextResponse.json({ error: 'Forbidden: Admin only' }, { status: 403 })
+    }
     console.error('[API] Create video error:', error)
     return NextResponse.json({ error: error.message || 'Failed to create video' }, { status: 500 })
   }

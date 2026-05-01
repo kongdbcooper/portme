@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic';
 
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
+import VideoUploadTable from '@/components/admin/VideoUploadTable'
 
 export default async function VideosPage() {
   const videos = await prisma.video.findMany({
@@ -31,6 +32,12 @@ export default async function VideosPage() {
           </svg>
           เพิ่มวิดีโอใหม่
         </Link>
+      </div>
+
+      {/* Video Upload Table */}
+      <div>
+        <h3 className="text-lg font-semibold text-white mb-3">อัปโหลดวิดีโอใหม่</h3>
+        <VideoUploadTable />
       </div>
 
       {/* Video List */}

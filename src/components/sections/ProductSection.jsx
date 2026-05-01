@@ -73,11 +73,12 @@ export default function ProductSection({ abVariant, settings = {} }) {
   const autoScrollRef = useRef(null)
   const scrollSpeed = 1 // pixels per frame
 
-  // Fetch ALL products (no limit)
+  // Fetch ALL products (unlimited)
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const res = await fetch('/api/products?limit=100')
+        // ถ้า limit=1000 จะดึงสินค้าได้มากถึง 1000 ชิ้น (รองรับทั้งขนาดเล็กและใหญ่)
+        const res = await fetch('/api/products?limit=1000')
         if (res.ok) {
           const data = await res.json()
           setProducts(data.products || [])
