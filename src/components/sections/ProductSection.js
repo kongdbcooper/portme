@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef, useCallback } from 'react'
+import EditableBlock from '../admin/EditableBlock'
 
 // ------------------- 3D Tilt Card Component -------------------
 function TiltCard({ children, className, onClick }) {
@@ -63,7 +64,7 @@ function TiltCard({ children, className, onClick }) {
 }
 
 // ------------------- Main ProductSection Component -------------------
-export default function ProductSection({ abVariant }) {
+export default function ProductSection({ abVariant, settings = {} }) {
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedProduct, setSelectedProduct] = useState(null)
@@ -187,15 +188,21 @@ export default function ProductSection({ abVariant }) {
               <div className="space-y-6">
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-bold uppercase tracking-wider">
                   <span className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse" />
-                  About Me
+                  <EditableBlock settingKey="prod_badge" defaultText={settings.prod_badge || "About Me"} />
                 </div>
 
                 <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-white leading-tight">
-                  Hi, I'm <span className="text-brand-400">Pang</span>
+                  <EditableBlock as="span" settingKey="prod_title_1" defaultText={settings.prod_title_1 || "Hi, I'm "} />
+                  <EditableBlock as="span" className="text-brand-400" settingKey="prod_title_2" defaultText={settings.prod_title_2 || "Pang"} />
                 </h2>
 
                 <p className="text-gray-400 text-lg leading-relaxed max-w-md">
-                  A passionate developer who loves building modern web applications. I specialize in full-stack development with Next.js, React, and Node.js. Let's create something amazing together.
+                  <EditableBlock 
+                    as="span" 
+                    settingKey="prod_desc" 
+                    multiline 
+                    defaultText={settings.prod_desc || "A passionate developer who loves building modern web applications. I specialize in full-stack development with Next.js, React, and Node.js. Let's create something amazing together."} 
+                  />
                 </p>
 
                 <div className="flex items-center gap-4">
@@ -203,7 +210,7 @@ export default function ProductSection({ abVariant }) {
                     <svg className="w-4 h-4 text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                     </svg>
-                    Full-Stack Developer
+                    <EditableBlock settingKey="prod_role" defaultText={settings.prod_role || "Full-Stack Developer"} />
                   </div>
                   <div className="w-1 h-1 rounded-full bg-gray-600" />
                   <div className="flex items-center gap-2 text-gray-500 text-sm">
@@ -211,7 +218,7 @@ export default function ProductSection({ abVariant }) {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
-                    Thailand
+                    <EditableBlock settingKey="prod_location" defaultText={settings.prod_location || "Thailand"} />
                   </div>
                 </div>
 
@@ -252,7 +259,7 @@ export default function ProductSection({ abVariant }) {
         {/* ================= Section Heading ================= */}
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-white mb-4">
-            Try to click the image
+            <EditableBlock settingKey="prod_section_title" defaultText={settings.prod_section_title || "Try to click the image"} />
           </h2>
           <p className="text-lg text-gray-400">
             {abVariant === 'A' ? 'You will see the pop up' : 'You will see the button'}

@@ -7,10 +7,11 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import EditableBlock from '../admin/EditableBlock'
 
-export default function HeroSection({ backgroundUrl }) {
+export default function HeroSection({ settings = {} }) {
   const canvasRef = useRef(null)
-  const [heroBgUrl, setHeroBgUrl] = useState(backgroundUrl || null)
+  const [heroBgUrl, setHeroBgUrl] = useState(settings.hero_background_url || null)
 
   // ดึง background URL จาก settings API
   useEffect(() => {
@@ -27,10 +28,11 @@ export default function HeroSection({ backgroundUrl }) {
     }
     
     // ดึงตอน mount เท่านั้น ถ้าไม่มี prop backgroundUrl
-    if (!backgroundUrl) {
+    // เราใช้ settings prop เป็นหลักแล้ว แต่ก็มี fallback เล็กน้อย
+    if (!settings.hero_background_url) {
       fetchSettings()
     }
-  }, [backgroundUrl])
+  }, [settings.hero_background_url])
 
   // ------------------- Particle Animation -------------------
   // สร้าง floating particles บน canvas background
@@ -143,22 +145,24 @@ export default function HeroSection({ backgroundUrl }) {
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-300 text-sm font-medium mb-8 animate-fade-in">
           <span className="w-2 h-2 rounded-full bg-brand-400 animate-pulse" />
-          แพลตฟอร์มจัดการโปรดักซ์ยุคใหม่
+          <EditableBlock settingKey="hero_badge" defaultText={settings.hero_badge || "แพลตฟอร์มจัดการโปรดักซ์ยุคใหม่"} />
         </div>
 
         {/* Main Headline */}
         <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 animate-fade-up leading-none" style={{ fontFamily: 'Outfit, sans-serif' }}>
-          <span className="text-white">จัดการ</span>
-          <br />
-          <span className="animated-gradient-text">โปรดักซ์</span>
-          <br />
-          <span className="text-white">อย่างมืออาชีพ</span>
+          <EditableBlock as="span" className="text-white block" settingKey="hero_title_1" defaultText={settings.hero_title_1 || "จัดการ"} />
+          <EditableBlock as="span" className="animated-gradient-text block" settingKey="hero_title_2" defaultText={settings.hero_title_2 || "โปรดักซ์"} />
+          <EditableBlock as="span" className="text-white block" settingKey="hero_title_3" defaultText={settings.hero_title_3 || "อย่างมืออาชีพ"} />
         </h1>
 
         {/* Subheadline */}
         <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 animate-fade-up" style={{ animationDelay: '0.2s' }}>
-          ระบบ Admin Dashboard ที่ครบครัน อัปโหลดรูปภาพสู่ Cloudflare R2 อัตโนมัติ 
-          พร้อม A/B Testing และ Google Analytics ในตัว
+          <EditableBlock 
+            as="span" 
+            settingKey="hero_subtitle" 
+            multiline 
+            defaultText={settings.hero_subtitle || "ระบบ Admin Dashboard ที่ครบครัน อัปโหลดรูปภาพสู่ Cloudflare R2 อัตโนมัติ พร้อม A/B Testing และ Google Analytics ในตัว"} 
+          />
         </p>
 
         {/* CTA Buttons */}

@@ -11,11 +11,14 @@ import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth'
 import { uploadToR2 } from '@/lib/r2'
 
-// ขนาดไฟล์สูงสุด: 5MB
-const MAX_FILE_SIZE = 5 * 1024 * 1024
+// ขนาดไฟล์สูงสุด: 50MB (รองรับ Video)
+const MAX_FILE_SIZE = 50 * 1024 * 1024
 
 // ประเภทไฟล์ที่อนุญาต
-const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
+const ALLOWED_TYPES = [
+  'image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif',
+  'video/mp4', 'video/webm', 'video/ogg'
+]
 
 export async function POST(request) {
   try {
@@ -53,7 +56,7 @@ export async function POST(request) {
     if (!ALLOWED_TYPES.includes(file.type)) {
       console.warn(`[Upload] Invalid file type: ${file.type}`)
       return NextResponse.json(
-        { error: 'รองรับเฉพาะไฟล์ JPEG, PNG, WebP และ GIF เท่านั้น' },
+        { error: 'รองรับเฉพาะไฟล์รูปภาพ (JPEG, PNG, WebP, GIF) และวิดีโอ (MP4, WebM, OGG) เท่านั้น' },
         { status: 400 }
       )
     }
@@ -62,7 +65,7 @@ export async function POST(request) {
     if (file.size > MAX_FILE_SIZE) {
       console.warn(`[Upload] File too large: ${file.size} bytes`)
       return NextResponse.json(
-        { error: 'ขนาดไฟล์ต้องไม่เกิน 5MB' },
+        { error: 'ขนาดไฟล์ต้องไม่เกิน 50MB' },
         { status: 400 }
       )
     }
