@@ -8,9 +8,9 @@
 // =============================================================================
 
 import { getABVariant } from '@/lib/ab-test'
+import { getCachedSettings } from '@/lib/settings'
 import { prisma } from '@/lib/prisma'
 
-export const dynamic = 'force-dynamic'
 import HeroSection from '@/components/sections/HeroSection'
 import ProductSection from '@/components/sections/ProductSection'
 import ContactSection from '@/components/sections/ContactSection'
@@ -34,23 +34,28 @@ export default async function HomePage() {
   // ดึง A/B variant สำหรับ user นี้ (server-side)
   const abVariant = await getABVariant()
 
-  // ดึงการตั้งค่าเว็บไซต์ (Background Hero)
-  const settings = await prisma.siteSetting.findMany()
-  const settingsMap = settings.reduce((acc, curr) => {
-    acc[curr.key] = curr.value
-    return acc
-  }, {})
+  // ดึงการตั้งค่าเว็บไซต์ทั้งหมด (ผ่าน cache 5 นาที)
+  const settingsMap = await getCachedSettings()
+
+  // ดึงวิดีโอที่เปิดใช้งาน
+  const videos = await prisma.video.findMany({
+    where: { isActive: true },
+    orderBy: [
+      { order: 'asc' },
+      { createdAt: 'desc' },
+    ]
+  })
 
   return (
     <>
-      {/* Section 1: Hero (ส่ง background จาก DB ไปแสดง) */}
-      <HeroSection backgroundUrl={settingsMap.hero_background_url} />
+      {/* Section 1: Hero */}
+      <HeroSection settings={settingsMap} />
 
-      {/* Section 2: Products (พร้อม A/B variant) */}
-      <ProductSection abVariant={abVariant} />
+      {/* Section 2: Products */}
+      <ProductSection abVariant={abVariant} settings={settingsMap} />
 
-      {/* Section 3: Contact */}
-      <ContactSection />
+      {/* Section 3: Contact / Video Showcase */}
+      <ContactSection settings={settingsMap} videos={videos} />
     </>
   )
 }
