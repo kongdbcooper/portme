@@ -10,7 +10,7 @@ const AB_COOKIE_NAME = 'ab_variant'
 const AB_COOKIE_MAX_AGE = 30 * 24 * 60 * 60 // 30 วัน (seconds)
 
 // ------------------- Get or Assign A/B Variant -------------------
-// ดึง variant ที่ user เคยได้รับ หรือกำหนด variant ใหม่แบบ random 50/50
+// ดึง variant ที่ user เคยได้รับ หรือกำหนด variant ใหม่แบบ hash-based 50/50
 // ต้องเรียกใน Server Component หรือ Route Handler เท่านั้น
 export async function getABVariant() {
   const cookieStore = await cookies()
@@ -21,9 +21,20 @@ export async function getABVariant() {
     return existingVariant
   }
 
-  // กำหนด variant ใหม่แบบ random 50/50 (สำหรับกรณีไม่มี cookie)
+  // สร้าง variant ใหม่โดยใช้ hash จากค่าที่แน่นอน เพื่อหลีกเลี่ยงปัญหา hydration mismatch
+  // ใช้ timestamp ที่แปลงเป็น seconds (ทำให้ผู้ใช้คนเดียวกันในช่วงเวลาที่อยู่ใกล้กันได้ variant เดียวกัน)
+  const seed = Math.floor(Date.now() / 60000) // 1 นาที
+  let hash = 0
+  const str = 'seed_' + seed
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i)
+    hash = ((hash << 5) - hash) + char
+    hash = hash & hash // Convert to 32-bit integer
+  }
+  
+  // กำหนด variant ใหม่แบบ 50/50 โดยใช้ hash ที่แน่นอน (ไม่ใช่ random)
   // หมายเหตุ: การ set cookie ย้ายไปทำที่ middleware.js เพราะ Server Component set cookie ไม่ได้
-  return Math.random() < 0.5 ? 'A' : 'B'
+  return (hash % 2) === 0 ? 'A' : 'B'
 }
 
 // ------------------- Track A/B Event -------------------

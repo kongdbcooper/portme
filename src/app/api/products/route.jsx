@@ -35,6 +35,10 @@ export async function GET(request) {
     const page = parseInt(searchParams.get('page') || '1')
     const adminView = searchParams.get('admin') === 'true'
 
+    if (adminView) {
+      await requireAdmin()
+    }
+
     const where = {
       ...(adminView ? {} : { isActive: true }), // admin เห็นทั้งหมด
       ...(category ? { category } : {}),
@@ -67,6 +71,9 @@ export async function GET(request) {
     })
 
   } catch (error) {
+    if (error.message?.includes('Unauthorized')) {
+      return NextResponse.json({ error: 'Forbidden: Admin only' }, { status: 403 })
+    }
     console.error('[Products] GET error:', error)
     return NextResponse.json({ error: 'เกิดข้อผิดพลาด' }, { status: 500 })
   }

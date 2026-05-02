@@ -35,14 +35,20 @@ export default function EditableBlock({ settingKey, defaultText, as: Component =
 
   // Sync กับ defaultText หากมีการโหลดข้อมูลใหม่
   useEffect(() => {
-    setText(defaultText || '')
+    setText(defaultText ?? '')
   }, [defaultText])
 
   const handleSave = async () => {
-    if (text === defaultText) {
+    if (text === (defaultText ?? '')) {
       setIsEditing(false)
       return
     }
+
+    // save logic here
+  }
+
+  return <div />
+}
 
     setIsLoading(true)
     try {
@@ -64,7 +70,7 @@ export default function EditableBlock({ settingKey, defaultText, as: Component =
     } finally {
       setIsLoading(false)
     }
-  }
+  
 
   // หากไม่ได้เป็น Admin หรือกำลังไม่ได้แก้ไข ให้แสดงข้อความปกติ
   if (!isAdmin) {
@@ -131,4 +137,4 @@ export default function EditableBlock({ settingKey, defaultText, as: Component =
       </div>
     </div>
   )
-}
+

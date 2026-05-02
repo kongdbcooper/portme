@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { uploadFileWithPresignedUrl } from '@/lib/upload-client'
 
 export default function VideoForm({ video = null, mode = 'create' }) {
   const router = useRouter()
@@ -29,21 +30,7 @@ export default function VideoForm({ video = null, mode = 'create' }) {
     setSubmitError('')
 
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('folder', 'videos')
-
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Upload failed')
-      }
-
+      const data = await uploadFileWithPresignedUrl({ file, folder: 'videos' })
       setVideoUrl(data.url)
       setVideoKey(data.key)
     } catch (err) {

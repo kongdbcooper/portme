@@ -4,7 +4,7 @@
 // ใช้งานร่วมกับ: src/app/layout.js, src/app/globals.css
 // =============================================================================
 
-import Link from 'next/link'
+import BrandLogo from './BrandLogo'
 
 const FOOTER_LINKS = {
   'Menu': [
@@ -19,8 +19,9 @@ const FOOTER_LINKS = {
   ],
 }
 
-export default function Footer() {
+export default function Footer({ settings = {} }) {
   const currentYear = new Date().getFullYear()
+  const logoUrl = settings.site_logo_url || ''
 
   return (
     <footer className="relative border-t border-white/5" style={{ background: 'linear-gradient(180deg, #0a0a0f 0%, #0d0d1a 100%)' }}>
@@ -33,14 +34,7 @@ export default function Footer() {
           {/* ------------------- Brand Column ------------------- */}
           <div className="md:col-span-2 space-y-4">
             {/* Logo */}
-            <Link href="/" className="inline-flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-brand flex items-center justify-center">
-                <span className="text-white font-bold text-lg" style={{ fontFamily: 'Outfit, sans-serif' }}>P</span>
-              </div>
-              <span className="text-xl font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                Port<span className="gradient-text">Me</span>
-              </span>
-            </Link>
+            <BrandLogo logoUrl={logoUrl} />
 
             {/* Description */}
             <p className="text-gray-500 text-sm leading-relaxed max-w-sm">

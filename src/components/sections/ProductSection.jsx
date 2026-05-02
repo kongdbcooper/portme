@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef, useCallback } from 'react'
+import Image from 'next/image'
 import EditableBlock from '../admin/EditableBlock'
 
 // ------------------- 3D Tilt Card Component -------------------
@@ -65,6 +66,26 @@ function TiltCard({ children, className, onClick }) {
 
 // ------------------- Main ProductSection Component -------------------
 export default function ProductSection({ abVariant, settings = {} }) {
+  // Profile images (About Me) — settings.prod_profile_images stored as JSON string
+  const profileImages = (() => {
+    try {
+      return settings.prod_profile_images ? JSON.parse(settings.prod_profile_images) : []
+    } catch (e) {
+      return []
+    }
+  })()
+
+  const [profileIndex, setProfileIndex] = useState(0)
+  const [selectedProfileImage, setSelectedProfileImage] = useState(null)
+
+  // Auto-advance profile image every 4 seconds
+  useEffect(() => {
+    if (!profileImages || profileImages.length <= 1) return
+    const id = setInterval(() => {
+      setProfileIndex((i) => (i + 1) % profileImages.length)
+    }, 4000)
+    return () => clearInterval(id)
+  }, [profileImages])
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedProduct, setSelectedProduct] = useState(null)
@@ -171,8 +192,8 @@ export default function ProductSection({ abVariant, settings = {} }) {
     <section className="py-20 bg-[#0a0a0f]" id="products">
       <div className="container mx-auto px-4">
 
-        {/* ================= Ad / Promotion Banner ================= */}
-        {!loading && featuredProduct && (
+        {/* ================= Ad / Profile Banner ================= */}
+        {!loading && (profileImages.length > 0 || featuredProduct) && (
           <div
             className="relative mb-16 rounded-3xl overflow-hidden border border-white/5 cursor-pointer group"
             onClick={() => handleCardClick(featuredProduct)}
@@ -238,17 +259,62 @@ export default function ProductSection({ abVariant, settings = {} }) {
                 </button>
               </div>
 
-              {/* Right Side — Profile Image */}
+              {/* Right Side — Profile Image / Carousel Block */}
               <div className="relative flex items-center justify-center">
                 {/* Glow behind image */}
                 <div className="absolute inset-0 bg-brand-500/10 rounded-full blur-3xl scale-75 group-hover:scale-90 transition-transform duration-700" />
 
                 <div className="relative w-full max-w-md aspect-square rounded-3xl overflow-hidden shadow-2xl shadow-black/50 group-hover:scale-105 transition-transform duration-700 border border-white/5">
-                  <img
-                    src="/picture/blue.jpg"
-                    alt="About Me"
-                    className="w-full h-full object-cover"
+                  {/* Background = current profile image */}
+                  <div
+                    className="absolute inset-0 bg-cover bg-center"
+                    style={{
+                      backgroundImage: `url(${(profileImages.length > 0 ? profileImages[profileIndex].url : (featuredProduct?.imageUrl || '/picture/blue.jpg'))})`,
+                    }}
                   />
+
+                  {/* Foreground profile image (next in list) */}
+                  {profileImages.length > 0 ? (
+                    <Image
+                      src={profileImages[(profileIndex + 1) % profileImages.length].url}
+                      alt="About Me"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 500px"
+                      className="object-contain relative z-10"
+                      onClick={() => setSelectedProfileImage(profileImages[(profileIndex + 1) % profileImages.length])}
+                      unoptimized={profileImages[(profileIndex + 1) % profileImages.length].url.startsWith('blob:')}
+                    />
+                  ) : (
+                    <Image
+                      src={featuredProduct?.imageUrl || '/picture/blue.jpg'}
+                      alt="About Me"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 500px"
+                      className="object-cover"
+                      unoptimized={featuredProduct?.imageUrl?.startsWith('http') ? false : true}
+                    />
+                  )}
+
+                  {/* Controls: Prev / Next */}
+                  {profileImages.length > 1 && (
+                    <div className="absolute inset-0 flex items-center justify-between p-4 z-20 pointer-events-none">
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setProfileIndex((i) => (i - 1 + profileImages.length) % profileImages.length) }}
+                        className="pointer-events-auto w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center"
+                        aria-label="Previous"
+                      >
+                        ‹
+                      </button>
+
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setProfileIndex((i) => (i + 1) % profileImages.length) }}
+                        className="pointer-events-auto w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center"
+                        aria-label="Next"
+                      >
+                        ›
+                      </button>
+                    </div>
+                  )}
                   {/* Shine effect on hover */}
                   <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 </div>
@@ -306,11 +372,15 @@ export default function ProductSection({ abVariant, settings = {} }) {
                 >
                   {product.imageUrl && (
                     <div className="h-72 overflow-hidden bg-black/40 relative">
-                      <img
+                      <Image
                         src={product.imageUrl}
                         alt={product.name}
-                        className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110"
+                        fill
+                        sizes="(max-width: 768px) 100vw, 380px"
+                        className="object-contain transition-transform duration-700 group-hover:scale-110"
+                        unoptimized={false}
                       />
+                      
                       <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] text-white font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
                         ✨ Quick View
@@ -401,9 +471,11 @@ export default function ProductSection({ abVariant, settings = {} }) {
               }}
             >
               <div className="rounded-3xl overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5),0_30px_60px_-30px_rgba(90,107,255,0.3)]">
-                <img
+                <Image
                   src={selectedProduct.imageUrl}
                   alt={selectedProduct.name}
+                  width={1200}
+                  height={800}
                   className="w-full max-h-[60vh] object-contain bg-black/50"
                   style={{ filter: 'drop-shadow(0 20px 50px rgba(0,0,0,0.5))' }}
                 />
@@ -432,39 +504,37 @@ export default function ProductSection({ abVariant, settings = {} }) {
         </div>
       )}
 
-      {/* ------------------- Animations + Hide Scrollbar ------------------- */}
-      <style jsx global>{`
-        @keyframes fadeIn {
-          from { opacity: 0; }
-          to { opacity: 1; }
-        }
-        @keyframes pop3d {
-          0% {
-            opacity: 0;
-            transform: scale(0.4) rotateX(25deg) translateY(120px);
-          }
-          60% {
-            transform: scale(1.05) rotateX(-3deg) translateY(-10px);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1) rotateX(0deg) translateY(0);
-          }
-        }
-        @keyframes slideUp {
-          from {
-            opacity: 0;
-            transform: translateZ(80px) translateY(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateZ(80px) translateY(0);
-          }
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
+
+      {/* Profile image popup */}
+      {selectedProfileImage && (
+        <div
+          className="fixed inset-0 z-[110] flex items-center justify-center p-4 sm:p-8"
+          onClick={() => setSelectedProfileImage(null)}
+          style={{ animation: 'fadeIn 0.2s ease-out forwards' }}
+        >
+          <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" />
+          <div
+            className="relative w-full max-w-3xl overflow-visible flex items-center justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="rounded-3xl overflow-hidden shadow-2xl">
+              <Image 
+              src={selectedProfileImage.url} 
+              alt="Profile" width={1600} height={900} className="w-full max-h-[80vh] object-contain bg-black/50" />
+            </div>
+            <button
+              onClick={() => setSelectedProfileImage(null)}
+              className="absolute -top-4 -right-4 w-12 h-12 bg-white text-black rounded-full flex items-center justify-center shadow-2xl hover:scale-110 hover:rotate-90 transition-all duration-300 z-50"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
     </section>
   )
 }
+

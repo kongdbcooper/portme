@@ -6,6 +6,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // React Compiler (Next.js 16 feature)
+  
   reactCompiler: true,
   serverExternalPackages: ['@prisma/client'],
   
@@ -55,8 +56,9 @@ const nextConfig = {
               "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com",
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
-              "img-src 'self' data: blob: https://*.r2.dev https://www.google-analytics.com",
-              "connect-src 'self' https://www.google-analytics.com https://analytics.google.com",
+              "img-src 'self' data: blob: https://*.r2.dev https://*.r2.cloudflarestorage.com https://www.google-analytics.com",
+              "media-src 'self' blob: https://*.r2.dev https://*.r2.cloudflarestorage.com",
+              "connect-src 'self' https://*.r2.dev https://*.r2.cloudflarestorage.com https://www.google-analytics.com https://analytics.google.com",
               "frame-ancestors 'none'",
             ].join('; '),
           },

@@ -1,12 +1,12 @@
 // =============================================================================
 // src/components/admin/ImageUploader.js — Drag & Drop Image Uploader
-// อัปโหลดรูปภาพไปยัง Cloudflare R2 ผ่าน /api/upload
-// ใช้งานร่วมกับ: src/app/api/upload/route.js, src/lib/r2.js
-//               src/components/admin/ProductForm.js
+// ✅ ใส่แทน
+// อัปโหลดรูปภาพไปยัง Cloudflare R2 ผ่าน Presigned URL
 // =============================================================================
 
 'use client'
-
+// เพิ่ม import บนสุดของไฟล์
+import { uploadFileWithPresignedUrl } from '@/lib/upload-client'
 import { useState, useRef, useCallback } from 'react'
 import Image from 'next/image'
 
@@ -38,7 +38,7 @@ export default function ImageUploader({ currentImageUrl, initialImage, onUpload,
     return null
   }
 
-  // อัปโหลดไฟล์ไปยัง R2 ผ่าน API route
+  // อัปโหลดไฟล์ไปยัง R2 ผ่าน Presigned URL
   const uploadFile = async (file) => {
     const validationError = validateFile(file)
     if (validationError) {
@@ -50,48 +50,26 @@ export default function ImageUploader({ currentImageUrl, initialImage, onUpload,
     setIsUploading(true)
     setProgress(10)
 
-    // แสดง preview ทันทีก่อน upload จริง (optimistic)
+    // แสดง preview ทันที (optimistic)
     const localPreview = URL.createObjectURL(file)
     setPreview(localPreview)
     setProgress(30)
 
     try {
-      const formData = new FormData()
-      formData.append('file', file)
-      formData.append('folder', folder)
-
-      console.log('[ImageUploader] Starting upload...')
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      setProgress(80)
-      const data = await res.json()
-      console.log('[ImageUploader] Response:', { status: res.status, data })
-
-      if (!res.ok) {
-        const errorMsg = data.error || `Upload failed (HTTP ${res.status})`
-        console.error('[ImageUploader] Upload failed:', errorMsg)
-        throw new Error(errorMsg)
-      }
-
-      console.log('[ImageUploader] Upload successful:', data.url)
+      console.log('[ImageUploader] Starting presigned upload...')
+      setProgress(50)
+      const result = await uploadFileWithPresignedUrl({ file, folder })
       setProgress(100)
-      setPreview(data.url)
 
-      // แจ้ง parent component ว่าอัปโหลดสำเร็จ (รองรับ 2 แบบ)
-      if (onUpload) {
-        onUpload({ url: data.url, key: data.key })
-      }
-      if (onUploadSuccess) {
-        onUploadSuccess(data.url)
-      }
+      console.log('[ImageUploader] Upload successful:', result.url)
+      setPreview(result.url)
 
-      // คืน URL ชั่วคราว
+      if (onUpload) onUpload({ url: result.url, key: result.key })
+      if (onUploadSuccess) onUploadSuccess(result.url)
+
       URL.revokeObjectURL(localPreview)
     } catch (err) {
-      console.error('[ImageUploader] Error caught:', err)
+      console.error('[ImageUploader] Upload failed:', err)
       setError(err.message || 'อัปโหลดล้มเหลว กรุณาลองใหม่')
       setPreview(initialUrl || null)
     } finally {
@@ -99,6 +77,7 @@ export default function ImageUploader({ currentImageUrl, initialImage, onUpload,
       setTimeout(() => setProgress(0), 500)
     }
   }
+
 
   // Drag & Drop handlers
   const handleDragOver = useCallback((e) => {

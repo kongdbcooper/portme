@@ -87,7 +87,7 @@ export default function Sidebar({ user }) {
     }
   }
 
-  const SidebarContent = () => (
+  const sidebarContent = (
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="px-6 py-6 border-b border-white/5">
@@ -157,7 +157,7 @@ export default function Sidebar({ user }) {
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex flex-col w-64 h-screen fixed left-0 top-0 z-40 border-r border-white/5"
         style={{ background: 'linear-gradient(180deg, #111118 0%, #0d0d18 100%)' }}>
-        <SidebarContent />
+        {sidebarContent}
       </aside>
 
       {/* Mobile Toggle Button */}
@@ -187,7 +187,7 @@ export default function Sidebar({ user }) {
           />
           <aside className="lg:hidden fixed left-0 top-0 bottom-0 z-50 w-64 border-r border-white/5 animate-slide-in-left"
             style={{ background: 'linear-gradient(180deg, #111118 0%, #0d0d18 100%)' }}>
-            <SidebarContent />
+            {sidebarContent}
           </aside>
         </>
       )}

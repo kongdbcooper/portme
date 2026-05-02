@@ -14,7 +14,6 @@ export default async function sitemap() {
   const routes = [
     '',
     '/login',
-    '/signup',
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),

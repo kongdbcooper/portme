@@ -1,7 +1,17 @@
 export const runtime = 'nodejs';
 import { NextResponse } from 'next/server'
+import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
+
+const CreateVideoSchema = z.object({
+  title: z.string().min(1).max(200),
+  description: z.string().optional().nullable(),
+  videoUrl: z.string().url(),
+  videoKey: z.string().optional().nullable(),
+  isActive: z.boolean().optional(),
+  order: z.number().int().optional(),
+})
 
 export async function GET(request) {
   try {
@@ -31,11 +41,16 @@ export async function POST(request) {
     await requireAdmin()
 
     const body = await request.json()
-    const { title, description, videoUrl, videoKey, isActive, order } = body
+    const validation = CreateVideoSchema.safeParse(body)
 
-    if (!title || !videoUrl) {
-      return NextResponse.json({ error: 'Missing required fields: title, videoUrl' }, { status: 400 })
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: 'Invalid video data', details: validation.error.flatten().fieldErrors },
+        { status: 400 }
+      )
     }
+
+    const { title, description, videoUrl, videoKey, isActive, order } = validation.data
 
     const video = await prisma.video.create({
       data: {
@@ -44,7 +59,7 @@ export async function POST(request) {
         videoUrl,
         videoKey,
         isActive: isActive !== undefined ? isActive : true,
-        order: order || 0,
+        order: order ?? 0,
       },
     })
 
