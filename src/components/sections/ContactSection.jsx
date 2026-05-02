@@ -155,11 +155,6 @@ export default function ContactSection({ settings = {}, videos = [] }) {
                   </svg>
                 </button>
 
-                <style jsx global>{`
-                  .overflow-x-auto::-webkit-scrollbar {
-                    display: none;
-                  }
-                `}</style>
               </div>
             )}
           </div>

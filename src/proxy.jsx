@@ -12,7 +12,8 @@ import { decrypt } from './lib/session'
 const PROTECTED_ROUTES = ['/admin']
 
 // Routes สำหรับ auth pages (ถ้า login แล้ว redirect ไป admin)
-const AUTH_ROUTES = ['/login', '/register']
+// Registration is intentionally not supported in this version.
+const AUTH_ROUTES = ['/login']
 
 export async function proxy(request) {
   const { pathname } = request.nextUrl

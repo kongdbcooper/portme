@@ -14,7 +14,6 @@ export default function robots() {
         '/admin/',
         '/api/',
         '/login',
-        '/signup',
       ],
     },
     sitemap: `${baseUrl}/sitemap.xml`,

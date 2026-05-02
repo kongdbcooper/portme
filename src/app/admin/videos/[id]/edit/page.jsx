@@ -7,7 +7,7 @@ import { prisma } from '@/lib/prisma'
 import VideoForm from '@/components/admin/VideoForm'
 
 export default async function EditVideoPage({ params }) {
-  const { id } = params
+  const { id } = await params
 
   const video = await prisma.video.findUnique({
     where: { id }

@@ -1,15 +1,13 @@
-// =============================================================================
-// src/app/api/admin/settings/route.js — Admin Settings API
-// บันทึกการตั้งค่าเว็บไซต์ (Admin Only)
-// =============================================================================
-
 import { NextResponse } from 'next/server'
+import { revalidateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
+import { deleteFromR2 } from '@/lib/r2'
+
+const MEDIA_KEY_SETTINGS = new Set(['hero_background_key', 'site_logo_key'])
 
 export async function POST(request) {
   try {
-    // ------------------- Check Auth -------------------
     await requireAdmin()
 
     const body = await request.json()
@@ -19,22 +17,51 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Key and Value are required' }, { status: 400 })
     }
 
-    // ------------------- Save Setting -------------------
+    const previous = await prisma.siteSetting.findUnique({ where: { key } })
+
     const setting = await prisma.siteSetting.upsert({
       where: { key },
       update: { value },
       create: { key, value },
     })
 
+    revalidateTag('site-settings')
+
+    // If this is a single-media key, delete previous R2 object
+    if (MEDIA_KEY_SETTINGS.has(key)) {
+      if (previous?.value && previous.value !== value) {
+        await deleteFromR2(previous.value)
+      }
+    }
+
+    // If this is the profile images array, compare previous and new keys and delete removed objects
+    if (key === 'prod_profile_images') {
+      try {
+        const prevArr = previous?.value ? JSON.parse(previous.value) : []
+        const newArr = value ? JSON.parse(value) : []
+
+        const prevKeys = new Set(prevArr.map((i) => i.key).filter(Boolean))
+        const newKeys = new Set(newArr.map((i) => i.key).filter(Boolean))
+
+        for (const k of prevKeys) {
+          if (!newKeys.has(k)) {
+            await deleteFromR2(k)
+          }
+        }
+      } catch (err) {
+        console.error('[Admin Settings] Failed to diff profile images for cleanup:', err)
+      }
+    }
+
     return NextResponse.json({
       success: true,
       data: setting,
     })
-
   } catch (error) {
     if (error.message?.includes('Unauthorized')) {
       return NextResponse.json({ error: 'Forbidden: Admin only' }, { status: 403 })
     }
+
     console.error('[Admin Settings] Save error:', error)
     return NextResponse.json(
       { error: 'Failed to save settings' },

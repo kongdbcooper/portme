@@ -2,6 +2,7 @@ const { PrismaClient } = require('@prisma/client')
 const { PrismaPg } = require('@prisma/adapter-pg')
 const { Pool } = require('pg')
 const bcrypt = require('bcryptjs')
+const { default: ImageUploader } = require('@/components/admin/ImageUploader')
 require('dotenv').config()
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL })
@@ -11,26 +12,43 @@ const prisma = new PrismaClient({ adapter })
 async function main() {
   console.log('🌱 Seeding database...')
 
-  // 1. Create Admin User
-  const adminEmail = 'admin@portme.com'
-  const adminPassword = 'password123'
-  const passwordHash = await bcrypt.hash(adminPassword, 10)
+  const isProduction = process.env.NODE_ENV === 'production'
+  const allowProdSeed = process.env.ALLOW_PROD_SEED === 'true'
+  const runSampleData = !isProduction || allowProdSeed
 
-  const admin = await prisma.user.upsert({
-    where: { email: adminEmail },
-    update: {},
-    create: {
-      email: adminEmail,
-      name: 'System Admin',
-      passwordHash: passwordHash,
-      role: 'ADMIN',
-    },
-  })
+  // Admin credentials can be provided via env in production.
+  const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@portme.com'
+  const providedAdminPassword = process.env.SEED_ADMIN_PASSWORD
 
-  console.log(`✅ Admin user created: ${admin.email}`)
-  console.log(`🔑 Login with: ${adminEmail} / ${adminPassword}`)
+  // 1. Create or ensure Admin User (idempotent)
+  let admin = await prisma.user.findUnique({ where: { email: adminEmail } })
 
-  // 2. Create Initial Settings
+  if (!admin) {
+    if (isProduction && !providedAdminPassword) {
+      console.warn('⚠️ Production: SEED_ADMIN_PASSWORD not provided; skipping admin creation.')
+    } else {
+      const adminPassword = providedAdminPassword || 'password123'
+      const passwordHash = await bcrypt.hash(adminPassword, 10)
+
+      admin = await prisma.user.create({
+        data: {
+          email: adminEmail,
+          name: 'System Admin',
+          passwordHash,
+          role: 'ADMIN',
+        },
+      })
+
+      console.log(`✅ Admin user created: ${admin.email}`)
+      if (!isProduction) {
+        console.log(`🔑 Login with: ${adminEmail} / ${adminPassword}`)
+      }
+    }
+  } else {
+    console.log(`ℹ️ Admin already exists: ${admin.email}`)
+  }
+
+  // 2. Create Initial Settings (idempotent)
   const settings = [
     { key: 'site_name', value: 'PortMe Store' },
     { key: 'hero_title', value: 'Welcome to our premium collection' },
@@ -40,51 +58,58 @@ async function main() {
   for (const s of settings) {
     await prisma.siteSetting.upsert({
       where: { key: s.key },
-      update: {},
+      update: { value: s.value },
       create: s,
     })
   }
 
-  console.log('✅ Initial settings created')
+  console.log('✅ Initial settings ensured')
 
-  // 3. Create Sample Products
-  console.log('🗑️ Cleaning up old products...')
-  await prisma.product.deleteMany({})
+  // 3. Sample Products — only in non-production or when explicitly allowed
+const products = [
+  {
+    name: 'Me 1',
+    imageUrl: 'https://pub-b7f6f5f01b32476a9462f87d684f54d9.r2.dev/profile/pang1.jpg',
+    description: 'this is me.',
+    category: 'R2',
+    isActive: true,
+    abVariant: 'A',
+  },
+  {
+    name: 'Me 2',
+    imageUrl: 'https://pub-b7f6f5f01b32476a9462f87d684f54d9.r2.dev/profile/pang2.jpg',
+    description: 'this is me.',
+    category: 'R2',
+    isActive: true,
+    abVariant: 'B',
+  },
+  {
+    name: 'Me 3',
+    imageUrl: 'https://pub-b7f6f5f01b32476a9462f87d684f54d9.r2.dev/profile/pang3.jpg',
+    description: 'this is me.',
+    category: 'R2',
+    isActive: true,
+    abVariant: 'C',
+  },
+]
 
-  const products = [
-    {
-      name: 'Me 1',
-      imageUrl: '/picture/pang1.jpg',
-      description: 'this is me.',
-      category: 'R2',
-      isActive: true,
-      abVariant: 'A',
-    },
-    {
-      name: 'Me 2',
-      imageUrl: '/picture/pang2.jpg',
-      description: 'this is me.',
-      category: 'R2',
-      isActive: true,
-      abVariant: 'B',
-    },
-    {
-      name: 'Me 3',
-      imageUrl: '/picture/pang3.jpg',
-      description: 'this is me.',
-      category: 'R2',
-      isActive: true,
-      abVariant: 'C',
-    },
-  ]
-
-  for (const p of products) {
-    await prisma.product.create({
-      data: p,
-    })
+  if (runSampleData) {
+    for (const p of products) {
+      // Product.name is not unique in the schema, so treat name as a natural key here
+      const existing = await prisma.product.findFirst({ where: { name: p.name } })
+      if (existing) {
+        await prisma.product.update({ where: { id: existing.id }, data: p })
+        console.log(`ℹ️ Updated product: ${p.name}`)
+      } else {
+        await prisma.product.create({ data: p })
+        console.log(`✅ Created product: ${p.name}`)
+      }
+    }
+    console.log('✅ Sample products ensured')
+  } else {
+    console.log('ℹ️ Skipping sample products in production (set ALLOW_PROD_SEED=true to override)')
   }
 
-  console.log('✅ Sample products created')
   console.log('🚀 Seed complete!')
 }
 

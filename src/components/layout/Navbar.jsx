@@ -8,6 +8,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import BrandLogo from './BrandLogo'
 
 // Navigation links สำหรับ smooth scroll ไปแต่ละ section
 const NAV_LINKS = [
@@ -16,10 +17,11 @@ const NAV_LINKS = [
   { label: 'Contact Me', href: '#contact' },
 ]
 
-export default function Navbar() {
+export default function Navbar({ settings = {} }) {
   const [isScrolled, setIsScrolled] = useState(false) 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('hero')
+  const logoUrl = settings.site_logo_url || ''
 
   // ------------------- Scroll Detection -------------------
   // เปลี่ยน navbar style เมื่อ scroll ลงมา (glassmorphism effect)
@@ -63,14 +65,11 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-20">
 
           {/* ------------------- Logo ------------------- */}
-          <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-xl bg-gradient-brand flex items-center justify-center shadow-glow group-hover:scale-110 transition-transform duration-300">
-              <span className="text-white font-bold text-lg" style={{ fontFamily: 'Outfit, sans-serif' }}>P</span>
-            </div>
-            <span className="text-xl font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
-              Port<span className="gradient-text">Me</span>
-            </span>
-          </Link>
+          <BrandLogo
+            logoUrl={logoUrl}
+            className="flex items-center gap-3"
+            iconClassName="shadow-glow group-hover:scale-110 transition-transform duration-300"
+          />
 
           {/* ------------------- Desktop Nav Links ------------------- */}
           <ul className="hidden md:flex items-center gap-1">

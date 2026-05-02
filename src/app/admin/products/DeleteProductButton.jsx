@@ -77,7 +77,7 @@ export default function DeleteProductButton({ productId, productName }) {
             </div>
             <h3 className="text-white font-bold text-center mb-2">ยืนยันการลบ</h3>
             <p className="text-gray-400 text-sm text-center mb-6">
-              คุณต้องการลบ <span className="text-white font-medium">"{productName}"</span> ใช่หรือไม่?
+              คุณต้องการลบ <span className="text-white font-medium">&quot;{productName}&quot;</span> ใช่หรือไม่?
               <br />
               <span className="text-red-400 text-xs">รูปภาพใน R2 จะถูกลบด้วย และไม่สามารถกู้คืนได้</span>
             </p>

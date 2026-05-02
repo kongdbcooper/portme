@@ -6,13 +6,16 @@
 
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
+import { getCachedSettings } from '@/lib/settings'
 
-export default function PublicLayout({ children }) {
+export default async function PublicLayout({ children }) {
+  const settings = await getCachedSettings()
+
   return (
     <>
-      <Navbar />
+      <Navbar settings={settings} />
       <main>{children}</main>
-      <Footer />
+      <Footer settings={settings} />
     </>
   )
 }

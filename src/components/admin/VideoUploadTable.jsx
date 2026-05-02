@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { uploadFileWithPresignedUrl } from '@/lib/upload-client'
 
 export default function VideoUploadTable() {
   const [uploadQueue, setUploadQueue] = useState([])
@@ -74,21 +75,7 @@ export default function VideoUploadTable() {
     updateItem(id, { status: 'uploading', error: null })
 
     try {
-      const formData = new FormData()
-      formData.append('file', item.file)
-      formData.append('folder', 'videos')
-
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      })
-
-      if (!res.ok) {
-        const data = await res.json()
-        throw new Error(data.error || 'Upload failed')
-      }
-
-      const data = await res.json()
+      const data = await uploadFileWithPresignedUrl({ file: item.file, folder: 'videos' })
       updateItem(id, {
         status: 'uploaded',
         videoUrl: data.url,
