@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 
 // ------------------- 3D Tilt Card Component -------------------
-function TiltCard({ children, className, style, onClick }) {
+function TiltCard({ children, className, style, onClick, isActive }) {
   const cardRef = useRef(null)
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 })
   const [isHovered, setIsHovered] = useState(false)
@@ -34,7 +34,7 @@ function TiltCard({ children, className, style, onClick }) {
   return (
     <div
       ref={cardRef}
-      className={className}
+      className={`${className} ${isActive ? 'ring-2 ring-brand-500 shadow-brand-500/50' : ''}`}
       onClick={onClick}
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
@@ -44,14 +44,14 @@ function TiltCard({ children, className, style, onClick }) {
         ...style,
         perspective: '1000px',
         transformStyle: 'preserve-3d',
-        transform: isHovered
-          ? `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale3d(1.1, 1.1, 1.1)`
+        transform: isHovered || isActive
+          ? `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale3d(1.05, 1.05, 1.05)`
           : 'rotateX(0) rotateY(0) scale3d(1, 1, 1)',
         transition: isHovered ? 'transform 0.1s ease-out' : 'transform 0.5s ease-out',
-        zIndex: isHovered ? 50 : 1,
+        zIndex: isHovered || isActive ? 50 : 1,
       }}
     >
-      {isHovered && (
+      {(isHovered || isActive) && (
         <div
           className="absolute inset-0 z-10 pointer-events-none rounded-2xl opacity-60"
           style={{
@@ -82,7 +82,7 @@ function VideoThumbnail({ video }) {
 
   return (
     <div
-      className="h-72 overflow-hidden bg-black/40 relative"
+      className="h-72 overflow-hidden bg-black/40 relative group-hover:bg-black/20 transition-colors"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -92,11 +92,11 @@ function VideoThumbnail({ video }) {
         muted
         loop
         playsInline
-        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-        <div className="w-16 h-16 rounded-full bg-brand-500/80 backdrop-blur-md flex items-center justify-center hover:bg-brand-500 transition-colors shadow-lg shadow-brand-500/30">
+      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-90 group-hover:scale-100">
+        <div className="w-16 h-16 rounded-full bg-brand-500/80 backdrop-blur-md flex items-center justify-center hover:bg-brand-500 transition-all shadow-lg shadow-brand-500/30">
           <svg className="w-8 h-8 text-white fill-white ml-1" viewBox="0 0 24 24">
             <path d="M8 5v14l11-7z" />
           </svg>
@@ -109,18 +109,21 @@ function VideoThumbnail({ video }) {
   )
 }
 
-
 // ------------------- Main VideoSection Component -------------------
 export default function VideoSection() {
   const [videos, setVideos] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedVideo, setSelectedVideo] = useState(null)
+  const [showRelated, setShowRelated] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
+  
   const scrollRef = useRef(null)
+  const playerRef = useRef(null)
+  const videoElementRef = useRef(null)
   const autoScrollRef = useRef(null)
-  const scrollSpeed = 1 // pixels per frame
+  const scrollSpeed = 0.5 // Slow and smooth
 
-  // Fetch ALL videos (unlimited)
+  // Fetch ALL videos
   useEffect(() => {
     async function fetchVideos() {
       try {
@@ -129,6 +132,9 @@ export default function VideoSection() {
           const data = await res.json()
           const activeVideos = (data.videos || []).filter(v => v.isActive)
           setVideos(activeVideos)
+          if (activeVideos.length > 0) {
+            setSelectedVideo(activeVideos[0])
+          }
         }
       } catch (err) {
         console.error('Failed to fetch videos', err)
@@ -139,7 +145,7 @@ export default function VideoSection() {
     fetchVideos()
   }, [])
 
-  // ------------------- Auto-scroll Logic -------------------
+  // Auto-scroll logic for the carousel
   useEffect(() => {
     if (isPaused || !scrollRef.current || videos.length <= 3) return
 
@@ -150,7 +156,6 @@ export default function VideoSection() {
       if (!container) return
       container.scrollLeft += scrollSpeed
 
-      // Loop back to start when reaching end
       if (container.scrollLeft >= container.scrollWidth - container.clientWidth - 2) {
         container.scrollLeft = 0
       }
@@ -166,7 +171,6 @@ export default function VideoSection() {
     }
   }, [isPaused, videos])
 
-  // ------------------- Manual Scroll -------------------
   const scrollBy = (direction) => {
     if (!scrollRef.current) return
     const cardWidth = 380
@@ -181,165 +185,212 @@ export default function VideoSection() {
 
   const handleCardClick = (video) => {
     setSelectedVideo(video)
+    setShowRelated(false)
+    
+    // Smooth scroll to player
+    if (playerRef.current) {
+      playerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
   }
 
-  // Close modal with Escape key
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') setSelectedVideo(null)
-    }
-    if (selectedVideo) {
-      document.addEventListener('keydown', handleKeyDown)
-      document.body.style.overflow = 'hidden'
-    }
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown)
-      document.body.style.overflow = ''
-    }
-  }, [selectedVideo])
+  const handleVideoEnd = () => {
+    setShowRelated(true)
+  }
+
+  const playNext = () => {
+    const currentIndex = videos.findIndex(v => v.id === selectedVideo?.id)
+    const nextIndex = (currentIndex + 1) % videos.length
+    handleCardClick(videos[nextIndex])
+  }
+
+  const playPrev = () => {
+    const currentIndex = videos.findIndex(v => v.id === selectedVideo?.id)
+    const prevIndex = (currentIndex - 1 + videos.length) % videos.length
+    handleCardClick(videos[prevIndex])
+  }
 
   return (
-    <section className="py-20 bg-[#0a0a0f]" id="videos">
+    <section className="py-24 bg-[#0a0a0f] overflow-hidden" id="videos">
       <div className="container mx-auto px-4">
-        {/* ================= Section Heading ================= */}
-        <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-white mb-4 animate-fade-up">
-            My Videos Collection
+        
+        {/* ================= 1. THE COLLECTION AREA ================= */}
+        <div className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-sm font-bold uppercase tracking-widest mb-6">
+            <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse" />
+            Video Showcase
+          </div>
+          <h2 className="text-5xl font-black text-white mb-6 tracking-tight">
+            My <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-brand-600">Video Collection</span>
           </h2>
-          <p className="text-lg text-gray-400 animate-fade-up" style={{ animationDelay: '0.1s' }}>
-            Watch my latest videos and tutorials
+          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
+            สำรวจคลังวิดีโอทั้งหมดของเรา เลือกชมผลงานที่น่าสนใจได้จากรายการด้านล่างนี้
           </p>
         </div>
 
         {loading ? (
-          <div className="text-center text-gray-500">Loading videos...</div>
+          <div className="flex items-center justify-center h-64">
+            <div className="w-12 h-12 border-4 border-brand-500 border-t-transparent rounded-full animate-spin" />
+          </div>
         ) : videos.length === 0 ? (
-          <div className="text-center text-gray-500">No videos available</div>
+          <div className="text-center py-20 bg-surface-900/50 rounded-3xl border border-white/5">
+            <p className="text-gray-500 text-lg">ยังไม่มีวิดีโอในขณะนี้</p>
+          </div>
         ) : (
-          <div className="relative pt-8 pb-8">
-            {/* ---- Previous Button ---- */}
+          <div className="relative mb-32">
+            {/* Carousel Controls */}
             <button
               onClick={() => scrollBy(-1)}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-30 w-12 h-12 bg-surface-800/90 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-xl group"
-              aria-label="Previous"
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 z-30 w-14 h-14 bg-surface-800/80 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-2xl shadow-brand-500/20 group"
             >
-              <svg className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+              <svg className="w-6 h-6 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
 
-            {/* ---- Carousel Container ---- */}
             <div
               ref={scrollRef}
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
-              className="flex gap-8 overflow-x-auto scrollbar-hide scroll-smooth px-6 py-10"
-              style={{
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-                WebkitOverflowScrolling: 'touch',
-              }}
+              className="flex gap-8 overflow-x-auto scrollbar-hide scroll-smooth px-8 py-12"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {videos.map((video) => (
                 <TiltCard
                   key={video.id}
                   onClick={() => handleCardClick(video)}
-                  className="relative group cursor-pointer bg-surface-800/50 backdrop-blur-sm border border-white/5 rounded-2xl shadow-xl overflow-hidden transition-all duration-500 hover:shadow-brand-500/30 hover:border-brand-500/50 focus:shadow-brand-500/30 focus:border-brand-500/40 focus:outline-none flex-shrink-0"
+                  isActive={selectedVideo?.id === video.id}
+                  className="relative group cursor-pointer bg-surface-800/40 backdrop-blur-md border border-white/5 rounded-[2rem] shadow-2xl overflow-hidden transition-all duration-500 flex-shrink-0"
                   style={{ width: '380px' }}
                 >
                   <VideoThumbnail video={video} />
-
-                  {/* Video Info */}
-                  <div className="p-7 relative z-20 bg-gradient-to-t from-surface-900 via-surface-900/95 to-transparent">
-                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-brand-400 transition-colors duration-300 line-clamp-1">
+                  <div className="p-8 relative z-20">
+                    <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-brand-400 transition-colors duration-300 line-clamp-1">
                       {video.title}
                     </h3>
-                    <p className="text-gray-400 mb-6 h-12 overflow-hidden text-sm line-clamp-2">
-                      {video.description || 'No description'}
+                    <p className="text-gray-400 mb-6 h-12 overflow-hidden text-sm leading-relaxed line-clamp-2">
+                      {video.description || 'Watch this amazing video showcase.'}
                     </p>
-                    <div className="flex justify-between items-center pt-2">
-                      <div className="text-xs text-brand-300 font-medium">Click to watch full video</div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleCardClick(video)
-                        }}
-                        className="px-6 py-2 rounded-full font-bold transition-all duration-300 shadow-lg bg-white/10 hover:bg-brand-500 text-white hover:shadow-brand-500/40 hover:scale-105 backdrop-blur-md"
-                      >
-                        Watch
-                      </button>
+                    <div className="flex justify-between items-center">
+                      <span className="text-xs font-bold text-brand-500/80 uppercase tracking-widest">Click to play</span>
+                      <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-brand-500 transition-colors">
+                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                      </div>
                     </div>
                   </div>
                 </TiltCard>
               ))}
             </div>
 
-            {/* ---- Next Button ---- */}
             <button
               onClick={() => scrollBy(1)}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-30 w-12 h-12 bg-surface-800/90 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-xl group"
-              aria-label="Next"
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 z-30 w-14 h-14 bg-surface-800/80 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-2xl shadow-brand-500/20 group"
             >
-              <svg className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+              <svg className="w-6 h-6 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
               </svg>
             </button>
-            
-            {/* ---- Navigation Labels ---- */}
-            <div className="flex justify-between items-center mt-2 px-16 text-xs text-gray-500">
-              <span>← Scroll to explore</span>
-              <span>{videos.length} Videos</span>
-              <span>Hover to preview →</span>
-            </div>
           </div>
         )}
-      </div>
 
-      {/* ================= Video Player Modal (Card) ================= */}
-      {selectedVideo && (
-        <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-8 animate-fade-in"
-          onClick={() => setSelectedVideo(null)}
-        >
-          <div
-            className="relative w-full max-w-5xl bg-surface-900 border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row transform transition-all animate-fade-up"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Close Button */}
-            <button
-              onClick={() => setSelectedVideo(null)}
-              className="absolute top-4 right-4 z-50 w-10 h-10 bg-black/50 hover:bg-red-500 rounded-full text-white flex items-center justify-center transition-all backdrop-blur-md"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-
-            {/* Video Player Area */}
-            <div className="w-full md:w-2/3 bg-black flex items-center justify-center relative">
-              <video
-                src={selectedVideo.videoUrl}
-                controls
-                autoPlay
-                className="w-full h-full max-h-[70vh] object-contain"
-              />
-            </div>
-
-            {/* Video Details Area */}
-            <div className="w-full md:w-1/3 p-8 flex flex-col justify-center bg-gradient-to-b from-surface-800 to-surface-900 border-l border-white/5">
-              <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-400 text-xs font-semibold uppercase tracking-wider w-fit">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
-                Now Playing
-              </div>
-              <h2 className="text-3xl font-black text-white mb-4 leading-tight">{selectedVideo.title}</h2>
-              <div className="w-12 h-1 bg-brand-500 rounded-full mb-6" />
-              <p className="text-gray-400 text-base leading-relaxed overflow-y-auto max-h-48 pr-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                {selectedVideo.description || 'No description available for this video. Enjoy watching!'}
-              </p>
-            </div>
+        {/* ================= 2. DEDICATED PLAYER AREA ================= */}
+        <div ref={playerRef} className="pt-20 scroll-mt-20">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-black text-white mb-4">
+              ผลงานของเรา <span className="text-brand-500">ในรูปแบบวิดีโอ</span>
+            </h2>
+            <p className="text-gray-400">รับชมวิดีโอแนะนำตัวและผลงานของเราได้ที่นี่</p>
           </div>
+
+          {selectedVideo && (
+            <div className="relative max-w-6xl mx-auto group">
+              {/* Main Player Container */}
+              <div className="relative aspect-video bg-black rounded-[2.5rem] overflow-hidden shadow-[0_0_100px_rgba(90,107,255,0.15)] border border-white/10 animate-fade-in">
+                
+                {/* Video Element */}
+                <video
+                  ref={videoElementRef}
+                  key={selectedVideo.id}
+                  src={selectedVideo.videoUrl}
+                  controls={!showRelated}
+                  autoPlay
+                  onEnded={handleVideoEnd}
+                  className={`w-full h-full object-contain ${showRelated ? 'opacity-30 scale-95' : 'opacity-100 scale-100'} transition-all duration-700`}
+                />
+
+                {/* Related Videos Overlay (When ended) */}
+                {showRelated && (
+                  <div className="absolute inset-0 z-40 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center p-8 animate-fade-in">
+                    <h3 className="text-2xl font-bold text-white mb-8">วิดีโอที่น่าสนใจถัดไป</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full max-w-4xl">
+                      {videos
+                        .filter(v => v.id !== selectedVideo.id)
+                        .slice(0, 4)
+                        .map((v) => (
+                          <div 
+                            key={v.id}
+                            onClick={() => handleCardClick(v)}
+                            className="cursor-pointer group/item space-y-3"
+                          >
+                            <div className="aspect-video rounded-xl overflow-hidden border border-white/10 group-hover/item:border-brand-500 transition-colors">
+                              <video src={v.videoUrl} className="w-full h-full object-cover grayscale group-hover/item:grayscale-0 transition-all" />
+                            </div>
+                            <p className="text-xs font-medium text-gray-300 line-clamp-2 text-center group-hover/item:text-brand-400">
+                              {v.title}
+                            </p>
+                          </div>
+                        ))}
+                    </div>
+                    <button 
+                      onClick={() => setShowRelated(false)}
+                      className="mt-10 px-8 py-3 rounded-full bg-brand-500 text-white font-bold hover:bg-brand-600 transition-colors shadow-lg shadow-brand-500/30"
+                    >
+                      เล่นซ้ำ
+                    </button>
+                  </div>
+                )}
+
+                {/* Navigation Arrows inside player */}
+                {!showRelated && (
+                  <>
+                    <button 
+                      onClick={playPrev}
+                      className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <button 
+                      onClick={playNext}
+                      className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md"
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* Video Info below player */}
+              <div className="mt-10 flex flex-col md:flex-row justify-between items-start gap-8 px-4">
+                <div className="flex-1">
+                  <h3 className="text-3xl font-black text-white mb-4 tracking-tight">{selectedVideo.title}</h3>
+                  <p className="text-lg text-gray-400 leading-relaxed max-w-3xl">
+                    {selectedVideo.description || 'เพลิดเพลินกับการรับชมวิดีโอคุณภาพสูงของเรา หากคุณมีคำถามสามารถติดต่อเราได้ทันที'}
+                  </p>
+                </div>
+                <div className="flex gap-4">
+                  <button className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-surface-800 text-white hover:bg-surface-700 transition-colors border border-white/5">
+                    <svg className="w-5 h-5 text-brand-500" fill="currentColor" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92zM18 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM6 13c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm12 7.02c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg>
+                    แชร์วิดีโอ
+                  </button>
+                  <button className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-brand-500 text-white hover:bg-brand-600 transition-all hover:scale-105 shadow-lg shadow-brand-500/30">
+                    ติดต่อเรา
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+
+      </div>
     </section>
   )
 }

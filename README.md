@@ -1,5 +1,4 @@
 # Portme
-
 ## Setup
 
 1. Install dependencies:
@@ -9,11 +8,9 @@ npm install
 ```
 
 2. Create env file from template:
-
 ```bash
 cp .env.example .env.local
 ```
-
 3. Fill required variables in `.env.local`:
    - `DATABASE_URL`
    - `SESSION_SECRET` (must be at least 32 chars)
@@ -26,17 +23,13 @@ npm run db:seed
 ```
 
 5. Start development server:
-
 ```bash
 npm run dev
 ```
 
 ## Production checks
-
 Before deploying, verify build passes:
-
 ```bash
 npm run build
 ```
-
 If `SESSION_SECRET` is missing, build fails while collecting page data for API routes.

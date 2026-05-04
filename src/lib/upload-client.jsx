@@ -28,10 +28,9 @@ async function uploadFileViaServer({ file, folder }) {
   return data
 }
 
-export async function uploadFileWithPresignedUrl({ file, folder }) {
+export async function uploadFileWithPresignedUrl({ file, folder, onProgress }) {
   const presignResponse = await fetch('/api/upload/presign', {
     method: 'POST',
-    // include credentials so the presign endpoint can validate admin session
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -45,42 +44,45 @@ export async function uploadFileWithPresignedUrl({ file, folder }) {
   const presignData = await readJsonResponse(presignResponse)
 
   if (!presignResponse.ok) {
-    if (presignResponse.status === 400 || presignResponse.status === 403) {
-      throw new Error(presignData?.error || `Could not prepare upload (HTTP ${presignResponse.status})`)
-    }
-
-    const fallbackData = await uploadFileViaServer({ file, folder })
-    return {
-      url: fallbackData.url,
-      key: fallbackData.key,
-    }
+    throw new Error(presignData?.error || `Could not prepare upload (HTTP ${presignResponse.status}). Check if R2 is configured correctly.`)
   }
 
-  console.log('PRESIGN DATA:', presignData)
-  console.log('UPLOAD URL:', presignData.uploadUrl) 
-
-  try {
-    const uploadResponse = await fetch(presignData.uploadUrl, {
-      method: 'PUT',
-      headers: presignData.headers || { 'Content-Type': file.type },
-      body: file,
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest()
+    
+    xhr.open('PUT', presignData.uploadUrl)
+    
+    // Set headers
+    const headers = presignData.headers || { 'Content-Type': file.type }
+    Object.entries(headers).forEach(([key, value]) => {
+      xhr.setRequestHeader(key, value)
     })
 
-    if (!uploadResponse.ok) {
-      throw new Error(`Upload to storage failed (HTTP ${uploadResponse.status})`)
+    if (xhr.upload && onProgress) {
+      xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+          const percentComplete = Math.round((e.loaded / e.total) * 100)
+          onProgress(percentComplete)
+        }
+      }
     }
-  } catch (directUploadError) {
-    console.warn('[Upload Client] Direct R2 upload failed, falling back to server upload:', directUploadError)
 
-    const fallbackData = await uploadFileViaServer({ file, folder })
-    return {
-      url: fallbackData.url,
-      key: fallbackData.key,
+    xhr.onload = () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve({
+          url: presignData.publicUrl,
+          key: presignData.key,
+        })
+      } else {
+        reject(new Error(`Upload to storage failed (HTTP ${xhr.status})`))
+      }
     }
-  }
 
-  return {
-    url: presignData.publicUrl,
-    key: presignData.key,
-  }
+    xhr.onerror = () => {
+      console.error('[Upload Client] Direct R2 upload failed (Network Error)')
+      reject(new Error('Direct R2 upload failed. This could be due to CORS settings or network issues.'))
+    }
+
+    xhr.send(file)
+  })
 }
