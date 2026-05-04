@@ -2,14 +2,12 @@ export const runtime = 'nodejs'
 
 import { NextResponse } from 'next/server'
 import { requireAdmin } from '@/lib/auth'
-import { createPresignedUpload } from '@/lib/r2'
+import { uploadToR2 } from '@/lib/r2'
 
 const CLIENT_ERROR_MESSAGES = new Set([
   'Filename is required',
   'Content type is required',
-  'File size is required',
   'Invalid upload folder',
-  'Unsupported file type',
   'Image file size must not exceed 5MB',
   'Video file size must not exceed 50MB',
   'The videos folder only accepts video files',
@@ -20,17 +18,20 @@ export async function POST(request) {
   try {
     await requireAdmin()
 
-    const body = await request.json()
-    const upload = await createPresignedUpload({
-      filename: body?.filename,
-      contentType: body?.contentType,
-      size: body?.size,
-      folder: body?.folder,
-    })
+    const formData = await request.formData()
+    const file = formData.get('file')
+    const folder = formData.get('folder') || 'products'
+
+    if (!file || typeof file.arrayBuffer !== 'function' || typeof file.name !== 'string') {
+      return NextResponse.json({ error: 'A file is required' }, { status: 400 })
+    }
+
+    const upload = await uploadToR2(file, folder)
 
     return NextResponse.json({
       success: true,
-      ...upload,
+      url: upload.publicUrl,
+      key: upload.key,
     })
   } catch (error) {
     if (error.message?.includes('Unauthorized')) {
@@ -41,10 +42,7 @@ export async function POST(request) {
       return NextResponse.json({ error: error.message }, { status: 400 })
     }
 
-    console.error('[Upload Presign] Error:', error)
-    if (process.env.NODE_ENV !== 'production') {
-      return NextResponse.json({ error: error.message || 'Failed to create upload URL', stack: error.stack }, { status: 500 })
-    }
-    return NextResponse.json({ error: 'Failed to create upload URL' }, { status: 500 })
+    console.error('[Upload] Server fallback error:', error)
+    return NextResponse.json({ error: error.message || 'Failed to upload file' }, { status: 500 })
   }
 }

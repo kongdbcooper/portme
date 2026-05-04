@@ -6,7 +6,7 @@ export default defineConfig({
   engineType: "library",
   migrations: {
     path: "prisma/migrations",
-    seed: "npx tsx prisma/seed.js",
+    seed: "npx tsx prisma/seed.jsx",
   },
   datasource: {
     url: process.env.DATABASE_URL,

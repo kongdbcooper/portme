@@ -1,9 +1,3 @@
-// =============================================================================
-// src/lib/r2.js — Cloudflare R2 Storage Client (S3-compatible)
-// Safe, lazy-validated R2 helper: avoids throwing during module import so API
-// routes can initialize and always return JSON errors instead of HTML error pages.
-// =============================================================================
-
 import 'server-only'
 
 import {
@@ -12,8 +6,6 @@ import {
   DeleteObjectCommand,
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { NodeHttpHandler } from '@smithy/node-http-handler'  // ✅ เพิ่ม
-import https from 'https'   // ✅ เพิ่ม
 import { string } from 'zod'
 
 // Read env vars once and validate lazily
@@ -25,21 +17,15 @@ const accountId = process.env.CLOUDFLARE_ACCOUNT_ID || ''
 const R2_ENDPOINT = accountId ? `https://${accountId}.r2.cloudflarestorage.com` : ''
 
 let r2Configured = true
-if (!AK || !SK) {
+if (!AK || !SK || !BUCKET || !accountId) {
   r2Configured = false
-  console.warn('[R2] Missing credentials in environment variables')
-}
-if (!BUCKET) {
-  r2Configured = false
-  console.warn('[R2] Missing R2_BUCKET_NAME in environment variables')
-}
-if (!accountId) {
-  r2Configured = false
-  console.warn('[R2] Missing CLOUDFLARE_ACCOUNT_ID in environment variables')
+  console.warn('[R2] Missing Cloudflare R2 credentials or configuration in environment variables')
 }
 
 export let r2Client = null
 if (r2Configured) {
+  // ⚡️ Official & Minimal S3Client config for Cloudflare R2 in Production
+  // No custom httpsAgent or checksum calculations are needed.
   r2Client = new S3Client({
     region: 'auto',
     endpoint: R2_ENDPOINT,
@@ -47,33 +33,7 @@ if (r2Configured) {
       accessKeyId: AK,
       secretAccessKey: SK,
     },
-    forcePathStyle: true,
-    maxAttempts: 3,
-    requestChecksumCalculation: 'WHEN_REQUIRED',
-    // ✅ SSL/TLS Configuration for Cloudflare R2
-    requestHandler: new NodeHttpHandler({
-      httpsAgent: new https.Agent({
-        keepAlive: false,        // ✅ ปิด keepAlive แก้ SSL handshake
-        rejectUnauthorized: true,
-        minVersion: 'TLSv1.2',  // ✅ บังคับ TLS version ที่ถูกต้อง
-      }),
-      connectionTimeout: 30000,
-      requestTimeout: 60000,
-    }),
   })
-} else {
-  console.warn('[R2] r2Client not created due to missing configuration')
-}
-
-if (process.env.NODE_ENV !== 'production') {
-  try {
-    console.log(`[R2 DEBUG] accessKeyId length=${AK.length}, secret length=${SK.length}`)
-  } catch (e) {
-    console.warn('[R2 DEBUG] failed to read env vars')
-  }
-  if (!r2Configured) {
-    console.warn('[R2] R2 not fully configured — upload functions will throw until env vars are fixed')
-  }
 }
 
 function ensureR2() {
@@ -82,25 +42,72 @@ function ensureR2() {
   }
 }
 
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024
+const MAX_VIDEO_SIZE = 50 * 1024 * 1024
+const ALLOWED_FOLDERS = new Set(['products', 'settings', 'videos'])
+
+function sanitizeFilename(filename) {
+  return filename.replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '-')
+}
+
+function normalizeUploadInput({ filename, contentType, size = 0, folder = 'products' } = {}) {
+  const fname = string().nonempty('Filename is required').parse(filename)
+  const ctype = string().nonempty('Content type is required').parse(contentType)
+  const normalizedFolder = typeof folder === 'string' && folder ? folder : 'products'
+  const numericSize = Number(size) || 0
+
+  if (!ALLOWED_FOLDERS.has(normalizedFolder)) {
+    throw new Error('Invalid upload folder')
+  }
+
+  if (normalizedFolder === 'videos') {
+    if (!ctype.startsWith('video/')) {
+      throw new Error('The videos folder only accepts video files')
+    }
+    if (numericSize > MAX_VIDEO_SIZE) {
+      throw new Error('Video file size must not exceed 50MB')
+    }
+  } else {
+    if (!ctype.startsWith('image/')) {
+      throw new Error('This folder only accepts image files')
+    }
+    if (numericSize > MAX_IMAGE_SIZE) {
+      throw new Error('Image file size must not exceed 5MB')
+    }
+  }
+
+  return {
+    filename: sanitizeFilename(fname),
+    contentType: ctype,
+    folder: normalizedFolder,
+    size: numericSize,
+  }
+}
+
 // ------------------- Upload File to R2 -------------------
 export async function uploadToR2(file, folder = 'products') {
   ensureR2()
 
+  const normalized = normalizeUploadInput({
+    filename: file?.name,
+    contentType: file?.type,
+    size: file?.size,
+    folder,
+  })
+
   const timestamp = Date.now()
   const randomStr = Math.random().toString(36).substring(2, 8)
-  const extension = (file.name || '').split('.').pop().toLowerCase()
-  const key = `${folder}/${timestamp}-${randomStr}.${extension}`
+  const key = `${normalized.folder}/${timestamp}-${randomStr}-${normalized.filename}`
 
   const arrayBuffer = await file.arrayBuffer()
   const buffer = Buffer.from(arrayBuffer)
 
-  // Upload to R2
   await r2Client.send(
     new PutObjectCommand({
       Bucket: BUCKET,
       Key: key,
       Body: buffer,
-      ContentType: file.type || 'application/octet-stream',
+      ContentType: normalized.contentType,
       CacheControl: 'public, max-age=31536000',
     })
   )
@@ -132,22 +139,19 @@ export async function deleteFromR2(key) {
 export async function getPresignedUploadUrl(key, contentType) {
   ensureR2()
   const command = new PutObjectCommand({ Bucket: BUCKET, Key: key, ContentType: contentType })
-  const signedUrl = await getSignedUrl(r2Client, command, { expiresIn: 900 })
-  return signedUrl
+  return await getSignedUrl(r2Client, command, { expiresIn: 900 })
 }
 
 export async function createPresignedUpload({ filename, contentType, size = 0, folder = 'products' } = {}) {
-  const fname = string().nonempty('Filename is required').parse(filename)
-  const ctype = string().nonempty('Content type is required').parse(contentType)
+  const normalized = normalizeUploadInput({ filename, contentType, size, folder })
   const timestamp = Date.now()
-  const key = `${folder}/${timestamp}-${fname}`
+  const randomStr = Math.random().toString(36).substring(2, 8)
+  const key = `${normalized.folder}/${timestamp}-${randomStr}-${normalized.filename}`
 
   ensureR2()
 
-  const command = new PutObjectCommand({ Bucket: BUCKET, Key: key, ContentType: ctype })
+  const command = new PutObjectCommand({ Bucket: BUCKET, Key: key, ContentType: normalized.contentType })
   const uploadUrl = await getSignedUrl(r2Client, command, { expiresIn: 900 })
-
-  console.log('UPLOAD URL:', uploadUrl)
 
   const publicUrl = `${PUBLIC_URL}/${key}`
   return {
@@ -155,7 +159,7 @@ export async function createPresignedUpload({ filename, contentType, size = 0, f
     key,
     publicUrl,
     headers: {
-      'Content-Type': ctype,
+      'Content-Type': normalized.contentType,
     },
   }
 }

@@ -44,12 +44,6 @@ export default function EditableBlock({ settingKey, defaultText, as: Component =
       return
     }
 
-    // save logic here
-  }
-
-  return <div />
-}
-
     setIsLoading(true)
     try {
       const res = await fetch('/api/settings', {
@@ -70,7 +64,7 @@ export default function EditableBlock({ settingKey, defaultText, as: Component =
     } finally {
       setIsLoading(false)
     }
-  
+  }
 
   // หากไม่ได้เป็น Admin หรือกำลังไม่ได้แก้ไข ให้แสดงข้อความปกติ
   if (!isAdmin) {
@@ -137,4 +131,4 @@ export default function EditableBlock({ settingKey, defaultText, as: Component =
       </div>
     </div>
   )
-
+}

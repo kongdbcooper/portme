@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 
 // ------------------- 3D Tilt Card Component -------------------
-function TiltCard({ children, className, onClick }) {
+function TiltCard({ children, className, style, onClick }) {
   const cardRef = useRef(null)
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 })
   const [isHovered, setIsHovered] = useState(false)
@@ -16,8 +16,8 @@ function TiltCard({ children, className, onClick }) {
     const y = e.clientY - rect.top
     const centerX = rect.width / 2
     const centerY = rect.height / 2
-    const rotateX = ((y - centerY) / centerY) * -12
-    const rotateY = ((x - centerX) / centerX) * 12
+    const rotateX = ((y - centerY) / centerY) * -8
+    const rotateY = ((x - centerX) / centerX) * 8
     const glowX = (x / rect.width) * 100
     const glowY = (y / rect.height) * 100
     setTilt({ rotateX, rotateY })
@@ -41,19 +41,21 @@ function TiltCard({ children, className, onClick }) {
       onMouseLeave={handleMouseLeave}
       tabIndex={0}
       style={{
+        ...style,
         perspective: '1000px',
         transformStyle: 'preserve-3d',
         transform: isHovered
-          ? `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale3d(1.03, 1.03, 1.03)`
+          ? `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale3d(1.1, 1.1, 1.1)`
           : 'rotateX(0) rotateY(0) scale3d(1, 1, 1)',
         transition: isHovered ? 'transform 0.1s ease-out' : 'transform 0.5s ease-out',
+        zIndex: isHovered ? 50 : 1,
       }}
     >
       {isHovered && (
         <div
           className="absolute inset-0 z-10 pointer-events-none rounded-2xl opacity-60"
           style={{
-            background: `radial-gradient(circle at ${glowPos.x}% ${glowPos.y}%, rgba(90,107,255,0.15) 0%, transparent 60%)`,
+            background: `radial-gradient(circle at ${glowPos.x}% ${glowPos.y}%, rgba(90,107,255,0.2) 0%, transparent 60%)`,
           }}
         />
       )}
@@ -61,6 +63,52 @@ function TiltCard({ children, className, onClick }) {
     </div>
   )
 }
+
+// ------------------- Video Thumbnail Component -------------------
+function VideoThumbnail({ video }) {
+  const videoRef = useRef(null)
+
+  const handleMouseEnter = () => {
+    if (videoRef.current) {
+      videoRef.current.play().catch((e) => console.log('Autoplay blocked:', e))
+    }
+  }
+  const handleMouseLeave = () => {
+    if (videoRef.current) {
+      videoRef.current.pause()
+      videoRef.current.currentTime = 0
+    }
+  }
+
+  return (
+    <div
+      className="h-72 overflow-hidden bg-black/40 relative"
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
+      <video
+        ref={videoRef}
+        src={video.videoUrl}
+        muted
+        loop
+        playsInline
+        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        <div className="w-16 h-16 rounded-full bg-brand-500/80 backdrop-blur-md flex items-center justify-center hover:bg-brand-500 transition-colors shadow-lg shadow-brand-500/30">
+          <svg className="w-8 h-8 text-white fill-white ml-1" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z" />
+          </svg>
+        </div>
+      </div>
+      <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] text-white font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+        ▶ Preview
+      </div>
+    </div>
+  )
+}
+
 
 // ------------------- Main VideoSection Component -------------------
 export default function VideoSection() {
@@ -155,10 +203,10 @@ export default function VideoSection() {
       <div className="container mx-auto px-4">
         {/* ================= Section Heading ================= */}
         <div className="text-center mb-12">
-          <h2 className="text-4xl font-bold text-white mb-4">
+          <h2 className="text-4xl font-bold text-white mb-4 animate-fade-up">
             My Videos Collection
           </h2>
-          <p className="text-lg text-gray-400">
+          <p className="text-lg text-gray-400 animate-fade-up" style={{ animationDelay: '0.1s' }}>
             Watch my latest videos and tutorials
           </p>
         </div>
@@ -168,7 +216,7 @@ export default function VideoSection() {
         ) : videos.length === 0 ? (
           <div className="text-center text-gray-500">No videos available</div>
         ) : (
-          <div className="relative">
+          <div className="relative pt-8 pb-8">
             {/* ---- Previous Button ---- */}
             <button
               onClick={() => scrollBy(-1)}
@@ -185,7 +233,7 @@ export default function VideoSection() {
               ref={scrollRef}
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
-              className="flex gap-8 overflow-x-auto scrollbar-hide scroll-smooth px-2 py-4"
+              className="flex gap-8 overflow-x-auto scrollbar-hide scroll-smooth px-6 py-10"
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
@@ -196,44 +244,27 @@ export default function VideoSection() {
                 <TiltCard
                   key={video.id}
                   onClick={() => handleCardClick(video)}
-                  className="relative group cursor-pointer bg-surface-800/50 backdrop-blur-sm border border-white/5 rounded-2xl shadow-xl overflow-hidden transition-shadow duration-500 hover:shadow-brand-500/20 hover:border-brand-500/30 focus:shadow-brand-500/30 focus:border-brand-500/40 focus:outline-none flex-shrink-0"
+                  className="relative group cursor-pointer bg-surface-800/50 backdrop-blur-sm border border-white/5 rounded-2xl shadow-xl overflow-hidden transition-all duration-500 hover:shadow-brand-500/30 hover:border-brand-500/50 focus:shadow-brand-500/30 focus:border-brand-500/40 focus:outline-none flex-shrink-0"
                   style={{ width: '380px' }}
                 >
-                  {/* Video Thumbnail */}
-                  <div className="h-72 overflow-hidden bg-black/40 relative">
-                    <video
-                      src={video.videoUrl}
-                      alt={video.title}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                      <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 transition-colors">
-                        <svg className="w-8 h-8 text-white fill-white" viewBox="0 0 24 24">
-                          <path d="M8 5v14l11-7z" />
-                        </svg>
-                      </div>
-                    </div>
-                    <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] text-white font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-                      ▶ Play
-                    </div>
-                  </div>
+                  <VideoThumbnail video={video} />
 
                   {/* Video Info */}
-                  <div className="p-7 relative z-20">
+                  <div className="p-7 relative z-20 bg-gradient-to-t from-surface-900 via-surface-900/95 to-transparent">
                     <h3 className="text-xl font-bold text-white mb-2 group-hover:text-brand-400 transition-colors duration-300 line-clamp-1">
                       {video.title}
                     </h3>
                     <p className="text-gray-400 mb-6 h-12 overflow-hidden text-sm line-clamp-2">
                       {video.description || 'No description'}
                     </p>
-                    <div className="flex justify-end items-center pt-2">
+                    <div className="flex justify-between items-center pt-2">
+                      <div className="text-xs text-brand-300 font-medium">Click to watch full video</div>
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
                           handleCardClick(video)
                         }}
-                        className="px-7 py-3 rounded-xl font-bold transition-all duration-300 shadow-lg bg-brand-500 hover:bg-brand-600 text-white shadow-brand-500/20 hover:scale-105"
+                        className="px-6 py-2 rounded-full font-bold transition-all duration-300 shadow-lg bg-white/10 hover:bg-brand-500 text-white hover:shadow-brand-500/40 hover:scale-105 backdrop-blur-md"
                       >
                         Watch
                       </button>
@@ -253,52 +284,57 @@ export default function VideoSection() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
               </svg>
             </button>
-
+            
             {/* ---- Navigation Labels ---- */}
-            <div className="flex justify-between items-center mt-6 px-16 text-xs text-gray-500">
-              <span>← Click or scroll</span>
+            <div className="flex justify-between items-center mt-2 px-16 text-xs text-gray-500">
+              <span>← Scroll to explore</span>
               <span>{videos.length} Videos</span>
-              <span>Click to play →</span>
+              <span>Hover to preview →</span>
             </div>
           </div>
         )}
       </div>
 
-      {/* ================= Video Player Modal ================= */}
+      {/* ================= Video Player Modal (Card) ================= */}
       {selectedVideo && (
         <div
-          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-8 animate-fade-in"
           onClick={() => setSelectedVideo(null)}
         >
           <div
-            className="relative w-full max-w-4xl"
+            className="relative w-full max-w-5xl bg-surface-900 border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row transform transition-all animate-fade-up"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Close Button */}
             <button
               onClick={() => setSelectedVideo(null)}
-              className="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors"
+              className="absolute top-4 right-4 z-50 w-10 h-10 bg-black/50 hover:bg-red-500 rounded-full text-white flex items-center justify-center transition-all backdrop-blur-md"
             >
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
 
-            {/* Video Player */}
-            <div className="bg-black rounded-2xl overflow-hidden border border-white/10">
+            {/* Video Player Area */}
+            <div className="w-full md:w-2/3 bg-black flex items-center justify-center relative">
               <video
                 src={selectedVideo.videoUrl}
                 controls
                 autoPlay
-                className="w-full aspect-video"
+                className="w-full h-full max-h-[70vh] object-contain"
               />
             </div>
 
-            {/* Video Details */}
-            <div className="mt-6 space-y-3">
-              <h2 className="text-3xl font-bold text-white">{selectedVideo.title}</h2>
-              <p className="text-gray-400 text-lg">
-                {selectedVideo.description || 'No description available'}
+            {/* Video Details Area */}
+            <div className="w-full md:w-1/3 p-8 flex flex-col justify-center bg-gradient-to-b from-surface-800 to-surface-900 border-l border-white/5">
+              <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-400 text-xs font-semibold uppercase tracking-wider w-fit">
+                <span className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
+                Now Playing
+              </div>
+              <h2 className="text-3xl font-black text-white mb-4 leading-tight">{selectedVideo.title}</h2>
+              <div className="w-12 h-1 bg-brand-500 rounded-full mb-6" />
+              <p className="text-gray-400 text-base leading-relaxed overflow-y-auto max-h-48 pr-2 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+                {selectedVideo.description || 'No description available for this video. Enjoy watching!'}
               </p>
             </div>
           </div>

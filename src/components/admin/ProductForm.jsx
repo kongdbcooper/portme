@@ -29,10 +29,22 @@ export default function ProductForm({ product = null, mode = 'create' }) {
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
+  const [isImagePending, setIsImagePending] = useState(false)
+  const [isImageUploading, setIsImageUploading] = useState(false)
 
   // Submit form — เรียก API ตรงๆ (ไม่ใช้ Server Action เพราะ handle image state ด้วย)
   const handleSubmit = async (e) => {
     e.preventDefault()
+    
+    if (isImagePending) {
+      setSubmitError('กรุณากดยืนยันการอัปโหลดรูปภาพ (ตกลง) ก่อนบันทึกโปรดักซ์')
+      return
+    }
+    if (isImageUploading) {
+      setSubmitError('กรุณารอให้รูปภาพอัปโหลดเสร็จสิ้นก่อน')
+      return
+    }
+    
     setIsSubmitting(true)
     setSubmitError('')
 
@@ -80,6 +92,8 @@ export default function ProductForm({ product = null, mode = 'create' }) {
       <ImageUploader
         currentImageUrl={product?.imageUrl}
         onUpload={({ url, key }) => setUploadedImage({ url, key })}
+        onPendingChange={setIsImagePending}
+        onUploadingChange={setIsImageUploading}
       />
 
       {/* ------------------- Product Name ------------------- */}
@@ -207,8 +221,8 @@ export default function ProductForm({ product = null, mode = 'create' }) {
         <button
           type="submit"
           id={`product-form-submit-${mode}`}
-          disabled={isSubmitting}
-          className="btn-gradient px-8 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
+          disabled={isSubmitting || isImageUploading}
+          className={`btn-gradient px-8 py-3 ${(isSubmitting || isImageUploading) ? 'opacity-50 cursor-not-allowed' : ''}`}
         >
           {isSubmitting ? (
             <span className="flex items-center gap-2">
