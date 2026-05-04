@@ -8,27 +8,34 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { string } from 'zod'
 
-// Read env vars once and validate lazily
-const AK = process.env.R2_ACCESS_KEY_ID || ''
-const SK = process.env.R2_SECRET_ACCESS_KEY || ''
-const BUCKET = process.env.R2_BUCKET_NAME || ''
-const PUBLIC_URL = process.env.R2_PUBLIC_URL || ''
-const accountId = process.env.CLOUDFLARE_ACCOUNT_ID || ''
-const R2_ENDPOINT = accountId ? `https://${accountId}.r2.cloudflarestorage.com` : ''
+/**
+ * 🔥 อ่าน env ใน function เพื่อป้องกันการ cache ใน Next.js
+ */
+function getR2Config() {
+  const AK = process.env.R2_ACCESS_KEY_ID
+  const SK = process.env.R2_SECRET_ACCESS_KEY
+  const BUCKET = process.env.R2_BUCKET_NAME
+  const PUBLIC_URL = process.env.R2_PUBLIC_URL
+  const accountId = process.env.CLOUDFLARE_ACCOUNT_ID
 
-let r2Configured = true
-if (!AK || !SK || !BUCKET || !accountId) {
-  r2Configured = false
-  console.warn('[R2] Missing Cloudflare R2 credentials or configuration in environment variables')
+  if (!AK || !SK || !BUCKET || !accountId) {
+    console.error('[R2] Missing config:', { AK: !!AK, SK: !!SK, BUCKET: !!BUCKET, accountId: !!accountId })
+    throw new Error('R2 is not configured. Please set R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME and CLOUDFLARE_ACCOUNT_ID')
+  }
+
+  const endpoint = `https://${accountId}.r2.cloudflarestorage.com`
+
+  return { AK, SK, BUCKET, PUBLIC_URL, endpoint }
 }
 
-export let r2Client = null
-if (r2Configured) {
-  // ⚡️ Official & Minimal S3Client config for Cloudflare R2 in Production
-  // No custom httpsAgent or checksum calculations are needed.
-  r2Client = new S3Client({
+/**
+ * สร้าง client ใหม่เมื่อต้องการใช้งาน
+ */
+function createR2Client() {
+  const { AK, SK, endpoint } = getR2Config()
+  return new S3Client({
     region: 'auto',
-    endpoint: R2_ENDPOINT,
+    endpoint,
     credentials: {
       accessKeyId: AK,
       secretAccessKey: SK,
@@ -36,14 +43,10 @@ if (r2Configured) {
   })
 }
 
-function ensureR2() {
-  if (!r2Configured || !r2Client) {
-    throw new Error('R2 is not configured. Please set R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME and CLOUDFLARE_ACCOUNT_ID')
-  }
-}
+// ------------------- CONFIG -------------------
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024
-const MAX_VIDEO_SIZE = 50 * 1024 * 1024
+const MAX_VIDEO_SIZE = 500 * 1024 * 1024
 const ALLOWED_FOLDERS = new Set(['products', 'settings', 'videos'])
 
 function sanitizeFilename(filename) {
@@ -65,7 +68,7 @@ function normalizeUploadInput({ filename, contentType, size = 0, folder = 'produ
       throw new Error('The videos folder only accepts video files')
     }
     if (numericSize > MAX_VIDEO_SIZE) {
-      throw new Error('Video file size must not exceed 50MB')
+      throw new Error('Video file size must not exceed 500MB')
     }
   } else {
     if (!ctype.startsWith('image/')) {
@@ -85,8 +88,10 @@ function normalizeUploadInput({ filename, contentType, size = 0, folder = 'produ
 }
 
 // ------------------- Upload File to R2 -------------------
+
 export async function uploadToR2(file, folder = 'products') {
-  ensureR2()
+  const client = createR2Client()
+  const { BUCKET, PUBLIC_URL } = getR2Config()
 
   const normalized = normalizeUploadInput({
     filename: file?.name,
@@ -102,7 +107,7 @@ export async function uploadToR2(file, folder = 'products') {
   const arrayBuffer = await file.arrayBuffer()
   const buffer = Buffer.from(arrayBuffer)
 
-  await r2Client.send(
+  await client.send(
     new PutObjectCommand({
       Bucket: BUCKET,
       Key: key,
@@ -116,15 +121,16 @@ export async function uploadToR2(file, folder = 'products') {
   return { key, publicUrl }
 }
 
-// ------------------- Delete File from R2 -------------------
+// ------------------- Delete File -------------------
+
 export async function deleteFromR2(key) {
   if (!key) return
-  if (!r2Configured || !r2Client) {
-    console.warn('[R2] deleteFromR2 skipped because R2 is not configured')
-    return
-  }
+  
   try {
-    await r2Client.send(
+    const client = createR2Client()
+    const { BUCKET } = getR2Config()
+
+    await client.send(
       new DeleteObjectCommand({
         Bucket: BUCKET,
         Key: key,
@@ -135,23 +141,37 @@ export async function deleteFromR2(key) {
   }
 }
 
-// ------------------- Generate Presigned Upload URL -------------------
+// ------------------- Generate Presigned URL -------------------
+
 export async function getPresignedUploadUrl(key, contentType) {
-  ensureR2()
-  const command = new PutObjectCommand({ Bucket: BUCKET, Key: key, ContentType: contentType })
-  return await getSignedUrl(r2Client, command, { expiresIn: 900 })
+  const client = createR2Client()
+  const { BUCKET } = getR2Config()
+
+  const command = new PutObjectCommand({ 
+    Bucket: BUCKET, 
+    Key: key, 
+    ContentType: contentType 
+  })
+  
+  return await getSignedUrl(client, command, { expiresIn: 900 })
 }
 
 export async function createPresignedUpload({ filename, contentType, size = 0, folder = 'products' } = {}) {
+  const client = createR2Client()
+  const { BUCKET, PUBLIC_URL } = getR2Config()
+
   const normalized = normalizeUploadInput({ filename, contentType, size, folder })
   const timestamp = Date.now()
   const randomStr = Math.random().toString(36).substring(2, 8)
   const key = `${normalized.folder}/${timestamp}-${randomStr}-${normalized.filename}`
 
-  ensureR2()
-
-  const command = new PutObjectCommand({ Bucket: BUCKET, Key: key, ContentType: normalized.contentType })
-  const uploadUrl = await getSignedUrl(r2Client, command, { expiresIn: 900 })
+  const command = new PutObjectCommand({ 
+    Bucket: BUCKET, 
+    Key: key, 
+    ContentType: normalized.contentType 
+  })
+  
+  const uploadUrl = await getSignedUrl(client, command, { expiresIn: 900 })
 
   const publicUrl = `${PUBLIC_URL}/${key}`
   return {

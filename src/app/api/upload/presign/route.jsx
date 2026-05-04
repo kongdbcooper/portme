@@ -11,7 +11,7 @@ const CLIENT_ERROR_MESSAGES = new Set([
   'Invalid upload folder',
   'Unsupported file type',
   'Image file size must not exceed 5MB',
-  'Video file size must not exceed 50MB',
+  'Video file size must not exceed 500MB',
   'The videos folder only accepts video files',
   'This folder only accepts image files',
 ])

@@ -75,7 +75,11 @@ export default function VideoUploadTable() {
     updateItem(id, { status: 'uploading', error: null })
 
     try {
-      const data = await uploadFileWithPresignedUrl({ file: item.file, folder: 'videos' })
+      const data = await uploadFileWithPresignedUrl({ 
+        file: item.file, 
+        folder: 'videos',
+        onProgress: (percent) => updateItem(id, { progress: percent })
+      })
       updateItem(id, {
         status: 'uploaded',
         videoUrl: data.url,
@@ -184,7 +188,7 @@ export default function VideoUploadTable() {
             >
               เลือกไฟล์วิดีโอ
             </button>
-            <p className="text-gray-500 text-xs mt-3">รองรับ: MP4, WebM, OGG (สูงสุด 50MB)</p>
+            <p className="text-gray-500 text-xs mt-3">รองรับ: MP4, WebM, OGG (สูงสุด 500MB)</p>
             <input
               ref={fileInputRef}
               type="file"
@@ -267,7 +271,20 @@ export default function VideoUploadTable() {
                           }`}
                         >
                           {item.status === 'pending' && '⏳ รอการอัปโหลด'}
-                          {item.status === 'uploading' && '📤 กำลังอัปโหลด'}
+                          {item.status === 'uploading' && (
+                            <div className="flex flex-col gap-1 w-24">
+                              <div className="flex justify-between text-[10px]">
+                                <span>📤 กำลังอัปโหลด</span>
+                                <span>{item.progress}%</span>
+                              </div>
+                              <div className="w-full bg-white/10 rounded-full h-1 overflow-hidden">
+                                <div 
+                                  className="bg-blue-500 h-full transition-all duration-300" 
+                                  style={{ width: `${item.progress}%` }}
+                                />
+                              </div>
+                            </div>
+                          )}
                           {item.status === 'uploaded' && '✓ อัปโหลดสำเร็จ'}
                           {item.status === 'saved' && '💾 บันทึกแล้ว'}
                           {item.status === 'error' && '❌ ข้อผิดพลาด'}

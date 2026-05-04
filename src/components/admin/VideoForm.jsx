@@ -12,6 +12,7 @@ export default function VideoForm({ video = null, mode = 'create' }) {
   const [videoKey, setVideoKey] = useState(video?.videoKey || '')
   
   const [isUploading, setIsUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const fileInputRef = useRef(null)
@@ -20,9 +21,9 @@ export default function VideoForm({ video = null, mode = 'create' }) {
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Limit to 50MB
-    if (file.size > 50 * 1024 * 1024) {
-      alert('ขนาดไฟล์ต้องไม่เกิน 50MB')
+    // Limit to 500MB
+    if (file.size > 500 * 1024 * 1024) {
+      alert('ขนาดไฟล์ต้องไม่เกิน 500MB')
       return
     }
 
@@ -30,7 +31,11 @@ export default function VideoForm({ video = null, mode = 'create' }) {
     setSubmitError('')
 
     try {
-      const data = await uploadFileWithPresignedUrl({ file, folder: 'videos' })
+      const data = await uploadFileWithPresignedUrl({ 
+        file, 
+        folder: 'videos',
+        onProgress: (percent) => setUploadProgress(percent)
+      })
       setVideoUrl(data.url)
       setVideoKey(data.key)
     } catch (err) {
@@ -91,7 +96,7 @@ export default function VideoForm({ video = null, mode = 'create' }) {
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
       {/* Upload Section */}
       <div>
-        <label className="form-label">วิดีโอ (ไม่เกิน 50MB) <span className="text-red-400">*</span></label>
+        <label className="form-label">วิดีโอ (ไม่เกิน 500MB) <span className="text-red-400">*</span></label>
         
         {videoUrl ? (
           <div className="relative rounded-xl overflow-hidden aspect-video bg-black/40 border border-white/10 group mb-4">
@@ -115,9 +120,15 @@ export default function VideoForm({ video = null, mode = 'create' }) {
             }`}
           >
             {isUploading ? (
-              <div className="flex flex-col items-center">
+              <div className="flex flex-col items-center w-full max-w-xs">
                 <span className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mb-4" />
-                <p className="text-brand-400 font-medium">กำลังอัปโหลด...</p>
+                <p className="text-brand-400 font-medium mb-2">กำลังอัปโหลด... {uploadProgress}%</p>
+                <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
+                  <div 
+                    className="bg-brand-500 h-full transition-all duration-300" 
+                    style={{ width: `${uploadProgress}%` }}
+                  />
+                </div>
               </div>
             ) : (
               <>
@@ -127,7 +138,7 @@ export default function VideoForm({ video = null, mode = 'create' }) {
                   </svg>
                 </div>
                 <p className="text-white font-medium mb-1">คลิกเพื่ออัปโหลดวิดีโอ</p>
-                <p className="text-gray-500 text-sm text-center">MP4, WebM, OGG สูงสุด 50MB</p>
+                <p className="text-gray-500 text-sm text-center">MP4, WebM, OGG สูงสุด 500MB</p>
               </>
             )}
           </div>
