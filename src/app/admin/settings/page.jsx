@@ -64,12 +64,63 @@ export default function AdminSettingsPage() {
     }
   }
 
-  const saveHeroBackground = (url, key) =>
-    saveMediaSetting({
-      urlKey: 'hero_background_url',
-      keyKey: 'hero_background_key',
-      successText: 'Hero background saved.',
-    }, url, key)
+  const addHeroImage = async (url, key) => {
+    setIsSaving(true)
+    setMessage({ type: '', text: '' })
+
+    try {
+      const current = settings.hero_background_images ? JSON.parse(settings.hero_background_images) : []
+      const updated = [...current, { url, key }]
+
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'hero_background_images', value: JSON.stringify(updated) }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to save hero images')
+      }
+
+      setSettings((prev) => ({ ...prev, hero_background_images: JSON.stringify(updated) }))
+      setMessage({ type: 'success', text: 'Hero background added.' })
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const removeHeroImage = async (index) => {
+    setIsSaving(true)
+    setMessage({ type: '', text: '' })
+
+    try {
+      const current = settings.hero_background_images ? JSON.parse(settings.hero_background_images) : []
+      const updated = current.filter((_, i) => i !== index)
+
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'hero_background_images', value: JSON.stringify(updated) }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to remove hero image')
+      }
+
+      setSettings((prev) => ({ ...prev, hero_background_images: JSON.stringify(updated) }))
+      setMessage({ type: 'success', text: 'Hero background removed.' })
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message })
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   const saveSiteLogo = (url, key) =>
     saveMediaSetting({
@@ -180,7 +231,7 @@ export default function AdminSettingsPage() {
             <ImageUploader
               folder="settings"
               initialImage={settings.site_logo_url}
-              onUploadSuccess={saveSiteLogo}
+              onUpload={({ url, key }) => saveSiteLogo(url, key)}
             />
             <p className="text-xs text-gray-500 italic">Recommended: square PNG/WebP, up to 5MB.</p>
           </div>
@@ -267,31 +318,39 @@ export default function AdminSettingsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-4">
-            <label className="block text-sm font-medium text-gray-400">Hero Background Image</label>
+            <label className="block text-sm font-medium text-gray-400">Add Hero Background Image</label>
             <ImageUploader
               folder="settings"
-              initialImage={settings.hero_background_url}
-              onUploadSuccess={saveHeroBackground}
+              initialImage={null}
+              onUploadSuccess={({ url, key }) => addHeroImage(url, key)}
             />
-            <p className="text-xs text-gray-500 italic">Recommended: 1920x1080 WebP/JPG, up to 5MB.</p>
+            <p className="text-xs text-gray-500 italic">Add multiple images for a background carousel. Recommended: 1920x1080 WebP/JPG, up to 5MB.</p>
           </div>
 
           <div className="space-y-4">
             <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <h3 className="text-sm font-medium text-white mb-3">Upload notes</h3>
-              <ul className="text-xs text-gray-400 space-y-2 list-disc list-inside">
-                <li>Images upload directly to Cloudflare R2 using a short-lived admin-only URL.</li>
-                <li>The public URL and R2 object key are saved to the database.</li>
-                <li>Deleting the preview clears both saved setting values.</li>
-                <li>Bucket CORS must allow PUT from this site and localhost during development.</li>
+              <h3 className="text-sm font-medium text-white mb-3">Hero carousel</h3>
+              <p className="text-xs text-gray-400 mb-2">If multiple images are uploaded, they will crossfade automatically.</p>
+              <ul className="text-xs text-gray-400 space-y-1 list-disc list-inside">
+                <li>Images upload directly to Cloudflare R2.</li>
+                <li>The settings are saved automatically.</li>
               </ul>
             </div>
 
-            {settings.hero_background_url && (
-              <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-xs text-green-400">
-                Hero background is saved.
-              </div>
-            )}
+            <div className="grid grid-cols-2 gap-3">
+              {(settings.hero_background_images ? JSON.parse(settings.hero_background_images) : (settings.hero_background_url ? [{url: settings.hero_background_url}] : [])).map((img, idx) => (
+                <div key={idx} className="relative group">
+                  <img src={img.url} className="w-full h-24 object-cover rounded-md border border-white/10" />
+                  <button
+                    onClick={() => removeHeroImage(idx)}
+                    className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Remove"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
 
             {isSaving && (
               <div className="p-3 rounded-lg bg-brand-500/10 border border-brand-500/20 text-xs text-brand-300">

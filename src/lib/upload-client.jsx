@@ -8,6 +8,26 @@ async function readJsonResponse(response) {
   }
 }
 
+async function uploadFileViaServer({ file, folder }) {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('folder', folder)
+
+  const response = await fetch('/api/upload', {
+    method: 'POST',
+    credentials: 'include',
+    body: formData,
+  })
+
+  const data = await readJsonResponse(response)
+
+  if (!response.ok) {
+    throw new Error(data?.error || `Server upload failed (HTTP ${response.status})`)
+  }
+
+  return data
+}
+
 export async function uploadFileWithPresignedUrl({ file, folder }) {
   const presignResponse = await fetch('/api/upload/presign', {
     method: 'POST',
@@ -25,20 +45,38 @@ export async function uploadFileWithPresignedUrl({ file, folder }) {
   const presignData = await readJsonResponse(presignResponse)
 
   if (!presignResponse.ok) {
-    throw new Error(presignData?.error || `Could not prepare upload (HTTP ${presignResponse.status})`)
+    if (presignResponse.status === 400 || presignResponse.status === 403) {
+      throw new Error(presignData?.error || `Could not prepare upload (HTTP ${presignResponse.status})`)
+    }
+
+    const fallbackData = await uploadFileViaServer({ file, folder })
+    return {
+      url: fallbackData.url,
+      key: fallbackData.key,
+    }
   }
 
   console.log('PRESIGN DATA:', presignData)
   console.log('UPLOAD URL:', presignData.uploadUrl) 
 
-  const uploadResponse = await fetch(presignData.uploadUrl, {
-    method: 'PUT',
-    headers: presignData.headers || { 'Content-Type': file.type },
-    body: file,
-  })
+  try {
+    const uploadResponse = await fetch(presignData.uploadUrl, {
+      method: 'PUT',
+      headers: presignData.headers || { 'Content-Type': file.type },
+      body: file,
+    })
 
-  if (!uploadResponse.ok) {
-    throw new Error(`Upload to storage failed (HTTP ${uploadResponse.status})`)
+    if (!uploadResponse.ok) {
+      throw new Error(`Upload to storage failed (HTTP ${uploadResponse.status})`)
+    }
+  } catch (directUploadError) {
+    console.warn('[Upload Client] Direct R2 upload failed, falling back to server upload:', directUploadError)
+
+    const fallbackData = await uploadFileViaServer({ file, folder })
+    return {
+      url: fallbackData.url,
+      key: fallbackData.key,
+    }
   }
 
   return {

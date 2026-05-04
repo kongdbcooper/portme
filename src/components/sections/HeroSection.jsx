@@ -11,28 +11,47 @@ import EditableBlock from '../admin/EditableBlock'
 
 export default function HeroSection({ settings = {} }) {
   const canvasRef = useRef(null)
-  const [heroBgUrl, setHeroBgUrl] = useState(settings.hero_background_url || null)
+  
+  const [heroImages, setHeroImages] = useState(() => {
+    if (settings.hero_background_images) {
+      try { return JSON.parse(settings.hero_background_images).map(img => img.url) } catch(e){}
+    }
+    if (settings.hero_background_url) return [settings.hero_background_url]
+    return []
+  })
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
   // ดึง background URL จาก settings API
   useEffect(() => {
     async function fetchSettings() {
       try {
         const res = await fetch('/api/settings', { cache: 'no-store' })
-        const settings = await res.json()
-        if (settings.hero_background_url) {
-          setHeroBgUrl(settings.hero_background_url)
+        const data = await res.json()
+        if (data.hero_background_images) {
+          try {
+            setHeroImages(JSON.parse(data.hero_background_images).map(img => img.url))
+          } catch(e){}
+        } else if (data.hero_background_url) {
+          setHeroImages([data.hero_background_url])
         }
       } catch (error) {
         console.error('Failed to fetch hero background:', error)
       }
     }
     
-    // ดึงตอน mount เท่านั้น ถ้าไม่มี prop backgroundUrl
-    // เราใช้ settings prop เป็นหลักแล้ว แต่ก็มี fallback เล็กน้อย
-    if (!settings.hero_background_url) {
+    if (heroImages.length === 0) {
       fetchSettings()
     }
-  }, [settings.hero_background_url])
+  }, [heroImages.length])
+
+  // Carousel Effect
+  useEffect(() => {
+    if (heroImages.length <= 1) return
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => (prev + 1) % heroImages.length)
+    }, 5000) // เปลี่ยนรูปทุก 5 วินาที
+    return () => clearInterval(interval)
+  }, [heroImages.length])
 
   // ------------------- Particle Animation -------------------
   // สร้าง floating particles บน canvas background
@@ -98,18 +117,32 @@ export default function HeroSection({ settings = {} }) {
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden"
-      style={{ 
-        background: heroBgUrl 
-          ? `linear-gradient(rgba(10, 10, 15, 0.7), rgba(17, 17, 24, 0.8)), url(${heroBgUrl}) center/cover no-repeat`
-          : 'linear-gradient(135deg, #0a0a0f 0%, #111118 40%, #1a1a2e 100%)'
-      }}
+      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#0a0a0f]"
     >
+      {/* ------------------- Background Carousel ------------------- */}
+      {heroImages.length > 0 ? (
+        heroImages.map((img, idx) => (
+          <div
+            key={idx}
+            className="absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out"
+            style={{
+              opacity: idx === currentImageIndex ? 1 : 0,
+              background: `linear-gradient(rgba(10, 10, 15, 0.7), rgba(17, 17, 24, 0.8)), url(${img}) center/cover no-repeat`
+            }}
+          />
+        ))
+      ) : (
+        <div
+          className="absolute inset-0 w-full h-full"
+          style={{ background: 'linear-gradient(135deg, #0a0a0f 0%, #111118 40%, #1a1a2e 100%)' }}
+        />
+      )}
+
       {/* ------------------- Particle Canvas ------------------- */}
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 w-full h-full pointer-events-none"
-        style={{ opacity: heroBgUrl ? 0.4 : 0.6 }}
+        className="absolute inset-0 w-full h-full pointer-events-none z-0"
+        style={{ opacity: heroImages.length > 0 ? 0.4 : 0.6 }}
       />
 
       {/* ------------------- Gradient Orbs ------------------- */}

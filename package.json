@@ -14,18 +14,20 @@
     "db:studio": "prisma studio"
   },
   "prisma": {
-    "seed": "npx tsx prisma/seed.js"
+    "seed": "npx tsx prisma/seed.jsx"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1038.0",
+    "@aws-sdk/client-s3": "^3.1041.0",
     "@aws-sdk/node-http-handler": "^3.374.0",
     "@aws-sdk/s3-request-presigner": "^3.1038.0",
     "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^7.8.0",
     "@smithy/node-http-handler": "^4.6.1",
     "bcryptjs": "^3.0.3",
+    "cloudflare": "^6.0.0",
     "init": "^0.1.2",
     "jose": "^6.2.3",
+    "lint": "^1.2.2",
     "next": "^16.2.4",
     "pg": "^8.20.0",
     "prisma": "^7.8.0",

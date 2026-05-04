@@ -5,7 +5,7 @@ import Image from 'next/image'
 import EditableBlock from '../admin/EditableBlock'
 
 // ------------------- 3D Tilt Card Component -------------------
-function TiltCard({ children, className, onClick }) {
+function TiltCard({ children, className, style, onClick }) {
   const cardRef = useRef(null)
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 })
   const [isHovered, setIsHovered] = useState(false)
@@ -18,8 +18,8 @@ function TiltCard({ children, className, onClick }) {
     const y = e.clientY - rect.top
     const centerX = rect.width / 2
     const centerY = rect.height / 2
-    const rotateX = ((y - centerY) / centerY) * -12
-    const rotateY = ((x - centerX) / centerX) * 12
+    const rotateX = ((y - centerY) / centerY) * -8
+    const rotateY = ((x - centerX) / centerX) * 8
     const glowX = (x / rect.width) * 100
     const glowY = (y / rect.height) * 100
     setTilt({ rotateX, rotateY })
@@ -43,19 +43,21 @@ function TiltCard({ children, className, onClick }) {
       onMouseLeave={handleMouseLeave}
       tabIndex={0}
       style={{
+        ...style,
         perspective: '1000px',
         transformStyle: 'preserve-3d',
         transform: isHovered
-          ? `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale3d(1.03, 1.03, 1.03)`
+          ? `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale3d(1.1, 1.1, 1.1)`
           : 'rotateX(0) rotateY(0) scale3d(1, 1, 1)',
         transition: isHovered ? 'transform 0.1s ease-out' : 'transform 0.5s ease-out',
+        zIndex: isHovered ? 50 : 1,
       }}
     >
       {isHovered && (
         <div
           className="absolute inset-0 z-10 pointer-events-none rounded-2xl opacity-60"
           style={{
-            background: `radial-gradient(circle at ${glowPos.x}% ${glowPos.y}%, rgba(90,107,255,0.15) 0%, transparent 60%)`,
+            background: `radial-gradient(circle at ${glowPos.x}% ${glowPos.y}%, rgba(90,107,255,0.2) 0%, transparent 60%)`,
           }}
         />
       )}
@@ -276,17 +278,17 @@ export default function ProductSection({ abVariant, settings = {} }) {
                   {/* Foreground profile image (next in list) */}
                   {profileImages.length > 0 ? (
                     <Image
-                      src={profileImages[(profileIndex + 1) % profileImages.length].url}
+                      src={profileImages[(profileIndex + 1) % profileImages.length]?.url || '/picture/blue.jpg'}
                       alt="About Me"
                       fill
                       sizes="(max-width: 768px) 100vw, 500px"
                       className="object-contain relative z-10"
                       onClick={() => setSelectedProfileImage(profileImages[(profileIndex + 1) % profileImages.length])}
-                      unoptimized={profileImages[(profileIndex + 1) % profileImages.length].url.startsWith('blob:')}
+                      unoptimized={profileImages[(profileIndex + 1) % profileImages.length]?.url?.startsWith('blob:') ? true : false}
                     />
                   ) : (
                     <Image
-                      src={featuredProduct?.imageUrl || '/picture/blue.jpg'}
+                      src={(featuredProduct?.imageUrl && featuredProduct.imageUrl.trim() !== '') ? featuredProduct.imageUrl : '/picture/blue.jpg'}
                       alt="About Me"
                       fill
                       sizes="(max-width: 768px) 100vw, 500px"
@@ -367,39 +369,45 @@ export default function ProductSection({ abVariant, settings = {} }) {
                 <TiltCard
                   key={product.id}
                   onClick={() => handleCardClick(product)}
-                  className="relative group cursor-pointer bg-surface-800/50 backdrop-blur-sm border border-white/5 rounded-2xl shadow-xl overflow-hidden transition-shadow duration-500 hover:shadow-brand-500/20 hover:border-brand-500/30 focus:shadow-brand-500/30 focus:border-brand-500/40 focus:outline-none flex-shrink-0"
+                  className="relative group cursor-pointer bg-surface-800/50 backdrop-blur-sm border border-white/5 rounded-2xl shadow-xl overflow-hidden transition-all duration-500 hover:shadow-brand-500/30 hover:border-brand-500/50 focus:shadow-brand-500/30 focus:border-brand-500/40 focus:outline-none flex-shrink-0"
                   style={{ width: '380px' }}
                 >
-                  {product.imageUrl && (
-                    <div className="h-72 overflow-hidden bg-black/40 relative">
-                      <Image
-                        src={product.imageUrl}
-                        alt={product.name}
-                        fill
-                        sizes="(max-width: 768px) 100vw, 380px"
-                        className="object-contain transition-transform duration-700 group-hover:scale-110"
-                        unoptimized={false}
-                      />
-                      
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f]/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] text-white font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-                        ✨ Quick View
+                  <div className="h-72 overflow-hidden bg-black/40 relative">
+                    <Image
+                      src={(product.imageUrl && typeof product.imageUrl === 'string' && product.imageUrl.trim() !== '') ? product.imageUrl : '/picture/blue.jpg'}
+                      alt={product.name || 'Product'}
+                      fill
+                      sizes="(max-width: 768px) 100vw, 380px"
+                      className="object-contain transition-transform duration-700 group-hover:scale-105"
+                      unoptimized={typeof product.imageUrl === 'string' && product.imageUrl.startsWith('blob:') ? true : false}
+                    />
+                    
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      <div className="w-16 h-16 rounded-full bg-brand-500/80 backdrop-blur-md flex items-center justify-center hover:bg-brand-500 transition-colors shadow-lg shadow-brand-500/30">
+                        <svg className="w-8 h-8 text-white fill-white" viewBox="0 0 24 24">
+                          <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
+                        </svg>
                       </div>
                     </div>
-                  )}
-                  <div className="p-7 relative z-20">
-                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-brand-400 transition-colors duration-300">
+                    <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] text-white font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                      ✨ Quick View
+                    </div>
+                  </div>
+                  <div className="p-7 relative z-20 bg-gradient-to-t from-surface-900 to-transparent">
+                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-brand-400 transition-colors duration-300 line-clamp-1">
                       {product.name}
                     </h3>
                     <p className="text-gray-400 mb-6 h-12 overflow-hidden text-sm line-clamp-2">
                       {product.description}
                     </p>
-                    <div className="flex justify-end items-center pt-2">
+                    <div className="flex justify-between items-center pt-2">
+                      <div className="text-xs text-brand-300 font-medium">Click to view details</div>
                       <button
                         onClick={(e) => handleProductClick(product.id, e)}
-                        className="px-7 py-3 rounded-xl font-bold transition-all duration-300 shadow-lg bg-brand-500 hover:bg-brand-600 text-white shadow-brand-500/20 hover:scale-105"
+                        className="px-6 py-2 rounded-full font-bold transition-all duration-300 shadow-lg bg-white/10 hover:bg-brand-500 text-white hover:shadow-brand-500/40 hover:scale-105 backdrop-blur-md"
                       >
-                        Click me
+                        View
                       </button>
                     </div>
                   </div>
@@ -457,9 +465,14 @@ export default function ProductSection({ abVariant, settings = {} }) {
           onClick={() => setSelectedProduct(null)}
           style={{ animation: 'fadeIn 0.3s ease-out forwards' }}
         >
-          <div className="absolute inset-0 bg-black/90 backdrop-blur-xl" />
+          <div 
+            className="absolute inset-0 backdrop-blur-xl" 
+            style={{ 
+              background: 'linear-gradient(135deg, rgba(10,10,15,0.95) 0%, rgba(17,17,24,0.95) 40%, rgba(26,26,46,0.95) 100%)' 
+            }} 
+          />
           <div
-            className="relative w-full max-w-3xl overflow-visible flex items-center justify-center"
+            className="relative w-full max-w-4xl overflow-visible flex flex-col items-center justify-center"
             style={{ perspective: '2000px' }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -470,32 +483,36 @@ export default function ProductSection({ abVariant, settings = {} }) {
                 animation: 'pop3d 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
               }}
             >
-              <div className="rounded-3xl overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.5),0_30px_60px_-30px_rgba(90,107,255,0.3)]">
+              <div className="relative rounded-3xl overflow-hidden bg-black/40 border border-white/10 shadow-[0_50px_100px_-20px_rgba(0,0,0,0.6),0_30px_60px_-30px_rgba(90,107,255,0.4)] backdrop-blur-md p-2">
                 <Image
-                  src={selectedProduct.imageUrl}
-                  alt={selectedProduct.name}
+                  src={(selectedProduct.imageUrl && typeof selectedProduct.imageUrl === 'string' && selectedProduct.imageUrl.trim() !== '') ? selectedProduct.imageUrl : '/picture/blue.jpg'}
+                  alt={selectedProduct.name || 'Product'}
                   width={1200}
                   height={800}
-                  className="w-full max-h-[60vh] object-contain bg-black/50"
-                  style={{ filter: 'drop-shadow(0 20px 50px rgba(0,0,0,0.5))' }}
+                  className="w-full max-h-[65vh] object-contain rounded-2xl"
+                  style={{ filter: 'drop-shadow(0 20px 50px rgba(0,0,0,0.6))' }}
+                  unoptimized={typeof selectedProduct.imageUrl === 'string' && selectedProduct.imageUrl.startsWith('blob:') ? true : false}
                 />
               </div>
+              
+              {/* Floating Info Box */}
               <div
-                className="mt-6 mx-auto max-w-lg bg-surface-800/80 backdrop-blur-2xl p-8 rounded-3xl border border-white/10 shadow-2xl text-center"
-                style={{ transform: 'translateZ(80px)', animation: 'slideUp 0.5s 0.2s ease-out both' }}
+                className="absolute -bottom-8 md:-bottom-12 left-1/2 -translate-x-1/2 w-[95%] sm:w-[90%] max-w-lg bg-surface-800/90 backdrop-blur-2xl p-6 rounded-3xl border border-white/10 shadow-[0_20px_40px_rgba(0,0,0,0.5)] text-center z-50"
+                style={{ transform: 'translateZ(100px)', animation: 'slideUp 0.5s 0.3s ease-out both' }}
               >
-                <h2 className="text-3xl font-black text-white mb-2">{selectedProduct.name}</h2>
-                <p className="text-gray-300 mb-4">{selectedProduct.description}</p>
-                <div className="text-3xl font-black text-brand-400">
-                  ฿{Number(selectedProduct.price).toLocaleString()}
+                <h2 className="text-2xl font-black text-white mb-2">{selectedProduct.name}</h2>
+                <p className="text-gray-300 text-sm mb-4 line-clamp-3 overflow-y-auto max-h-24 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent pr-2">{selectedProduct.description}</p>
+                <div className="text-2xl font-black text-brand-400">
+                  {selectedProduct.price ? `฿${Number(selectedProduct.price).toLocaleString()}` : 'Free'}
                 </div>
               </div>
+
               <button
                 onClick={() => setSelectedProduct(null)}
-                className="absolute -top-4 -right-4 w-12 h-12 bg-white text-black rounded-full flex items-center justify-center shadow-2xl hover:scale-110 hover:rotate-90 transition-all duration-300 z-50"
-                style={{ transform: 'translateZ(120px)' }}
+                className="absolute -top-6 -right-6 w-14 h-14 bg-white text-black rounded-full flex items-center justify-center shadow-[0_10px_20px_rgba(0,0,0,0.3)] hover:scale-110 hover:bg-brand-500 hover:text-white transition-all duration-300 z-50 group"
+                style={{ transform: 'translateZ(150px)' }}
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 group-hover:rotate-90 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
@@ -519,8 +536,10 @@ export default function ProductSection({ abVariant, settings = {} }) {
           >
             <div className="rounded-3xl overflow-hidden shadow-2xl">
               <Image 
-              src={selectedProfileImage.url} 
-              alt="Profile" width={1600} height={900} className="w-full max-h-[80vh] object-contain bg-black/50" />
+              src={(selectedProfileImage?.url && selectedProfileImage.url.trim() !== '') ? selectedProfileImage.url : '/picture/blue.jpg'} 
+              alt="Profile" width={1600} height={900} className="w-full max-h-[80vh] object-contain bg-black/50" 
+              unoptimized={selectedProfileImage?.url?.startsWith('blob:') ? true : false}
+              />
             </div>
             <button
               onClick={() => setSelectedProfileImage(null)}
