@@ -3,19 +3,38 @@ import { revalidateTag } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
 import { deleteFromR2 } from '@/lib/r2'
+import { z } from 'zod'
 
 const MEDIA_KEY_SETTINGS = new Set(['hero_background_key', 'site_logo_key'])
+const ALLOWED_KEYS = [
+  'site_logo_url',
+  'site_logo_key',
+  'hero_background_url',
+  'hero_background_key',
+  'hero_background_images',
+  'prod_profile_images',
+]
+
+const SettingSchema = z.object({
+  key: z.enum(ALLOWED_KEYS, { error: 'Invalid setting key' }),
+  value: z.string(),
+})
 
 export async function POST(request) {
   try {
     await requireAdmin()
 
     const body = await request.json()
-    const { key, value } = body
+    const validation = SettingSchema.safeParse(body)
 
-    if (!key || value === undefined) {
-      return NextResponse.json({ error: 'Key and Value are required' }, { status: 400 })
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: 'Invalid data', details: validation.error.flatten().fieldErrors },
+        { status: 400 }
+      )
     }
+
+    const { key, value } = validation.data
 
     const previous = await prisma.siteSetting.findUnique({ where: { key } })
 

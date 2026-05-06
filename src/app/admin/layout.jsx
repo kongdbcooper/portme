@@ -8,6 +8,7 @@
 
 import { redirect } from 'next/navigation'
 import { getSession } from '@/lib/auth'
+import { getCachedSettings } from '@/lib/settings'
 import Sidebar from '@/components/admin/Sidebar'
 
 export const metadata = {
@@ -25,6 +26,7 @@ export const metadata = {
  */
 export default async function AdminLayout({ children }) {
   const session = await getSession()
+  const settings = await getCachedSettings()
 
   // Double-check: ถ้าไม่ใช่ Admin redirect ออก
   if (!session || session.role !== 'ADMIN') {
@@ -35,7 +37,7 @@ export default async function AdminLayout({ children }) {
     // ไม่ใช้ root layout navbar/footer — admin มี layout แยก
     <div className="min-h-screen" style={{ background: '#0a0a0f' }}>
       {/* Sidebar */}
-      <Sidebar user={{ email: session.email }} />
+      <Sidebar user={{ email: session.email }} logoUrl={settings.site_logo_url} />
 
       {/* Main Content Area */}
       <div className="lg:ml-64 min-h-screen">

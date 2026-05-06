@@ -12,6 +12,7 @@ import bcrypt from 'bcryptjs'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { createSession } from '@/lib/session'
+import { rateLimit } from '@/lib/rate-limit'
 
 // Schema สำหรับ validate request body
 const LoginSchema = z.object({
@@ -20,6 +21,15 @@ const LoginSchema = z.object({
 })
 
 export async function POST(request) {
+  // ------------------- Rate Limiting -------------------
+  const { success } = await rateLimit(request, 10) // 10 attempts per minute
+  if (!success) {
+    return NextResponse.json(
+      { error: 'Too many login attempts. Please try again later.' },
+      { status: 429 }
+    )
+  }
+
   try {
     const body = await request.json()
 

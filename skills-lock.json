@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "skills": {
+    "alloydb-basics": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/alloydb-basics/SKILL.md",
+      "computedHash": "cf628b53572473cbc12973255372e0460b59c087f1a462be6f63a45a4289c42e"
+    },
+    "bigquery-basics": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/bigquery-basics/SKILL.md",
+      "computedHash": "5ec355e0dcaa5f21d8f63e12b0299c0d05cef5959c0fb41512b073e3b6443963"
+    },
+    "cloud-run-basics": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/cloud-run-basics/SKILL.md",
+      "computedHash": "83a46d62ab1f9199cbfa2a9c9185b96131161ab111494caa9178f2daa9725e0b"
+    },
+    "cloud-sql-basics": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/cloud-sql-basics/SKILL.md",
+      "computedHash": "089080724290fb88ea86c4b1a22db9de9695f215d0aef1cb212df1fbcb243d5a"
+    },
+    "firebase-basics": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/firebase-basics/SKILL.md",
+      "computedHash": "300876ca36f48fbb84f832ac42274042247c6ca23660e7935aa0f72612d9cf6b"
+    },
+    "gemini-api": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/gemini-api/SKILL.md",
+      "computedHash": "0409d5a219aa675d7703c71dbf511f68bc3e36357306245d4ffb99961d0c43ac"
+    },
+    "gke-basics": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/gke-basics/SKILL.md",
+      "computedHash": "695dab60fec9949e9bbc5be8ea8c8426b996a5463551ce6b1fd8e8c51a0d8be6"
+    },
+    "google-cloud-recipe-auth": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/google-cloud-recipe-auth/SKILL.md",
+      "computedHash": "90d9d648f587f2ca9b8b5f817df5844298b998c3ef03793cb3dc8807f104f084"
+    },
+    "google-cloud-recipe-networking-observability": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/google-cloud-networking-observability/SKILL.md",
+      "computedHash": "b3912d1e1fba8fd8fea8b87892a987a993cfbc2f5edc0b27380c6d78fc8a366a"
+    },
+    "google-cloud-recipe-onboarding": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/google-cloud-recipe-onboarding/SKILL.md",
+      "computedHash": "abe73688865fee583f255352f1c8d1c3512c687d76346e6362379bfd6c3e9e88"
+    },
+    "google-cloud-waf-cost-optimization": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/google-cloud-waf-cost-optimization/SKILL.md",
+      "computedHash": "e91b8ef387a077c6f84b784a00673b424d9bcac6f5ab84142f378c5a3bfe8fc6"
+    },
+    "google-cloud-waf-reliability": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/google-cloud-waf-reliability/SKILL.md",
+      "computedHash": "738a725fa0fd4e642880e77ca11dd626921743bdb9da0fbc0702117b25ba33fa"
+    },
+    "google-cloud-waf-security": {
+      "source": "google/skills",
+      "sourceType": "github",
+      "skillPath": "skills/cloud/google-cloud-waf-security/SKILL.md",
+      "computedHash": "b49e3f41dd7758c3392cde1ff10fbed769d7e089cd8c4a8bf0c914749f1276e3"
+    }
+  }
+}

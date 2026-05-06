@@ -173,30 +173,30 @@ export default function HeroSection({ settings = {} }) {
       />
 
       {/* ------------------- Hero Content ------------------- */}
-      <div className="relative z-10 section-container text-center px-4">
+      <div className="relative z-10 section-container text-center px-4 flex flex-col items-center">
 
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-300 text-sm font-medium mb-8 animate-fade-in">
-          <span className="w-2 h-2 rounded-full bg-brand-400 animate-pulse" />
           <EditableBlock settingKey="hero_badge" defaultText={settings.hero_badge || "แพลตฟอร์มจัดการโปรดักซ์ยุคใหม่"} />
         </div>
 
         {/* Main Headline */}
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 animate-fade-up leading-none" style={{ fontFamily: 'Outfit, sans-serif' }}>
-          <EditableBlock as="span" className="text-white block" settingKey="hero_title_1" defaultText={settings.hero_title_1 || "จัดการ"} />
-          <EditableBlock as="span" className="animated-gradient-text block" settingKey="hero_title_2" defaultText={settings.hero_title_2 || "โปรดักซ์"} />
-          <EditableBlock as="span" className="text-white block" settingKey="hero_title_3" defaultText={settings.hero_title_3 || "อย่างมืออาชีพ"} />
+        <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 animate-fade-up leading-none flex flex-col items-center" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <EditableBlock as="span" className="text-white block text-center" settingKey="hero_title_1" defaultText={settings.hero_title_1 || "จัดการ"} />
+          <EditableBlock as="span" className="animated-gradient-text block text-center" settingKey="hero_title_2" defaultText={settings.hero_title_2 || "โปรดักซ์"} />
+          <EditableBlock as="span" className="text-white block text-center" settingKey="hero_title_3" defaultText={settings.hero_title_3 || "อย่างมืออาชีพ"} />
         </h1>
 
         {/* Subheadline */}
-        <p className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 animate-fade-up" style={{ animationDelay: '0.2s' }}>
+        <div className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 animate-fade-up text-center" style={{ animationDelay: '0.2s' }}>
           <EditableBlock 
             as="span" 
             settingKey="hero_subtitle" 
             multiline 
+            className="text-center block"
             defaultText={settings.hero_subtitle || "ระบบ Admin Dashboard ที่ครบครัน อัปโหลดรูปภาพสู่ Cloudflare R2 อัตโนมัติ พร้อม A/B Testing และ Google Analytics ในตัว"} 
           />
-        </p>
+        </div>
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-up" style={{ animationDelay: '0.4s' }}>
@@ -208,39 +208,25 @@ export default function HeroSection({ settings = {} }) {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
-            ดูโปรดักซ์ทั้งหมด
+            <EditableBlock as="span" settingKey="hero_cta_primary" defaultText={settings.hero_cta_primary || "ดูโปรดักซ์ทั้งหมด"} />
           </a>
           <a
             href="#contact"
             id="hero-contact-btn"
             className="btn-ghost text-base px-8 py-4"
           >
-            ติดต่อเรา
+            <EditableBlock as="span" settingKey="hero_cta_secondary" defaultText={settings.hero_cta_secondary || "ติดต่อเรา"} />
           </a>
-        </div>
-
-        {/* ------------------- Stats Row ------------------- */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-8 mt-16 animate-fade-up" style={{ animationDelay: '0.6s' }}>
-          {[
-            { value: '500+', label: 'โปรดักซ์' },
-            { value: '99.9%', label: 'Uptime' },
-            { value: '<100ms', label: 'Response Time' },
-          ].map(({ value, label }) => (
-            <div key={label} className="text-center">
-              <div className="text-3xl font-black gradient-text mb-1" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                {value}
-              </div>
-              <div className="text-gray-500 text-sm">{label}</div>
-            </div>
-          ))}
         </div>
       </div>
 
       {/* ------------------- Scroll Indicator ------------------- */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce">
-        <span className="text-gray-600 text-xs">เลื่อนลง</span>
-        <div className="w-5 h-8 rounded-full border border-gray-700 flex items-start justify-center p-1">
-          <div className="w-1 h-2 bg-brand-500 rounded-full animate-bounce" />
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce opacity-60">
+        <span className="text-white/40 text-[10px] uppercase tracking-widest font-bold">
+          <EditableBlock settingKey="hero_scroll_label" defaultText="เลื่อนลง" />
+        </span>
+        <div className="w-5 h-8 rounded-full border border-white/20 flex items-start justify-center p-1">
+          <div className="w-1 h-2 bg-brand-500 rounded-full" />
         </div>
       </div>
     </section>

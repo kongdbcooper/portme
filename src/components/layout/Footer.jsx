@@ -1,10 +1,7 @@
-// =============================================================================
-// src/components/layout/Footer.js — Site Footer
-// Footer พร้อม links, social icons, และ branding
-// ใช้งานร่วมกับ: src/app/layout.js, src/app/globals.css
-// =============================================================================
+'use client'
 
 import BrandLogo from './BrandLogo'
+import EditableBlock from '../admin/EditableBlock'
 
 const FOOTER_LINKS = {
   'Menu': [
@@ -37,9 +34,9 @@ export default function Footer({ settings = {} }) {
             <BrandLogo logoUrl={logoUrl} />
 
             {/* Description */}
-            <p className="text-gray-500 text-sm leading-relaxed max-w-sm">
-              Personal website with Admin Dashboard that can manage projects and images.
-            </p>
+            <div className="text-gray-500 text-sm leading-relaxed max-w-sm">
+              <EditableBlock settingKey="footer_desc" defaultText="Personal website with Admin Dashboard that can manage projects and images." />
+            </div>
 
             {/* Social Icons */}
             <div className="flex items-center gap-3 pt-2">
@@ -85,13 +82,15 @@ export default function Footer({ settings = {} }) {
         {/* ------------------- Bottom Bar ------------------- */}
         <div className="mt-12 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-gray-600 text-xs">
-            © {currentYear} PortMe. สงวนลิขสิทธิ์ทุกประการ
+            © {currentYear} <EditableBlock as="span" settingKey="footer_copyright" defaultText="PortMe" />. <EditableBlock as="span" settingKey="footer_rights" defaultText="สงวนลิขสิทธิ์ทุกประการ" />
           </p>
           <div className="flex items-center gap-4">
             <span className="text-gray-700 text-xs">Built with Next.js 16 + Tailwind CSS</span>
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="text-gray-600 text-xs">All systems operational</span>
+              <span className="text-gray-600 text-xs">
+                <EditableBlock as="span" settingKey="footer_status" defaultText="All systems operational" />
+              </span>
             </div>
           </div>
         </div>

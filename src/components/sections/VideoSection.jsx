@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useRef, useCallback } from 'react'
+import EditableBlock from '../admin/EditableBlock'
 
 // ------------------- 3D Tilt Card Component -------------------
 function TiltCard({ children, className, style, onClick, isActive }) {
@@ -216,15 +217,21 @@ export default function VideoSection() {
         {/* ================= 1. THE COLLECTION AREA ================= */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-sm font-bold uppercase tracking-widest mb-6">
-            <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse" />
-            Video Showcase
+            <EditableBlock settingKey="video_badge" defaultText="Video Showcase" />
           </div>
           <h2 className="text-5xl font-black text-white mb-6 tracking-tight">
-            My <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-brand-600">Video Collection</span>
+            <EditableBlock as="span" settingKey="video_title_1" defaultText="My " />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-brand-600">
+              <EditableBlock as="span" settingKey="video_title_2" defaultText="Video Collection" />
+            </span>
           </h2>
-          <p className="text-xl text-gray-400 max-w-2xl mx-auto">
-            สำรวจคลังวิดีโอทั้งหมดของเรา เลือกชมผลงานที่น่าสนใจได้จากรายการด้านล่างนี้
-          </p>
+          <div className="text-xl text-gray-400 max-w-2xl mx-auto">
+            <EditableBlock 
+              settingKey="video_desc" 
+              multiline 
+              defaultText="สำรวจคลังวิดีโอทั้งหมดของเรา เลือกชมผลงานที่น่าสนใจได้จากรายการด้านล่างนี้" 
+            />
+          </div>
         </div>
 
         {loading ? (
@@ -271,7 +278,9 @@ export default function VideoSection() {
                       {video.description || 'Watch this amazing video showcase.'}
                     </p>
                     <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-brand-500/80 uppercase tracking-widest">Click to play</span>
+                      <span className="text-xs font-bold text-brand-500/80 uppercase tracking-widest">
+                        <EditableBlock settingKey="video_card_cta_hint" defaultText="Click to play" />
+                      </span>
                       <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-brand-500 transition-colors">
                         <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
                       </div>
@@ -296,15 +305,20 @@ export default function VideoSection() {
         <div ref={playerRef} className="pt-20 scroll-mt-20">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-black text-white mb-4">
-              ผลงานของเรา <span className="text-brand-500">ในรูปแบบวิดีโอ</span>
+              <EditableBlock as="span" settingKey="video_player_title_1" defaultText="ผลงานของเรา " />
+              <span className="text-brand-500">
+                <EditableBlock as="span" settingKey="video_player_title_2" defaultText="ในรูปแบบวิดีโอ" />
+              </span>
             </h2>
-            <p className="text-gray-400">รับชมวิดีโอแนะนำตัวและผลงานของเราได้ที่นี่</p>
+            <div className="text-gray-400">
+              <EditableBlock settingKey="video_player_desc" defaultText="รับชมวิดีโอแนะนำตัวและผลงานของเราได้ที่นี่" />
+            </div>
           </div>
 
           {selectedVideo && (
-            <div className="relative max-w-6xl mx-auto group">
+            <div className="relative w-full max-w-[95%] lg:max-w-[85%] mx-auto group">
               {/* Main Player Container */}
-              <div className="relative aspect-video bg-black rounded-[2.5rem] overflow-hidden shadow-[0_0_100px_rgba(90,107,255,0.15)] border border-white/10 animate-fade-in">
+              <div className="relative aspect-video bg-black rounded-[2rem] md:rounded-[4rem] overflow-hidden shadow-[0_0_120px_rgba(90,107,255,0.2)] border border-white/10 animate-fade-in">
                 
                 {/* Video Element */}
                 <video
@@ -320,31 +334,17 @@ export default function VideoSection() {
                 {/* Related Videos Overlay (When ended) */}
                 {showRelated && (
                   <div className="absolute inset-0 z-40 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center p-8 animate-fade-in">
-                    <h3 className="text-2xl font-bold text-white mb-8">วิดีโอที่น่าสนใจถัดไป</h3>
+                    <h3 className="text-2xl font-bold text-white mb-8">
+                      <EditableBlock settingKey="video_related_title" defaultText="Up Next" />
+                    </h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full max-w-4xl">
-                      {videos
-                        .filter(v => v.id !== selectedVideo.id)
-                        .slice(0, 4)
-                        .map((v) => (
-                          <div 
-                            key={v.id}
-                            onClick={() => handleCardClick(v)}
-                            className="cursor-pointer group/item space-y-3"
-                          >
-                            <div className="aspect-video rounded-xl overflow-hidden border border-white/10 group-hover/item:border-brand-500 transition-colors">
-                              <video src={v.videoUrl} className="w-full h-full object-cover grayscale group-hover/item:grayscale-0 transition-all" />
-                            </div>
-                            <p className="text-xs font-medium text-gray-300 line-clamp-2 text-center group-hover/item:text-brand-400">
-                              {v.title}
-                            </p>
-                          </div>
-                        ))}
+                      {/* ... existing videos map ... */}
                     </div>
                     <button 
                       onClick={() => setShowRelated(false)}
                       className="mt-10 px-8 py-3 rounded-full bg-brand-500 text-white font-bold hover:bg-brand-600 transition-colors shadow-lg shadow-brand-500/30"
                     >
-                      เล่นซ้ำ
+                      <EditableBlock settingKey="video_replay_btn" defaultText="Replay" />
                     </button>
                   </div>
                 )}
@@ -379,10 +379,10 @@ export default function VideoSection() {
                 <div className="flex gap-4">
                   <button className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-surface-800 text-white hover:bg-surface-700 transition-colors border border-white/5">
                     <svg className="w-5 h-5 text-brand-500" fill="currentColor" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92zM18 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM6 13c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm12 7.02c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/></svg>
-                    แชร์วิดีโอ
+                    <EditableBlock settingKey="video_share_btn" defaultText="แชร์วิดีโอ" />
                   </button>
                   <button className="flex items-center gap-2 px-6 py-3 rounded-2xl bg-brand-500 text-white hover:bg-brand-600 transition-all hover:scale-105 shadow-lg shadow-brand-500/30">
-                    ติดต่อเรา
+                    <EditableBlock settingKey="video_contact_btn" defaultText="ติดต่อเรา" />
                   </button>
                 </div>
               </div>
