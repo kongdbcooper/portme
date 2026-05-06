@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import Image from 'next/image'
 import EditableBlock from '../admin/EditableBlock'
 
 export default function ProfileSection({ settings = {}, loading = false }) {
+  // Profile images (About Me) — settings.prod_profile_images stored as JSON string
   const profileImages = (() => {
     try {
       return settings.prod_profile_images ? JSON.parse(settings.prod_profile_images) : []
@@ -15,19 +16,16 @@ export default function ProfileSection({ settings = {}, loading = false }) {
 
   const [profileIndex, setProfileIndex] = useState(0)
 
-  const handleNext = useCallback(() => {
-    setProfileIndex((i) => (i + 1) % profileImages.length)
-  }, [profileImages.length])
-
-  const handlePrev = useCallback(() => {
-    setProfileIndex((i) => (i - 1 + profileImages.length) % profileImages.length)
-  }, [profileImages.length])
-
+  // Auto-advance disabled as per user request
+  
   if (loading || profileImages.length === 0) return null
+
+  const handleNext = () => setProfileIndex((i) => (i + 1) % profileImages.length)
+  const handlePrev = () => setProfileIndex((i) => (i - 1 + profileImages.length) % profileImages.length)
 
   return (
     <div className="relative w-full min-h-[85vh] flex items-center overflow-hidden group mb-12 -mt-16">
-      {/* 1. MAIN BACKGROUND (Previous Image) - Immersive Blend */}
+        {/* 1. MAIN BACKGROUND (Previous Image) - Immersive Blend */}
       <div
         className="absolute inset-0 transition-all duration-1000 ease-in-out z-0"
         style={{
@@ -36,8 +34,10 @@ export default function ProfileSection({ settings = {}, loading = false }) {
           backgroundPosition: 'center',
         }}
       >
+        {/* Ultra-Strong Seamless Gradient Fades */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-transparent to-[#0a0a0f] z-10" />
         <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0f] via-[#0a0a0f]/30 to-transparent z-10" />
+        {/* Global Darkener */}
         <div className="absolute inset-0 bg-black/50 backdrop-blur-[3px] z-0" />
       </div>
 
@@ -55,35 +55,35 @@ export default function ProfileSection({ settings = {}, loading = false }) {
             <div className="space-y-16">
               {/* Intro Text - Massive Colorful Hero */}
               <div className="text-6xl md:text-8xl lg:text-9xl font-black uppercase tracking-tighter leading-none">
-                <EditableBlock
-                  as="span"
-                  className="animated-gradient-text block py-6"
-                  settingKey="prod_title_1"
-                  defaultText={settings.prod_title_1 || "I'm Creative Developer"}
+                <EditableBlock 
+                  as="span" 
+                  className="animated-gradient-text block py-6" 
+                  settingKey="prod_title_1" 
+                  defaultText={settings.prod_title_1 || "I'm Creative Developer"} 
                 />
               </div>
             </div>
 
             <div className="space-y-20 max-w-3xl">
-              {/* Description - Standardized Left Alignment */}
-              <div className="text-white text-3xl lg:text-4xl leading-relaxed font-bold drop-shadow-2xl opacity-100">
-                <EditableBlock
-                  as="div"
-                  settingKey="prod_desc"
-                  multiline
-                  defaultText={settings.prod_desc || "I build high-performance, visually stunning digital products that push the boundaries of modern web development"}
-                />
-              </div>
+               {/* Description - Standardized Left Alignment */}
+               <div className="text-white text-3xl lg:text-4xl leading-relaxed font-bold drop-shadow-2xl opacity-100">
+                 <EditableBlock
+                   as="div"
+                   settingKey="prod_desc"
+                   multiline
+                   defaultText={settings.prod_desc || "I build high-performance, visually stunning digital products that push the boundaries of modern web development."}
+                 />
+               </div>
 
-              {/* Extended Bio Section - Better support for long text */}
-              <div className="text-gray-300 text-xl lg:text-2xl leading-loose font-medium opacity-90 border-l-2 border-brand-500/30 pl-8">
-                <EditableBlock
-                  as="div"
-                  settingKey="prod_long_bio"
-                  multiline
-                  defaultText={settings.prod_long_bio || "With over 5 years of experience in the industry, I specialize in React, Next.js, and advanced motion graphics. My work focuses on delivering seamless user interactions and pixel-perfect designs that leave a lasting impression."}
-                />
-              </div>
+               {/* Extended Bio Section - Better support for long text */}
+               <div className="text-gray-300 text-xl lg:text-2xl leading-loose font-medium opacity-90 border-l-2 border-brand-500/30 pl-8">
+                 <EditableBlock
+                   as="div"
+                   settingKey="prod_long_bio"
+                   multiline
+                   defaultText={settings.prod_long_bio || "With over 5 years of experience in the industry, I specialize in React, Next.js, and advanced motion graphics. My work focuses on delivering seamless user interactions and pixel-perfect designs that leave a lasting impression."}
+                 />
+               </div>
             </div>
 
             <div className="pt-12 flex flex-col sm:flex-row items-center gap-12">
@@ -102,7 +102,7 @@ export default function ProfileSection({ settings = {}, loading = false }) {
                 </svg>
               </button>
 
-              {profileImages.length > 1 && (
+               {profileImages.length > 1 && (
                 <div className="text-white/60 text-base font-black uppercase tracking-[0.5em] flex items-center gap-8 opacity-70 group-hover:opacity-100 transition-all duration-700">
                   <div className="w-24 h-[3px] bg-brand-500/40 group-hover:w-40 group-hover:bg-brand-500 transition-all duration-700" />
                   <EditableBlock settingKey="prod_scroll_text" defaultText={settings.prod_scroll_text || "Scroll to Explore"} />
@@ -115,8 +115,8 @@ export default function ProfileSection({ settings = {}, loading = false }) {
           <div className="relative space-y-12 flex flex-col items-center" style={{ fontFamily: 'Outfit, sans-serif' }}>
             {/* Background Glow */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-brand-500/10 rounded-full blur-[150px] scale-90 group-hover:scale-110 transition-transform duration-1000 pointer-events-none" />
-
-            {/* The Image Container */}
+            
+              {/* The Image Container with Integrated Small Card */}
             <div
               className="relative w-full max-w-2xl aspect-[4/5] rounded-[6rem] overflow-hidden shadow-[0_100px_200px_-40px_rgba(0,0,0,1)] transition-all duration-1000 group-hover:scale-[1.02]"
             >
@@ -133,52 +133,52 @@ export default function ProfileSection({ settings = {}, loading = false }) {
                 <div className="w-full h-full bg-gradient-to-br from-brand-500/10 to-transparent" />
               )}
 
-              {/* Small Card - Bottom Right, 1/3 width, seamless blend, clickable */}
-              {profileImages.length > 1 && (
-                <div
-                  className="absolute bottom-4 right-4 w-1/3 aspect-[4/5] overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 opacity-90 hover:opacity-100"
-                  onClick={handleNext}
-                >
-                  <Image
-                    src={profileImages[(profileIndex + 1) % profileImages.length]?.url || '/picture/blue.jpg'}
-                    alt="Next Preview"
-                    fill
-                    sizes="(max-width: 1024px) 400px"
-                    className="object-contain"
-                    unoptimized={profileImages[(profileIndex + 1) % profileImages.length]?.url?.startsWith('blob:') ? true : false}
-                  />
-                </div>
-              )}
+              {/* Small Card - Bottom Right, Seamless Blend */}
+            {profileImages.length > 1 && (
+              <div
+                className="absolute bottom-4 right-4 w-1/3 aspect-[4/5] rounded-2xl overflow-hidden cursor-pointer transition-all duration-300 hover:scale-105 opacity-90 hover:opacity-100"
+                onClick={handleNext}
+              >
+                <Image
+                  src={profileImages[(profileIndex + 1) % profileImages.length]?.url || '/picture/blue.jpg'}
+                  alt="Next Preview"
+                  fill
+                  sizes="(max-width: 1024px) 400px"
+                  className="object-contain"
+                  unoptimized={profileImages[(profileIndex + 1) % profileImages.length]?.url?.startsWith('blob:') ? true : false}
+                />
+              </div>
+            )}
             </div>
 
-            {/* Consolidated Navigation & CTA Block */}
-            <div className="relative w-full max-w-2xl p-8 md:p-10 rounded-[4rem] bg-surface-900/80 backdrop-blur-3xl border border-white/10 shadow-3xl z-50">
+             {/* Consolidated Navigation & CTA Block */}
+             <div className="relative w-full max-w-2xl p-8 md:p-10 rounded-[4rem] bg-surface-900/80 backdrop-blur-3xl border border-white/10 shadow-3xl z-50">
               <div className="flex justify-between items-center gap-6">
                 {/* Prev Button */}
-                <button
-                  onClick={handlePrev}
-                  className="w-12 h-12 rounded-xl bg-surface-800/80 border border-white/20 flex items-center justify-center text-brand-300 hover:bg-brand-500 hover:border-brand-500 hover:text-white transition-all duration-300 active:scale-90 flex-shrink-0"
-                >
+                  <button
+                    onClick={handlePrev}
+                    className="w-12 h-12 rounded-xl bg-surface-800/80 border border-white/20 flex items-center justify-center text-brand-300 hover:bg-brand-500 hover:border-brand-500 hover:text-white transition-all duration-300 active:scale-90 flex-shrink-0"
+                  >
                   <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={5} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
 
-                {/* Centered Counter & Label */}
-                <div className="flex-1 text-center space-y-1">
-                  <div className="text-brand-300 text-[10px] font-black uppercase tracking-[0.3em] opacity-100">
-                    <EditableBlock settingKey="prod_nav_label" defaultText={settings.prod_nav_label || "Explore Profile"} />
-                  </div>
-                  <h4 className="text-white text-3xl font-black tracking-tighter">
-                    {profileIndex + 1} <span className="text-white/40">/</span> {profileImages.length}
-                  </h4>
+                 {/* Centered Counter & Label */}
+                 <div className="flex-1 text-center space-y-1">
+                   <div className="text-brand-300 text-[10px] font-black uppercase tracking-[0.3em] opacity-100">
+                     <EditableBlock settingKey="prod_nav_label" defaultText={settings.prod_nav_label || "Explore Profile"} />
+                   </div>
+                   <h4 className="text-white text-3xl font-black tracking-tighter">
+                     {profileIndex + 1} <span className="text-white/40">/</span> {profileImages.length}
+                   </h4>
                 </div>
 
-                {/* Next Button */}
-                <button
-                  onClick={handleNext}
-                  className="w-12 h-12 rounded-xl bg-surface-800/80 border border-white/20 flex items-center justify-center text-brand-300 hover:bg-brand-500 hover:border-brand-500 hover:text-white transition-all duration-300 active:scale-90 flex-shrink-0"
-                >
+                 {/* Next Button */}
+                 <button
+                   onClick={handleNext}
+                   className="w-12 h-12 rounded-xl bg-surface-800/80 border border-white/20 flex items-center justify-center text-brand-300 hover:bg-brand-500 hover:border-brand-500 hover:text-white transition-all duration-300 active:scale-90 flex-shrink-0"
+                 >
                   <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={5} d="M9 5l7 7-7 7" />
                   </svg>

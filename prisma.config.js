@@ -1,9 +1,10 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
+console.log('DATABASE_URL in config:', process.env.DATABASE_URL);
+
 export default defineConfig({
   schema: "prisma/schema.prisma",
-  engineType: "library",
   migrations: {
     path: "prisma/migrations",
     seed: "npx tsx prisma/seed.jsx",
