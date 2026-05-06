@@ -9,6 +9,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 // เมนู sidebar สำหรับ Admin
 const MENU_ITEMS = [
@@ -69,7 +70,7 @@ const MENU_ITEMS = [
   },
 ]
 
-export default function Sidebar({ user }) {
+export default function Sidebar({ user, logoUrl }) {
   const pathname = usePathname()
   const router = useRouter()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -90,18 +91,30 @@ export default function Sidebar({ user }) {
   const sidebarContent = (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="px-6 py-6 border-b border-white/5">
-        <Link href="/" className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-gradient-brand flex items-center justify-center">
-            <span className="text-white font-bold" style={{ fontFamily: 'Outfit, sans-serif' }}>P</span>
+      <div className="px-6 py-8 border-b border-white/5">
+        <Link href="/" className="flex items-center gap-4 group">
+          <div className="relative h-12 flex items-center">
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt="Logo"
+                className="h-full w-auto object-contain drop-shadow-[0_4px_12px_rgba(90,107,255,0.3)] transition-transform group-hover:scale-110 duration-300"
+              />
+            ) : (
+              <div className="w-11 h-11 rounded-xl bg-gradient-brand flex items-center justify-center">
+                <span className="text-white font-bold text-xl" style={{ fontFamily: 'Outfit, sans-serif' }}>P</span>
+              </div>
+            )}
           </div>
-          <span className="text-lg font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
-            Port<span className="gradient-text">Me</span>
-          </span>
+          <div className="flex flex-col">
+            <span className="text-lg font-bold text-white leading-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              Port<span className="gradient-text">Me</span>
+            </span>
+            <span className="text-[10px] uppercase tracking-[0.2em] text-brand-400 font-bold opacity-80">
+              Admin Panel
+            </span>
+          </div>
         </Link>
-        <div className="mt-3 px-2 py-1.5 rounded-lg bg-brand-500/10 border border-brand-500/20">
-          <p className="text-brand-300 text-xs font-medium">⚡ Admin Dashboard</p>
-        </div>
       </div>
 
       {/* Navigation */}

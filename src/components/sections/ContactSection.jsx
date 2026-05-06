@@ -21,7 +21,6 @@ export default function ContactSection({ settings = {} }) {
           {/* Header */}
           <div className="text-center mb-16 animate-fade-in">
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-300 text-xs font-medium mb-4">
-              <span className="w-2 h-2 rounded-full bg-brand-400 animate-pulse" />
               <EditableBlock settingKey="contact_badge" defaultText={settings.contact_badge || "Contact Me"} />
             </div>
             <h2 className="text-4xl font-black text-white mb-6">
@@ -45,7 +44,7 @@ export default function ContactSection({ settings = {} }) {
               <div className="w-16 h-16 bg-brand-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
                 <span className="text-3xl">📧</span>
               </div>
-              <div className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2">
+              <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">
                 <EditableBlock settingKey="contact_label_1" defaultText={settings.contact_label_1 || "Email"} />
               </div>
               <div className="text-white text-lg font-bold">
@@ -58,7 +57,7 @@ export default function ContactSection({ settings = {} }) {
               <div className="w-16 h-16 bg-brand-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
                 <span className="text-3xl">📱</span>
               </div>
-              <div className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2">
+              <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">
                 <EditableBlock settingKey="contact_label_2" defaultText={settings.contact_label_2 || "Line"} />
               </div>
               <div className="text-white text-lg font-bold">
@@ -71,7 +70,7 @@ export default function ContactSection({ settings = {} }) {
               <div className="w-16 h-16 bg-brand-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
                 <span className="text-3xl">🕐</span>
               </div>
-              <div className="text-gray-500 text-xs font-bold uppercase tracking-widest mb-2">
+              <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">
                 <EditableBlock settingKey="contact_label_3" defaultText={settings.contact_label_3 || "Business Hours"} />
               </div>
               <div className="text-white text-lg font-bold">

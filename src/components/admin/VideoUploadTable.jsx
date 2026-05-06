@@ -188,7 +188,8 @@ export default function VideoUploadTable() {
             >
               เลือกไฟล์วิดีโอ
             </button>
-            <p className="text-gray-500 text-xs mt-3">รองรับ: MP4, WebM, OGG (สูงสุด 500MB)</p>
+            <p className="text-gray-500 text-xs mt-3">แนะนำ: ขนาด 1080p (1920x1080 หรือ 1080x1920) เพื่อการแสดงผลวิดีโอที่คมชัดและลื่นไหล 100%</p>
+            <p className="text-gray-600 text-[10px] mt-1">รองรับ: MP4, WebM, OGG (สูงสุด 500MB)</p>
             <input
               ref={fileInputRef}
               type="file"

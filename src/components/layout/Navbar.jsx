@@ -9,6 +9,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import BrandLogo from './BrandLogo'
+import EditableBlock from '../admin/EditableBlock'
 
 // Navigation links สำหรับ smooth scroll ไปแต่ละ section
 const NAV_LINKS = [
@@ -21,17 +22,31 @@ export default function Navbar({ settings = {} }) {
   const [isScrolled, setIsScrolled] = useState(false) 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('hero')
+  const [isVisible, setIsVisible] = useState(true)
+  const [lastScrollY, setLastScrollY] = useState(0)
   const logoUrl = settings.site_logo_url || ''
 
   // ------------------- Scroll Detection -------------------
-  // เปลี่ยน navbar style เมื่อ scroll ลงมา (glassmorphism effect)
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20)
+      const currentScrollY = window.scrollY
+      
+      // Toggle sticky style
+      setIsScrolled(currentScrollY > 20)
+
+      // Smart Header Logic: Hide on scroll down, Show on scroll up
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsVisible(false) // Scrolling down
+      } else {
+        setIsVisible(true)  // Scrolling up
+      }
+      
+      setLastScrollY(currentScrollY)
     }
-    window.addEventListener('scroll', handleScroll)
+    
+    window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+  }, [lastScrollY])
 
   // ------------------- Active Section Detection -------------------
   // Highlight nav link ที่ตรงกับ section ที่กำลังอยู่
@@ -55,7 +70,9 @@ export default function Navbar({ settings = {} }) {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 transform ${
+        isVisible ? 'translate-y-0' : '-translate-y-full'
+      } ${
         isScrolled
           ? 'bg-surface-900/80 backdrop-blur-xl border-b border-white/5 shadow-lg shadow-black/20'
           : 'bg-transparent'
@@ -73,29 +90,24 @@ export default function Navbar({ settings = {} }) {
 
           {/* ------------------- Desktop Nav Links ------------------- */}
           <ul className="hidden md:flex items-center gap-1">
-            {NAV_LINKS.map(({ label, href }) => {
-              const sectionId = href.replace('#', '')
-              const isActive = activeSection === sectionId
-
-              return (
-                <li key={href}>
-                  <a
-                    href={href}
-                    className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                      isActive
-                        ? 'text-white'
-                        : 'text-gray-400 hover:text-white hover:bg-white/5'
-                    }`}
-                  >
-                    {label}
-                    {/* Active indicator dot */}
-                    {isActive && (
-                      <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-brand-500 rounded-full" />
-                    )}
-                  </a>
-                </li>
-              )
-            })}
+            <li>
+              <a href="#hero" className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeSection === 'hero' ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+                <EditableBlock settingKey="nav_link_1" defaultText="Main" />
+                {activeSection === 'hero' && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-brand-500 rounded-full" />}
+              </a>
+            </li>
+            <li>
+              <a href="#products" className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeSection === 'products' ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+                <EditableBlock settingKey="nav_link_2" defaultText="Projects" />
+                {activeSection === 'products' && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-brand-500 rounded-full" />}
+              </a>
+            </li>
+            <li>
+              <a href="#contact" className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeSection === 'contact' ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+                <EditableBlock settingKey="nav_link_3" defaultText="Contact Me" />
+                {activeSection === 'contact' && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-brand-500 rounded-full" />}
+              </a>
+            </li>
           </ul>
 
           {/* ------------------- CTA Buttons ------------------- */}
@@ -105,14 +117,14 @@ export default function Navbar({ settings = {} }) {
               id="navbar-login-btn"
               className="btn-ghost text-sm px-4 py-2"
             >
-              Login
+              <EditableBlock settingKey="nav_login_label" defaultText={settings.nav_login_label || "Login"} />
             </Link>
             <a
               href="#contact"
               id="navbar-contact-btn"
               className="btn-gradient text-sm px-4 py-2"
             >
-              Contact Me
+              <EditableBlock settingKey="nav_contact_label" defaultText={settings.nav_contact_label || "Contact Me"} />
             </a>
           </div>
 
@@ -139,30 +151,42 @@ export default function Navbar({ settings = {} }) {
           }`}
         >
           <div className="glass-card p-4 mt-2 space-y-1">
-            {NAV_LINKS.map(({ label, href }) => (
-              <a
-                key={href}
-                href={href}
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/5 transition-colors font-medium"
-              >
-                {label}
-              </a>
-            ))}
+            <a
+              href="#hero"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/5 transition-colors font-medium"
+            >
+              <EditableBlock settingKey="nav_link_1" defaultText="Main" />
+            </a>
+            <a
+              href="#products"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/5 transition-colors font-medium"
+            >
+              <EditableBlock settingKey="nav_link_2" defaultText="Projects" />
+            </a>
+            <a
+              href="#contact"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className="block px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/5 transition-colors font-medium"
+            >
+              <EditableBlock settingKey="nav_link_3" defaultText="Contact Me" />
+            </a>
+            
             <div className="pt-2 border-t border-white/10 flex flex-col gap-2">
               <Link
                 href="/login"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="block text-center py-2.5 rounded-xl border border-brand-500/40 text-brand-400 font-medium hover:bg-brand-500/10 transition-colors"
               >
-                Login
+                <EditableBlock settingKey="nav_login_label" defaultText="Login" />
               </Link>
               <a
                 href="#contact"
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="btn-gradient text-center py-2.5"
               >
-                Contact Me
+                <EditableBlock settingKey="nav_contact_label" defaultText="Contact Me" />
               </a>
             </div>
           </div>

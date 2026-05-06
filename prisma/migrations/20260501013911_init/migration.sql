@@ -30,7 +30,7 @@ CREATE TABLE "products" (
     "imageKey" TEXT,
     "category" TEXT,
     "isActive" BOOLEAN NOT NULL DEFAULT true,
-    "abVariant" "ABVariant" NOT NULL DEFAULT 'A', 'B', 'C',
+    "abVariant" "ABVariant" NOT NULL DEFAULT 'A',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

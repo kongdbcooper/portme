@@ -17,7 +17,7 @@ import Image from 'next/image'
  * @param {Function} onUpload - callback เมื่ออัปโหลดสำเร็จ ({ url, key })
  * @param {Function} onUploadSuccess - callback เมื่ออัปโหลดสำเร็จ (ส่ง url โดยตรง)
  */
-export default function ImageUploader({ currentImageUrl, initialImage, onUpload, onUploadSuccess, folder = 'products', onPendingChange, onUploadingChange }) {
+export default function ImageUploader({ currentImageUrl, initialImage, onUpload, onUploadSuccess, folder = 'products', onPendingChange, onUploadingChange, fillHeight = false }) {
   const [isDragging, setIsDragging] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   useEffect(() => { if (onUploadingChange) onUploadingChange(isUploading) }, [isUploading, onUploadingChange])
@@ -153,7 +153,7 @@ export default function ImageUploader({ currentImageUrl, initialImage, onUpload,
   }
 
   return (
-    <div className="space-y-3">
+    <div className={`flex flex-col ${fillHeight ? 'h-full' : 'space-y-3'}`}>
       <label className="form-label">รูปภาพโปรดักซ์</label>
 
       {/* Drop Zone */}
@@ -162,14 +162,14 @@ export default function ImageUploader({ currentImageUrl, initialImage, onUpload,
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
         onClick={() => !isUploading && !pendingFile && fileInputRef.current?.click()}
-        className={`relative rounded-2xl border-2 border-dashed transition-all duration-300 ${pendingFile ? 'cursor-default' : 'cursor-pointer'} overflow-hidden
+        className={`relative rounded-2xl border-2 border-dashed transition-all duration-300 ${pendingFile ? 'cursor-default' : 'cursor-pointer'} overflow-hidden flex-1 flex flex-col
           ${isDragging
             ? 'border-brand-500 bg-brand-500/10 scale-[1.01]'
             : 'border-white/10 hover:border-brand-500/50 hover:bg-white/2'
           }
           ${isUploading ? 'cursor-wait pointer-events-none' : ''}
         `}
-        style={{ minHeight: '180px' }}
+        style={{ minHeight: fillHeight ? '0' : '320px' }}
         role="button"
         aria-label="อัปโหลดรูปภาพ"
         tabIndex={0}
@@ -185,95 +185,97 @@ export default function ImageUploader({ currentImageUrl, initialImage, onUpload,
           </div>
         )}
 
-        {preview ? (
-          // Preview image
-          <div className="relative w-full" style={{ minHeight: '180px' }}>
-            <Image
-              src={preview}
-              alt="Product preview"
-              fill
-              className={`object-cover transition-all duration-300 ${isUploading ? 'opacity-50' : 'opacity-100'}`}
-              sizes="(max-width: 768px) 100vw, 500px"
-              unoptimized={preview.startsWith('blob:')}
-            />
-            {/* Overlay on hover (only when no pending file) */}
-            {!isUploading && !pendingFile && (
-              <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-3 cursor-pointer">
-                <div className="text-center text-white">
-                  <div className="text-3xl mb-2">🔄</div>
-                  <p className="text-sm font-medium">เปลี่ยนรูป</p>
-                </div>
-                <div className="w-px h-12 bg-white/20" />
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    handleDelete()
-                  }}
-                  className="text-center text-red-400 hover:text-red-300"
-                >
-                  <div className="text-3xl mb-2">🗑️</div>
-                  <p className="text-sm font-medium">ลบ</p>
-                </button>
-              </div>
-            )}
-            
-            {/* Confirm / Cancel Overlay for Pending File */}
-            {!isUploading && pendingFile && (
-              <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-4 z-20">
-                <p className="text-white font-medium text-center px-4">ต้องการอัปโหลดรูปนี้หรือไม่?</p>
-                <div className="flex gap-3">
+        <div className="flex-1 flex flex-col items-center justify-center relative">
+          {preview ? (
+            // Preview image
+            <div className="absolute inset-0 w-full h-full">
+              <Image
+                src={preview}
+                alt="Product preview"
+                fill
+                className={`object-contain transition-all duration-300 ${isUploading ? 'opacity-50' : 'opacity-100'}`}
+                sizes="(max-width: 768px) 100vw, 500px"
+                unoptimized={preview.startsWith('blob:')}
+              />
+              {/* Overlay on hover (only when no pending file) */}
+              {!isUploading && !pendingFile && (
+                <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-3 cursor-pointer">
+                  <div className="text-center text-white">
+                    <div className="text-3xl mb-2">🔄</div>
+                    <p className="text-sm font-medium">เปลี่ยนรูป</p>
+                  </div>
+                  <div className="w-px h-12 bg-white/20" />
                   <button
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation()
-                      confirmUpload()
+                      handleDelete()
                     }}
-                    className="px-6 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg text-sm font-medium transition-colors shadow-lg"
+                    className="text-center text-red-400 hover:text-red-300"
                   >
-                    ตกลง
-                  </button>
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      cancelUpload()
-                    }}
-                    className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-colors border border-white/20"
-                  >
-                    ยกเลิก
+                    <div className="text-3xl mb-2">🗑️</div>
+                    <p className="text-sm font-medium">ลบ</p>
                   </button>
                 </div>
-              </div>
-            )}
-            
-            {/* Uploading indicator */}
-            {isUploading && (
-              <div className="absolute inset-0 flex items-center justify-center z-20">
-                <div className="flex flex-col items-center gap-2 text-white">
-                  <svg className="animate-spin w-8 h-8" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
-                  <span className="text-sm">กำลังอัปโหลด... {progress}%</span>
+              )}
+              
+              {/* Confirm / Cancel Overlay for Pending File */}
+              {!isUploading && pendingFile && (
+                <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-4 z-20">
+                  <p className="text-white font-medium text-center px-4">ต้องการอัปโหลดรูปนี้หรือไม่?</p>
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        confirmUpload()
+                      }}
+                      className="px-6 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg text-sm font-medium transition-colors shadow-lg"
+                    >
+                      ตกลง
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        cancelUpload()
+                      }}
+                      className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-colors border border-white/20"
+                    >
+                      ยกเลิก
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          // Empty state
-          <div className="flex flex-col items-center justify-center py-12 px-6 text-center" style={{ minHeight: '180px' }}>
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl mb-4 transition-transform duration-300 ${isDragging ? 'scale-125' : ''}`}
-              style={{ background: 'rgba(90,107,255,0.15)' }}>
-              {isDragging ? '📂' : '🖼️'}
+              )}
+              
+              {/* Uploading indicator */}
+              {isUploading && (
+                <div className="absolute inset-0 flex items-center justify-center z-20">
+                  <div className="flex flex-col items-center gap-2 text-white">
+                    <svg className="animate-spin w-8 h-8" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                    </svg>
+                    <span className="text-sm">กำลังอัปโหลด... {progress}%</span>
+                  </div>
+                </div>
+              )}
             </div>
-            <p className="text-white font-medium mb-1">
-              {isDragging ? 'ปล่อยไฟล์ที่นี่' : 'ลากรูปมาวางที่นี่'}
-            </p>
-            <p className="text-gray-500 text-sm">หรือ <span className="text-brand-400 underline">คลิกเพื่อเลือกไฟล์</span></p>
-            <p className="text-gray-600 text-xs mt-2">JPEG, PNG, WebP, GIF — ไม่เกิน 5MB</p>
-          </div>
-        )}
+          ) : (
+            // Empty state
+            <div className="flex flex-col items-center justify-center py-12 px-6 text-center">
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-3xl mb-4 transition-transform duration-300 ${isDragging ? 'scale-125' : ''}`}
+                style={{ background: 'rgba(90,107,255,0.15)' }}>
+                {isDragging ? '📂' : '🖼️'}
+              </div>
+              <p className="text-white font-medium mb-1">
+                {isDragging ? 'ปล่อยไฟล์ที่นี่' : 'ลากรูปมาวางที่นี่'}
+              </p>
+              <p className="text-gray-500 text-sm">หรือ <span className="text-brand-400 underline">คลิกเพื่อเลือกไฟล์</span></p>
+              <p className="text-gray-600 text-xs mt-2">JPEG, PNG, WebP, GIF — ไม่เกิน 5MB</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Hidden file input */}
@@ -288,7 +290,7 @@ export default function ImageUploader({ currentImageUrl, initialImage, onUpload,
 
       {/* Error message */}
       {error && (
-        <p className="flex items-center gap-2 text-red-400 text-sm animate-fade-in">
+        <p className="flex items-center gap-2 text-red-400 text-sm animate-fade-in mt-2">
           <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -298,7 +300,7 @@ export default function ImageUploader({ currentImageUrl, initialImage, onUpload,
 
       {/* Success info */}
       {preview && !isUploading && !error && !pendingFile && (
-        <p className="flex items-center gap-2 text-green-400 text-sm">
+        <p className="flex items-center gap-2 text-green-400 text-sm mt-2">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>

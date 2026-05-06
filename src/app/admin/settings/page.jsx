@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import ImageUploader from '@/components/admin/ImageUploader'
 
 export default function AdminSettingsPage() {
@@ -8,6 +9,7 @@ export default function AdminSettingsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [message, setMessage] = useState({ type: '', text: '' })
+  const router = useRouter()
 
   useEffect(() => {
     async function fetchSettings() {
@@ -57,6 +59,7 @@ export default function AdminSettingsPage() {
         [keyKey]: key || '',
       }))
       setMessage({ type: 'success', text: successText })
+      router.refresh()
     } catch (error) {
       setMessage({ type: 'error', text: error.message })
     } finally {
@@ -86,6 +89,7 @@ export default function AdminSettingsPage() {
 
       setSettings((prev) => ({ ...prev, hero_background_images: JSON.stringify(updated) }))
       setMessage({ type: 'success', text: 'Hero background added.' })
+      router.refresh()
     } catch (err) {
       setMessage({ type: 'error', text: err.message })
     } finally {
@@ -152,6 +156,7 @@ export default function AdminSettingsPage() {
 
       setSettings((prev) => ({ ...prev, prod_profile_images: JSON.stringify(updated) }))
       setMessage({ type: 'success', text: 'Profile image added.' })
+      router.refresh()
     } catch (err) {
       setMessage({ type: 'error', text: err.message })
     } finally {
@@ -197,7 +202,7 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
+    <div className="max-w-6xl mx-auto space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
           Site Settings
@@ -215,7 +220,7 @@ export default function AdminSettingsPage() {
         </div>
       )}
 
-      <section className="glass-card p-6 md:p-8 space-y-6">
+      <section className="space-y-4">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-400">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -225,37 +230,55 @@ export default function AdminSettingsPage() {
           <h2 className="text-xl font-bold text-white">Site Logo</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-gray-400">Logo Image</label>
+        <div className="p-4 rounded-xl bg-white/5 border border-white/10 mb-4">
+          <h3 className="text-sm font-medium text-white mb-2">Where it appears</h3>
+          <ul className="text-xs text-gray-400 flex flex-wrap gap-x-6 gap-y-2 list-disc list-inside">
+            <li>The navbar and footer use this same logo setting.</li>
+            <li>If no logo is uploaded, the site falls back to the letter P mark.</li>
+            <li>Changing the logo also removes the previous R2 logo object.</li>
+          </ul>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+          {/* Uploader Block */}
+          <div className="glass-card p-6 border-brand-500/10">
+            <label className="block text-sm font-medium text-gray-300 mb-4">เปลี่ยนโลโก้ไซต์</label>
             <ImageUploader
               folder="settings"
               initialImage={settings.site_logo_url}
               onUpload={({ url, key }) => saveSiteLogo(url, key)}
             />
-            <p className="text-xs text-gray-500 italic">Recommended: square PNG/WebP, up to 5MB.</p>
+            <p className="text-xs text-gray-500 italic mt-3">แนะนำ: ขนาด 512x512px (จัตุรัส) หรือแบบแนวยาว (ความสูง 128px) เพื่อความคมชัดและการแสดงผลที่สมบูรณ์ 100%</p>
           </div>
 
-          <div className="space-y-4">
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <h3 className="text-sm font-medium text-white mb-3">Where it appears</h3>
-              <ul className="text-xs text-gray-400 space-y-2 list-disc list-inside">
-                <li>The navbar and footer use this same logo setting.</li>
-                <li>If no logo is uploaded, the site falls back to the letter P mark.</li>
-                <li>Changing the logo also removes the previous R2 logo object.</li>
-              </ul>
-            </div>
-
-            {settings.site_logo_url && (
-              <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20 text-xs text-green-400">
-                Site logo is saved.
+          {/* Current Display Block (Seamless) */}
+          <div className="p-6">
+            <label className="block text-sm font-medium text-gray-400 mb-6">โลโก้ปัจจุบันที่ใช้งานอยู่</label>
+            {settings.site_logo_url ? (
+              <div className="space-y-6">
+                <div className="flex justify-center items-center py-10 transition-transform hover:scale-105 duration-500">
+                  <img 
+                    src={settings.site_logo_url} 
+                    className="max-w-full max-h-[320px] object-contain drop-shadow-[0_0_35px_rgba(90,107,255,0.25)]" 
+                    alt="Current Logo" 
+                  />
+                </div>
+                <div className="flex items-center justify-center gap-2 text-green-400 font-medium">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-xs uppercase tracking-widest">Active on Site</span>
+                </div>
+              </div>
+            ) : (
+              <div className="aspect-[3/4] w-full max-w-[280px] mx-auto border-2 border-dashed border-white/5 rounded-3xl flex flex-col items-center justify-center text-gray-600">
+                <span className="text-4xl mb-3 opacity-20">🖼️</span>
+                <p className="text-xs font-medium opacity-40">ยังไม่ได้ตั้งค่าโลโก้</p>
               </div>
             )}
           </div>
         </div>
       </section>
 
-      <section className="glass-card p-6 md:p-8 space-y-6">
+      <section className="space-y-4 pt-4 border-t border-white/5">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-400">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -265,31 +288,38 @@ export default function AdminSettingsPage() {
           <h2 className="text-xl font-bold text-white">Profile Images (About Me)</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-gray-400">Add Profile Image</label>
+        <div className="p-4 rounded-xl bg-white/5 border border-white/10 mb-4">
+          <h3 className="text-sm font-medium text-white mb-1">Profile carousel</h3>
+          <p className="text-xs text-gray-400">รูปภาพเหล่านี้จะถูกนำไปแสดงในส่วน "เกี่ยวกับฉัน" โดยจะหมุนเวียนแสดงเป็น Carousel บนหน้าเว็บ</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+          {/* Uploader Block */}
+          <div className="glass-card p-6 border-brand-500/10">
+            <label className="block text-sm font-medium text-gray-300 mb-4">เพิ่มรูปโปรไฟล์ใหม่</label>
             <ImageUploader
               folder="settings"
               initialImage={null}
               onUploadSuccess={({ url, key }) => addProfileImage(url, key)}
             />
-            <p className="text-xs text-gray-500 italic">Add multiple images; they will rotate on the public site.</p>
+            <p className="text-xs text-gray-500 italic mt-3">แนะนำ: ขนาด 800x1000px (แนวตั้ง 4:5) เพื่อการแสดงผลบนหน้า About ที่สวยงามคมชัด 100%</p>
           </div>
 
-          <div className="space-y-4">
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <h3 className="text-sm font-medium text-white mb-3">Profile carousel</h3>
-              <p className="text-xs text-gray-400">Uploaded images are stored in R2 and referenced by the site settings. You can remove images below to delete them from display (R2 object may be removed automatically).</p>
-            </div>
-
-            <div className="grid grid-cols-3 gap-3">
+          {/* Management Block (Seamless) */}
+          <div className="p-6">
+            <label className="block text-sm font-medium text-gray-400 mb-6">รูปโปรไฟล์ปัจจุบัน</label>
+            <div className="grid grid-cols-2 gap-6">
               {(settings.prod_profile_images ? JSON.parse(settings.prod_profile_images) : []).map((img, idx) => (
-                <div key={idx} className="relative">
-                  <img src={img.url} className="w-full h-20 object-cover rounded-md border border-white/10" />
+                <div key={idx} className="relative group aspect-square transition-all duration-500 hover:scale-105">
+                  <img 
+                    src={img.url} 
+                    className="w-full h-full object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.3)]" 
+                    alt={`Profile ${idx}`} 
+                  />
                   <button
                     onClick={() => removeProfileImage(idx)}
-                    className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center shadow"
-                    title="Remove"
+                    className="absolute top-0 right-0 w-8 h-8 rounded-full bg-red-500/90 text-white flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600 hover:scale-110 active:scale-95 z-10"
+                    title="ลบรูปภาพ"
                   >
                     ×
                   </button>
@@ -298,15 +328,22 @@ export default function AdminSettingsPage() {
             </div>
 
             {isSaving && (
-              <div className="p-3 rounded-lg bg-brand-500/10 border border-brand-500/20 text-xs text-brand-300">
-                Saving profile images...
+              <div className="mt-8 flex items-center justify-center gap-3 text-brand-400">
+                <div className="w-4 h-4 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+                <span className="text-xs font-medium uppercase tracking-widest">Updating...</span>
+              </div>
+            )}
+            
+            {(!settings.prod_profile_images || JSON.parse(settings.prod_profile_images).length === 0) && (
+              <div className="py-12 text-center border-2 border-dashed border-white/5 rounded-3xl">
+                <p className="text-xs text-gray-600 font-medium opacity-40">ยังไม่ได้เพิ่มรูปโปรไฟล์</p>
               </div>
             )}
           </div>
         </div>
       </section>
 
-      <section className="glass-card p-6 md:p-8 space-y-6">
+      <section className="space-y-4 pt-4 border-t border-white/5">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-400">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -316,45 +353,59 @@ export default function AdminSettingsPage() {
           <h2 className="text-xl font-bold text-white">Hero Section</h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <label className="block text-sm font-medium text-gray-400">Add Hero Background Image</label>
+        <div className="p-4 rounded-xl bg-white/5 border border-white/10 mb-4">
+          <h3 className="text-sm font-medium text-white mb-1">Hero carousel</h3>
+          <p className="text-xs text-gray-400">รูปพื้นหลังของหน้าแรก (Hero Section) หากใส่หลายรูปจะเปลี่ยนแบบ Crossfade อัตโนมัติ</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+          {/* Uploader Block */}
+          <div className="glass-card p-6 border-brand-500/10">
+            <label className="block text-sm font-medium text-gray-300 mb-4">เพิ่มรูปพื้นหลัง Hero</label>
             <ImageUploader
               folder="settings"
               initialImage={null}
               onUploadSuccess={({ url, key }) => addHeroImage(url, key)}
             />
-            <p className="text-xs text-gray-500 italic">Add multiple images for a background carousel. Recommended: 1920x1080 WebP/JPG, up to 5MB.</p>
+            <p className="text-xs text-gray-500 italic mt-3">แนะนำ: ขนาด 1920x1080px (16:9) เพื่อรองรับการแสดงผลภาพพื้นหลังทุกหน้าจอให้เต็มประสิทธิภาพ 100%</p>
           </div>
 
-          <div className="space-y-4">
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10">
-              <h3 className="text-sm font-medium text-white mb-3">Hero carousel</h3>
-              <p className="text-xs text-gray-400 mb-2">If multiple images are uploaded, they will crossfade automatically.</p>
-              <ul className="text-xs text-gray-400 space-y-1 list-disc list-inside">
-                <li>Images upload directly to Cloudflare R2.</li>
-                <li>The settings are saved automatically.</li>
-              </ul>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
+          {/* Management Block (Seamless) */}
+          <div className="p-6">
+            <label className="block text-sm font-medium text-gray-400 mb-6">รายการรูปพื้นหลังที่ใช้งานอยู่</label>
+            <div className="grid grid-cols-1 gap-8">
               {(settings.hero_background_images ? JSON.parse(settings.hero_background_images) : (settings.hero_background_url ? [{url: settings.hero_background_url}] : [])).map((img, idx) => (
-                <div key={idx} className="relative group">
-                  <img src={img.url} className="w-full h-24 object-cover rounded-md border border-white/10" />
-                  <button
-                    onClick={() => removeHeroImage(idx)}
-                    className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red-500 text-white flex items-center justify-center shadow opacity-0 group-hover:opacity-100 transition-opacity"
-                    title="Remove"
-                  >
-                    ×
-                  </button>
+                <div key={idx} className="relative group aspect-video transition-all duration-700 hover:scale-[1.02]">
+                  <img 
+                    src={img.url} 
+                    className="w-full h-full object-contain drop-shadow-[0_12px_30px_rgba(0,0,0,0.5)] rounded-2xl" 
+                    alt={`Hero ${idx}`} 
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center rounded-2xl">
+                    <button
+                      onClick={() => removeHeroImage(idx)}
+                      className="px-6 py-2.5 bg-red-500 text-white rounded-full text-xs font-bold shadow-2xl transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 hover:bg-red-600 hover:scale-105 active:scale-95"
+                    >
+                      ลบรูปภาพนี้ออกจากระบบ
+                    </button>
+                  </div>
+                  <div className="absolute -bottom-4 left-4 px-3 py-1 bg-brand-500/10 backdrop-blur-xl border border-white/10 rounded-full text-[10px] text-brand-400 font-bold uppercase tracking-widest">
+                    Hero Frame #{idx + 1}
+                  </div>
                 </div>
               ))}
             </div>
 
             {isSaving && (
-              <div className="p-3 rounded-lg bg-brand-500/10 border border-brand-500/20 text-xs text-brand-300">
-                Saving settings...
+              <div className="mt-12 flex items-center justify-center gap-3 text-brand-400">
+                <div className="w-4 h-4 border-2 border-brand-500 border-t-transparent rounded-full animate-spin" />
+                <span className="text-xs font-medium uppercase tracking-widest">Processing...</span>
+              </div>
+            )}
+
+            {(!settings.hero_background_images && !settings.hero_background_url) && (
+              <div className="py-24 text-center border-2 border-dashed border-white/5 rounded-3xl">
+                <p className="text-xs text-gray-600 font-medium opacity-40">ยังไม่มีรูปพื้นหลัง (แสดงธีมมาตรฐาน)</p>
               </div>
             )}
           </div>
