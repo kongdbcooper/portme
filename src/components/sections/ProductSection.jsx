@@ -352,7 +352,6 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
                   rel="noopener noreferrer"
                   className="w-full md:w-auto px-8 md:px-12 py-4 md:py-6 bg-brand-500 hover:bg-brand-600 text-white font-black text-lg rounded-2xl transition-all hover:scale-105 shadow-xl shadow-brand-500/20 text-center"
                 >
-                  <EditableBlock settingKey="prod_modal_cta" defaultText="View Live Project" />
                 </a>
               </div>
             </div>
