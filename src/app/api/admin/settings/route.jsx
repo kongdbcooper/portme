@@ -7,7 +7,7 @@ import { z } from 'zod'
 
 const MEDIA_KEY_SETTINGS = new Set(['hero_background_key', 'site_logo_key'])
 const ALLOWED_KEYS = [
-  'site_logo_url',
+  'site_logo',
   'site_logo_key',
   'hero_background_url',
   'hero_background_key',

@@ -24,7 +24,7 @@ export default function Navbar({ settings = {} }) {
   const [activeSection, setActiveSection] = useState('hero')
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
-  const logoUrl = settings.site_logo || settings.site_logo_url || ''
+  const logoUrl = settings.site_logo_url || ''
   const siteName = settings.site_name || 'Monkey'
 
   // ------------------- Scroll Detection -------------------
