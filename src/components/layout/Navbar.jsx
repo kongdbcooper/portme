@@ -13,9 +13,9 @@ import EditableBlock from '../admin/EditableBlock'
 
 // Navigation links สำหรับ smooth scroll ไปแต่ละ section
 const NAV_LINKS = [
-  { label: 'Main', href: '#hero' },
-  { label: 'Projects', href: '#projects' },
-  { label: 'Contact Me', href: '#contact' },
+  { label: 'Home', href: '#hero' },
+  { label: 'Products', href: '#projects' },
+  { label: 'About Me', href: '#contact' },
 ]
 
 export default function Navbar({ settings = {} }) {
@@ -92,19 +92,19 @@ export default function Navbar({ settings = {} }) {
           <ul className="hidden md:flex items-center gap-1">
             <li>
               <a href="#hero" className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeSection === 'hero' ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-                <EditableBlock settingKey="nav_link_1" defaultText="Main" />
+                <EditableBlock settingKey="nav_link_1" defaultText="Home" />
                 {activeSection === 'hero' && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-brand-500 rounded-full" />}
               </a>
             </li>
             <li>
               <a href="#products" className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeSection === 'products' ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-                <EditableBlock settingKey="nav_link_2" defaultText="Projects" />
+                <EditableBlock settingKey="nav_link_2" defaultText="Products" />
                 {activeSection === 'products' && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-brand-500 rounded-full" />}
               </a>
             </li>
             <li>
               <a href="#contact" className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeSection === 'contact' ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-                <EditableBlock settingKey="nav_link_3" defaultText="Contact Me" />
+                <EditableBlock settingKey="nav_link_3" defaultText="About Me" />
                 {activeSection === 'contact' && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-brand-500 rounded-full" />}
               </a>
             </li>
@@ -117,7 +117,7 @@ export default function Navbar({ settings = {} }) {
               id="navbar-login-btn"
               className="btn-ghost text-sm px-4 py-2"
             >
-              <EditableBlock settingKey="nav_login_label" defaultText={settings.nav_login_label || "Login"} />
+              <EditableBlock settingKey="nav_login_label" defaultText={settings.nav_login_label || "Admin"} />
             </Link>
             <a
               href="#contact"
@@ -146,8 +146,8 @@ export default function Navbar({ settings = {} }) {
 
         {/* ------------------- Mobile Menu ------------------- */}
         <div
-          className={`md:hidden overflow-hidden transition-all duration-300 ${
-            isMobileMenuOpen ? 'max-h-80 pb-4' : 'max-h-0'
+          className={`md:hidden overflow-hidden transition-all duration-500 ease-in-out ${
+            isMobileMenuOpen ? 'max-h-screen opacity-100 py-4' : 'max-h-0 opacity-0'
           }`}
         >
           <div className="glass-card p-4 mt-2 space-y-1">
@@ -156,21 +156,21 @@ export default function Navbar({ settings = {} }) {
               onClick={() => setIsMobileMenuOpen(false)}
               className="block px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/5 transition-colors font-medium"
             >
-              <EditableBlock settingKey="nav_link_1" defaultText="Main" />
+              <EditableBlock settingKey="nav_link_1" defaultText="Home" />
             </a>
             <a
               href="#products"
               onClick={() => setIsMobileMenuOpen(false)}
               className="block px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/5 transition-colors font-medium"
             >
-              <EditableBlock settingKey="nav_link_2" defaultText="Projects" />
+              <EditableBlock settingKey="nav_link_2" defaultText="Products" />
             </a>
             <a
               href="#contact"
               onClick={() => setIsMobileMenuOpen(false)}
               className="block px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/5 transition-colors font-medium"
             >
-              <EditableBlock settingKey="nav_link_3" defaultText="Contact Me" />
+              <EditableBlock settingKey="nav_link_3" defaultText="About Me" />
             </a>
             
             <div className="pt-2 border-t border-white/10 flex flex-col gap-2">
@@ -179,7 +179,7 @@ export default function Navbar({ settings = {} }) {
                 onClick={() => setIsMobileMenuOpen(false)}
                 className="block text-center py-2.5 rounded-xl border border-brand-500/40 text-brand-400 font-medium hover:bg-brand-500/10 transition-colors"
               >
-                <EditableBlock settingKey="nav_login_label" defaultText="Login" />
+                <EditableBlock settingKey="nav_login_label" defaultText="Admin" />
               </Link>
               <a
                 href="#contact"
