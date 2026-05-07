@@ -67,8 +67,10 @@ export default function EditableBlock({ settingKey, defaultText, as: Component =
   }
 
   // หากไม่ได้เป็น Admin หรือกำลังไม่ได้แก้ไข ให้แสดงข้อความปกติ
+  const content = (text?.trim() || defaultText?.trim());
   if (!isAdmin) {
-    return <Component className={className}>{text?.trim() || defaultText}</Component>
+    if (!content) return null; // Hide entirely if no content for public users
+    return <Component className={className}>{content}</Component>
   }
 
   // โหมดแสดงข้อความ + Hover Effect สำหรับ Admin
@@ -82,7 +84,12 @@ export default function EditableBlock({ settingKey, defaultText, as: Component =
         title="คลิกเพื่อแก้ไข (Admin Only)"
       >
         {hasContent ? (text || defaultText) : <span className="opacity-50 italic">คลิกเพื่อเพิ่มข้อความ</span>}
-        <span className="absolute -top-3 -right-3 bg-brand-500 text-white text-[10px] px-2 py-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none font-black uppercase tracking-normal shadow-lg z-50">
+        
+        {/* Edit Badge - Premium Pill Style */}
+        <span className="absolute -top-4 -right-4 bg-brand-500 text-white text-[11px] px-4 py-2 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none font-black uppercase tracking-wider shadow-2xl z-50 flex items-center gap-2 scale-75 group-hover:scale-100 origin-bottom-left border border-white/20">
+          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+          </svg>
           Edit
         </span>
       </Component>
@@ -103,7 +110,7 @@ export default function EditableBlock({ settingKey, defaultText, as: Component =
             fontSize: 'inherit', 
             fontWeight: 'inherit', 
             lineHeight: 'inherit',
-            color: isGradient ? '#5a6bff' : 'currentColor', // Use currentColor for better inheritance
+            color: '#fff', // Force white text color for visibility
             fontFamily: 'inherit',
             textAlign: 'inherit',
             letterSpacing: 'inherit',
@@ -121,7 +128,7 @@ export default function EditableBlock({ settingKey, defaultText, as: Component =
             fontSize: 'inherit', 
             fontWeight: 'inherit', 
             lineHeight: 'inherit',
-            color: isGradient ? '#5a6bff' : 'currentColor', // Use currentColor for better inheritance
+            color: '#fff', // Force white text color for visibility
             fontFamily: 'inherit',
             textAlign: 'inherit',
             letterSpacing: 'inherit'
@@ -131,34 +138,34 @@ export default function EditableBlock({ settingKey, defaultText, as: Component =
       )}
       
       {/* Controls - Floating Toolbar Style */}
-      <div className="absolute left-1/2 -translate-x-1/2 -bottom-16 flex items-center gap-3 z-[100] p-1.5 bg-surface-900/90 backdrop-blur-2xl rounded-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] animate-in fade-in zoom-in-95 duration-200 min-w-max">
+      <div className="absolute left-1/2 -translate-x-1/2 -bottom-20 md:-bottom-16 flex items-center gap-4 z-[100] p-2 bg-surface-900/95 backdrop-blur-3xl rounded-3xl border border-white/20 shadow-[0_30px_60px_rgba(0,0,0,0.8)] animate-in fade-in slide-in-from-bottom-4 duration-300 min-w-max">
         <button
           onClick={() => {
             setText(defaultText || '')
             setIsEditing(false)
           }}
-          className="flex items-center justify-center w-10 h-10 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white rounded-xl transition-all"
+          className="flex items-center justify-center w-12 h-12 md:w-10 md:h-10 bg-white/5 hover:bg-white/10 text-white/70 hover:text-white rounded-2xl transition-all"
           title="ยกเลิก (Esc)"
           disabled={isLoading}
         >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
-        <div className="w-[1px] h-6 bg-white/10 mx-1" />
+        <div className="w-[1px] h-8 md:h-6 bg-white/10 mx-1" />
         <button
           onClick={handleSave}
-          className="flex items-center justify-center gap-2 px-6 h-10 bg-brand-500 hover:bg-brand-600 text-white font-black rounded-xl transition-all shadow-lg shadow-brand-500/20 disabled:opacity-50"
+          className="flex items-center justify-center gap-2 px-8 md:px-6 h-12 md:h-10 bg-brand-500 hover:bg-brand-600 text-white font-black rounded-2xl transition-all shadow-xl shadow-brand-500/40 disabled:opacity-50"
           disabled={isLoading}
         >
           {isLoading ? (
-            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <span className="w-5 h-5 md:w-4 md:h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : (
             <>
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
               </svg>
-              <span className="text-sm">บันทึก</span>
+              <span className="text-sm md:text-xs">บันทึก</span>
             </>
           )}
         </button>

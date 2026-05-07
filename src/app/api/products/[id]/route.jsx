@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
 import { deleteFromR2 } from '@/lib/r2'
+import { revalidateTag } from 'next/cache'
 
 const UpdateProductSchema = z.object({
   name: z.string().min(1).max(200).optional(),
@@ -96,6 +97,9 @@ export async function DELETE(request, { params }) {
     if (product.imageKey) {
       await deleteFromR2(product.imageKey)
     }
+
+    // Invalidate cache
+    revalidateTag('products')
 
     return NextResponse.json({ success: true, message: 'Product deleted' })
   } catch (error) {

@@ -129,6 +129,11 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
   // ------------------- Manual Scroll -------------------
   const scrollBy = (direction) => {
     if (!scrollRef.current) return
+    
+    // Temporarily pause auto-scroll to allow manual navigation
+    setIsPaused(true)
+    setTimeout(() => setIsPaused(false), 5000) // Resume after 5s
+
     const cardWidth = window.innerWidth < 640 ? window.innerWidth * 0.85 : 380
     const gap = window.innerWidth < 640 ? 16 : 32
     const scrollAmount = (cardWidth + gap) * direction
@@ -139,13 +144,14 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
     })
   }
 
-  const handleProductClick = async (productId, e) => {
+  const handleProductClick = async (product, e) => {
     e.stopPropagation()
+    setSelectedProduct(product) // Open Modal
     try {
       await fetch('/api/ab-test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ productId, variant: abVariant, eventType: 'CLICK' })
+        body: JSON.stringify({ productId: product.id, variant: abVariant, eventType: 'CLICK' })
       })
     } catch (err) {
       console.error('Failed to record click', err)
@@ -182,14 +188,16 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
       <div className="container mx-auto px-4">
         {/* ================= Section Heading ================= */}
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-sm font-bold uppercase tracking-widest mb-6">
-            <EditableBlock settingKey="prod_badge_label" defaultText="Product Collection" />
+          <div className="flex justify-center mb-6">
+            <EditableBlock 
+              settingKey="prod_badge_label" 
+              defaultText="Product Collection" 
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-sm font-bold uppercase tracking-widest empty:hidden"
+            />
           </div>
           <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">
             <EditableBlock as="span" settingKey="prod_section_title_1" defaultText="Explore " />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-brand-600">
-              <EditableBlock as="span" settingKey="prod_section_title_2" defaultText="Our Collection" />
-            </span>
+            <EditableBlock as="span" className="gradient-text" settingKey="prod_section_title_2" defaultText="Our Collection" />
           </h2>
           <div className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto">
             <EditableBlock settingKey="prod_section_desc" defaultText="สัมผัสผลงานและผลิตภัณฑ์ทั้งหมดของเรา เลือกชมรายละเอียดแต่ละชิ้นได้จากรายการด้านล่าง" />
@@ -209,11 +217,11 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
             {/* ---- Previous Button ---- */}
             <button
               onClick={() => scrollBy(-1)}
-              className="absolute left-4 lg:left-0 top-1/2 -translate-y-1/2 lg:-translate-x-12 z-30 w-12 h-12 bg-surface-800/90 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-xl group"
+              className="absolute -left-4 md:-left-10 lg:-left-24 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-surface-800/90 backdrop-blur-2xl border border-white/10 flex items-center justify-center text-brand-300 hover:bg-brand-500 hover:border-brand-500 hover:text-white transition-all duration-300 active:scale-90 shadow-3xl pointer-events-auto group"
               aria-label="Previous"
             >
-              <svg className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+              <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={5} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
 
@@ -267,7 +275,7 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
                         </span>
                       </div>
                       <button 
-                        onClick={(e) => handleProductClick(product.id, e)}
+                        onClick={(e) => handleProductClick(product, e)}
                         className="text-brand-400 text-xs font-black uppercase tracking-widest flex items-center gap-2 group-hover:translate-x-1 transition-transform"
                       >
                         <EditableBlock settingKey="prod_card_cta" defaultText="Details" />
@@ -284,11 +292,11 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
             {/* ---- Next Button ---- */}
             <button
               onClick={() => scrollBy(1)}
-              className="absolute right-4 lg:right-0 top-1/2 -translate-y-1/2 lg:translate-x-12 z-30 w-12 h-12 bg-surface-800/90 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-xl group"
+              className="absolute -right-4 md:-right-10 lg:-right-24 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-surface-800/90 backdrop-blur-2xl border border-white/10 flex items-center justify-center text-brand-300 hover:bg-brand-500 hover:border-brand-500 hover:text-white transition-all duration-300 active:scale-90 shadow-3xl pointer-events-auto group"
               aria-label="Next"
             >
-              <svg className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+              <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={5} d="M9 5l7 7-7 7" />
               </svg>
             </button>
           </div>

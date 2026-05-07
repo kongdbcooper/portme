@@ -55,6 +55,17 @@
     scrollbar-width: thin;
     scrollbar-color: #5a6bff #1a1a2e;
   }
+  
+  ::selection {
+    background: #5a6bff;
+    color: #fff;
+    text-shadow: none;
+  }
+
+  input, textarea, select {
+    color: #fff;
+    background-color: transparent;
+  }
 
   /* Custom scrollbar สำหรับ Webkit browsers */
   ::-webkit-scrollbar {

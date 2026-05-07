@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
 import { deleteFromR2 } from '@/lib/r2'
+import { revalidateTag } from 'next/cache'
 
 const UpdateVideoSchema = z.object({
   title: z.string().min(1).max(200).optional(),
@@ -51,6 +52,9 @@ export async function PUT(request, { params }) {
       await deleteFromR2(existingVideo.videoKey)
     }
 
+    // Invalidate cache
+    revalidateTag('videos')
+
     return NextResponse.json(video)
   } catch (error) {
     if (error.message?.includes('Unauthorized')) {
@@ -81,6 +85,9 @@ export async function DELETE(request, { params }) {
     if (video.videoKey) {
       await deleteFromR2(video.videoKey)
     }
+
+    // Invalidate cache
+    revalidateTag('videos')
 
     return NextResponse.json({ success: true })
   } catch (error) {

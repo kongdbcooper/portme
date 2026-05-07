@@ -11,6 +11,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
+import { revalidateTag } from 'next/cache'
 
 // Schema สำหรับ validate create product
 const CreateProductSchema = z.object({
@@ -102,6 +103,9 @@ export async function POST(request) {
         price: validation.data.price, // Prisma จัดการ Decimal เอง
       },
     })
+
+    // Invalidate cache
+    revalidateTag('products')
 
     return NextResponse.json({ product }, { status: 201 })
 

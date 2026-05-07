@@ -101,17 +101,17 @@ export default function Sidebar({ user, logoUrl }) {
                 className="h-full w-auto object-contain drop-shadow-[0_4px_12px_rgba(90,107,255,0.3)] transition-transform group-hover:scale-110 duration-300"
               />
             ) : (
-              <div className="w-11 h-11 rounded-xl bg-gradient-brand flex items-center justify-center">
-                <span className="text-white font-bold text-xl" style={{ fontFamily: 'Outfit, sans-serif' }}>P</span>
+              <div className="w-11 h-11 rounded-xl bg-gradient-brand flex items-center justify-center shadow-lg shadow-brand-500/20">
+                <span className="text-white font-bold text-xl" style={{ fontFamily: 'Outfit, sans-serif' }}>M</span>
               </div>
             )}
           </div>
           <div className="flex flex-col">
             <span className="text-lg font-bold text-white leading-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
-              Port<span className="gradient-text">Me</span>
+              Monkey<span className="gradient-text"> Admin</span>
             </span>
             <span className="text-[10px] uppercase tracking-[0.2em] text-brand-400 font-bold opacity-80">
-              Admin Panel
+              Control Panel
             </span>
           </div>
         </Link>
