@@ -40,6 +40,8 @@ function TiltCard({ children, className, style, onClick, isActive }) {
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleMouseEnter}
+      onTouchEnd={handleMouseLeave}
       tabIndex={0}
       style={{
         ...style,
@@ -83,9 +85,11 @@ function VideoThumbnail({ video }) {
 
   return (
     <div
-      className="h-72 overflow-hidden bg-black/40 relative group-hover:bg-black/20 transition-colors"
+      className="h-72 overflow-hidden bg-transparent relative transition-colors"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleMouseEnter}
+      onTouchEnd={handleMouseLeave}
     >
       <video
         ref={videoRef}
@@ -93,7 +97,7 @@ function VideoThumbnail({ video }) {
         muted
         loop
         playsInline
-        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+        className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110"
       />
       <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-90 group-hover:scale-100">
@@ -249,7 +253,7 @@ export default function VideoSection({ initialVideos = [] }) {
             {/* Carousel Controls */}
             <button
               onClick={() => scrollBy(-1)}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 lg:-translate-x-16 z-30 w-14 h-14 bg-surface-800/80 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-2xl shadow-brand-500/20 group"
+              className="absolute left-2 lg:left-0 top-1/2 -translate-y-1/2 lg:-translate-x-16 z-30 w-14 h-14 bg-surface-800/80 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-2xl shadow-brand-500/20 group"
             >
               <svg className="w-6 h-6 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
@@ -260,15 +264,21 @@ export default function VideoSection({ initialVideos = [] }) {
               ref={scrollRef}
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
-              className="flex gap-4 sm:gap-8 overflow-x-auto scrollbar-hide scroll-smooth px-4 sm:px-8 py-12"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              onTouchStart={() => setIsPaused(true)}
+              onTouchEnd={() => setIsPaused(false)}
+              className="flex gap-4 sm:gap-8 overflow-x-auto scrollbar-hide scroll-smooth px-4 sm:px-2 py-8 touch-pan-x"
+              style={{
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+                WebkitOverflowScrolling: 'touch',
+              }}
             >
               {videos.map((video) => (
                 <TiltCard
                   key={video.id}
                   onClick={() => handleCardClick(video)}
                   isActive={selectedVideo?.id === video.id}
-                  className="relative group cursor-pointer bg-surface-800/40 backdrop-blur-md border border-white/5 rounded-[2rem] shadow-2xl overflow-hidden transition-all duration-500 flex-shrink-0 w-[85vw] sm:w-[380px]"
+                  className="relative group cursor-pointer rounded-[2rem] overflow-hidden transition-all duration-500 flex-shrink-0 w-[85vw] sm:w-[380px]"
                 >
                   <VideoThumbnail video={video} />
                   <div className="p-8 relative z-20">
@@ -293,7 +303,7 @@ export default function VideoSection({ initialVideos = [] }) {
 
             <button
               onClick={() => scrollBy(1)}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 lg:translate-x-16 z-30 w-14 h-14 bg-surface-800/80 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-2xl shadow-brand-500/20 group"
+              className="absolute right-2 lg:right-0 top-1/2 -translate-y-1/2 lg:translate-x-16 z-30 w-14 h-14 bg-surface-800/80 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-2xl shadow-brand-500/20 group"
             >
               <svg className="w-6 h-6 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
@@ -355,13 +365,13 @@ export default function VideoSection({ initialVideos = [] }) {
                   <>
                     <button 
                       onClick={playPrev}
-                      className="absolute left-2 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-16 md:h-16 rounded-full bg-black/20 hover:bg-brand-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md z-50 shadow-2xl"
+                      className="absolute left-2 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-16 md:h-16 rounded-full bg-black/40 md:bg-black/20 hover:bg-brand-500/80 text-white flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 backdrop-blur-md z-50 shadow-2xl"
                     >
                       <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
                     </button>
                     <button 
                       onClick={playNext}
-                      className="absolute right-2 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-16 md:h-16 rounded-full bg-black/20 hover:bg-brand-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md z-50 shadow-2xl"
+                      className="absolute right-2 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-16 md:h-16 rounded-full bg-black/40 md:bg-black/20 hover:bg-brand-500/80 text-white flex items-center justify-center opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 backdrop-blur-md z-50 shadow-2xl"
                     >
                       <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
                     </button>

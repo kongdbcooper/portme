@@ -190,7 +190,7 @@ export default function HeroSection({ settings = {} }) {
         </div>
 
         {/* Main Headline */}
-        <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black mb-6 animate-fade-up leading-[1.1] sm:leading-none flex flex-col items-center" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black mb-6 animate-fade-up leading-[1.1] sm:leading-none flex flex-col items-center" style={{ fontFamily: 'Outfit, sans-serif' }}>
           <EditableBlock as="span" className="text-white block text-center" settingKey="hero_title_1" defaultText={settings.hero_title_1 || "จัดการ"} />
           <EditableBlock as="span" className="animated-gradient-text block text-center" settingKey="hero_title_2" defaultText={settings.hero_title_2 || "โปรดักซ์"} />
           <EditableBlock as="span" className="text-white block text-center" settingKey="hero_title_3" defaultText={settings.hero_title_3 || "อย่างมืออาชีพ"} />

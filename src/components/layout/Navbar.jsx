@@ -150,25 +150,37 @@ export default function Navbar({ settings = {} }) {
             isMobileMenuOpen ? 'max-h-screen opacity-100 py-4' : 'max-h-0 opacity-0'
           }`}
         >
-          <div className="glass-card p-4 mt-2 space-y-1">
+          <div className="bg-surface-900/98 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 mt-2 space-y-1 shadow-2xl">
             <a
               href="#hero"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="block px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/5 transition-colors font-medium"
+              className={`block px-4 py-3 rounded-xl transition-all duration-300 font-medium ${
+                activeSection === 'hero' 
+                  ? 'text-white bg-brand-500/20 border border-brand-500/30' 
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+              }`}
             >
               <EditableBlock settingKey="nav_link_1" defaultText="Home" />
             </a>
             <a
               href="#products"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="block px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/5 transition-colors font-medium"
+              className={`block px-4 py-3 rounded-xl transition-all duration-300 font-medium ${
+                activeSection === 'products' 
+                  ? 'text-white bg-brand-500/20 border border-brand-500/30' 
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+              }`}
             >
               <EditableBlock settingKey="nav_link_2" defaultText="Products" />
             </a>
             <a
               href="#contact"
               onClick={() => setIsMobileMenuOpen(false)}
-              className="block px-4 py-3 rounded-xl text-gray-300 hover:text-white hover:bg-white/5 transition-colors font-medium"
+              className={`block px-4 py-3 rounded-xl transition-all duration-300 font-medium ${
+                activeSection === 'contact' 
+                  ? 'text-white bg-brand-500/20 border border-brand-500/30' 
+                  : 'text-gray-400 hover:text-white hover:bg-white/5'
+              }`}
             >
               <EditableBlock settingKey="nav_link_3" defaultText="About Me" />
             </a>

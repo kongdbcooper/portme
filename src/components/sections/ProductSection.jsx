@@ -42,6 +42,8 @@ function TiltCard({ children, className, style, onClick }) {
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleMouseEnter}
+      onTouchEnd={handleMouseLeave}
       tabIndex={0}
       style={{
         ...style,
@@ -207,7 +209,7 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
             {/* ---- Previous Button ---- */}
             <button
               onClick={() => scrollBy(-1)}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-12 z-30 w-12 h-12 bg-surface-800/90 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-xl group"
+              className="absolute left-4 lg:left-0 top-1/2 -translate-y-1/2 lg:-translate-x-12 z-30 w-12 h-12 bg-surface-800/90 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-xl group"
               aria-label="Previous"
             >
               <svg className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -220,7 +222,9 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
               ref={scrollRef}
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
-              className="flex gap-4 sm:gap-8 overflow-x-auto scrollbar-hide scroll-smooth px-4 sm:px-2 py-4"
+              onTouchStart={() => setIsPaused(true)}
+              onTouchEnd={() => setIsPaused(false)}
+              className="flex gap-4 sm:gap-8 overflow-x-auto scrollbar-hide scroll-smooth px-4 sm:px-2 py-4 touch-pan-x"
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
@@ -231,9 +235,9 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
                 <TiltCard
                   key={product.id}
                   onClick={() => handleCardClick(product)}
-                  className="relative group cursor-pointer bg-surface-800/50 backdrop-blur-sm border border-white/5 rounded-2xl shadow-xl overflow-hidden transition-all duration-500 hover:shadow-brand-500/30 hover:border-brand-500/50 focus:shadow-brand-500/30 focus:border-brand-500/40 focus:outline-none flex-shrink-0 w-[85vw] sm:w-[380px]"
+                  className="relative group cursor-pointer rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-brand-500/10 focus:outline-none flex-shrink-0 w-[85vw] sm:w-[380px]"
                 >
-                  <div className="h-72 overflow-hidden bg-black/40 relative">
+                  <div className="h-72 overflow-hidden bg-transparent relative">
                     <Image
                       src={product.imageUrl || '/picture/blue.jpg'}
                       alt={product.name || 'Product'}
@@ -280,7 +284,7 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
             {/* ---- Next Button ---- */}
             <button
               onClick={() => scrollBy(1)}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-12 z-30 w-12 h-12 bg-surface-800/90 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-xl group"
+              className="absolute right-4 lg:right-0 top-1/2 -translate-y-1/2 lg:translate-x-12 z-30 w-12 h-12 bg-surface-800/90 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-xl group"
               aria-label="Next"
             >
               <svg className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
