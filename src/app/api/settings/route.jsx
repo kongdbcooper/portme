@@ -7,20 +7,14 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
 import { revalidateTag } from 'next/cache'
+import { getFreshSettings } from '@/lib/settings'
 
-// เราไม่ต้องใช้ force-dynamic ใน route นี้ เพราะ Next.js จะจัดการเรื่อง cache ตามที่เรากำหนด
+export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
 export async function GET() {
   try {
-    const settings = await prisma.siteSetting.findMany()
-    
-    // แปลง array เป็น key-value object
-    const settingsMap = settings.reduce((acc, curr) => {
-      acc[curr.key] = curr.value
-      return acc
-    }, {})
-
+    const settingsMap = await getFreshSettings()
     return NextResponse.json(settingsMap)
   } catch (error) {
     console.error('[Settings] Fetch error:', error)

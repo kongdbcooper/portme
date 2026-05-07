@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import EditableBlock from '../admin/EditableBlock'
-import ProfileSection from './ProfileSection'
 
 // ------------------- 3D Tilt Card Component -------------------
 function TiltCard({ children, className, style, onClick }) {
@@ -49,8 +48,8 @@ function TiltCard({ children, className, style, onClick }) {
         ...style,
         perspective: '1000px',
         transformStyle: 'preserve-3d',
-        transform: isHovered
-          ? `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale3d(1.1, 1.1, 1.1)`
+        transform: isHovered && window.innerWidth >= 768
+          ? `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale3d(1.05, 1.05, 1.05)`
           : 'rotateX(0) rotateY(0) scale3d(1, 1, 1)',
         transition: isHovered ? 'transform 0.1s ease-out' : 'transform 0.5s ease-out',
         zIndex: isHovered ? 50 : 1,
@@ -182,8 +181,6 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
       {/* Seamless Transition Overlay (Link to Hero) */}
       <div className="absolute top-0 inset-x-0 h-40 bg-gradient-to-b from-[#0a0a0f] to-transparent z-30 pointer-events-none" />
 
-      {/* ================= Profile Banner (Modular Component) ================= */}
-      <ProfileSection settings={settings} loading={loading} />
 
       <div className="container mx-auto px-4">
         {/* ================= Section Heading ================= */}
@@ -195,7 +192,7 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-sm font-bold uppercase tracking-widest empty:hidden"
             />
           </div>
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">
+          <h2 className="text-3xl sm:text-5xl font-black text-white mb-6 tracking-tight">
             <EditableBlock as="span" settingKey="prod_section_title_1" defaultText="Explore " />
             <EditableBlock as="span" className="gradient-text" settingKey="prod_section_title_2" defaultText="Our Collection" />
           </h2>
@@ -243,7 +240,7 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
                 <TiltCard
                   key={product.id}
                   onClick={() => handleCardClick(product)}
-                  className="relative group cursor-pointer rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-brand-500/10 focus:outline-none flex-shrink-0 w-[85vw] sm:w-[380px]"
+                  className="relative group cursor-pointer rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-brand-500/10 focus:outline-none flex-shrink-0 w-[75vw] sm:w-[380px]"
                 >
                   <div className="h-72 overflow-hidden bg-transparent relative">
                     <Image
