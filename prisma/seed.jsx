@@ -50,8 +50,13 @@ async function main() {
   // 2. Create Initial Settings (idempotent)
   const settings = [
     { key: 'site_name', value: 'PortMe Store' },
+    { key: 'site_logo', value: 'https://pub-b7f6f5f01b32476a9462f87d684f54d9.r2.dev/profile/pang1.jpg' },
     { key: 'hero_title', value: 'Welcome to our premium collection' },
     { key: 'hero_subtitle', value: 'Discover unique products tailored for you.' },
+    { key: 'prod_profile_images', value: JSON.stringify([
+      { url: 'https://pub-b7f6f5f01b32476a9462f87d684f54d9.r2.dev/profile/pang1.jpg' },
+      { url: 'https://pub-b7f6f5f01b32476a9462f87d684f54d9.r2.dev/profile/pang2.jpg' }
+    ]) },
   ]
 
   for (const s of settings) {
