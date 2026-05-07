@@ -14,7 +14,7 @@ import EditableBlock from '../admin/EditableBlock'
 // Navigation links สำหรับ smooth scroll ไปแต่ละ section
 const NAV_LINKS = [
   { label: 'Home', href: '#hero' },
-  { label: 'Products', href: '#projects' },
+  { label: 'Products', href: '#products' },
   { label: 'About Me', href: '#contact' },
 ]
 
@@ -24,7 +24,7 @@ export default function Navbar({ settings = {} }) {
   const [activeSection, setActiveSection] = useState('hero')
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
-  const logoUrl = settings.site_logo_url || ''
+  const logoUrl = settings.site_logo || settings.site_logo_url || ''
   const siteName = settings.site_name || 'Monkey'
 
   // ------------------- Scroll Detection -------------------

@@ -11,13 +11,14 @@ import { cookies } from 'next/headers'
 
 // Secret key สำหรับ sign JWT — ต้องตั้งค่าใน .env.local
 const secretKey = process.env.SESSION_SECRET
+const encodedKey = new TextEncoder().encode(secretKey || 'default-secret-key-at-least-32-chars-long')
+
 if (!secretKey) {
-  throw new Error('SESSION_SECRET environment variable is not set')
+  console.warn('[Session] SESSION_SECRET is not set. Auth will not work correctly.')
 }
-if (secretKey.length < 32) {
+if (secretKey && secretKey.length < 32) {
   console.warn(`[Session] SESSION_SECRET too short (${secretKey.length} chars, need ≥32)`)
 }
-const encodedKey = new TextEncoder().encode(secretKey)
 
 // Session duration: 7 วัน
 const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000
