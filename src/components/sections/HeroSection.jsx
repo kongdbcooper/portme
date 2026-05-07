@@ -136,9 +136,9 @@ export default function HeroSection({ settings = {} }) {
               alt={`Hero background ${idx + 1}`}
               fill
               priority={idx === 0}
-              className="object-cover object-top sm:object-center"
+              className="object-cover object-center sm:object-center transition-all duration-700"
               sizes="100vw"
-              quality={90}
+              quality={100}
             />
             {/* Dark Overlay */}
             <div className="absolute inset-0 bg-black/60 z-10" />
@@ -233,8 +233,11 @@ export default function HeroSection({ settings = {} }) {
         </div>
       </div>
 
+      {/* ------------------- Bottom Seamless Transition ------------------- */}
+      <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/80 to-transparent z-20 pointer-events-none" />
+
       {/* ------------------- Scroll Indicator ------------------- */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce opacity-60">
+      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce opacity-60 z-30">
         <span className="text-white/40 text-[10px] uppercase tracking-widest font-bold">
           <EditableBlock settingKey="hero_scroll_label" defaultText="เลื่อนลง" />
         </span>

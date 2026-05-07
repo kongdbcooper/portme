@@ -10,6 +10,9 @@ export default function ContactSection({ settings = {} }) {
       className="py-24 relative overflow-hidden"
       style={{ background: 'linear-gradient(180deg, #0a0a0f 0%, #111118 100%)' }}
     >
+      {/* Seamless Transition Overlay (Top) */}
+      <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-[#0a0a0f] to-transparent z-10 pointer-events-none" />
+
       {/* Decorative orb */}
       <div
         className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] opacity-10 pointer-events-none"

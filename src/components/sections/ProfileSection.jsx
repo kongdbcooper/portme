@@ -66,9 +66,13 @@ export default function ProfileSection({ settings = {}, loading = false }) {
         />
         {/* Ultra-Strong Seamless Gradient Fades */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-transparent to-[#0a0a0f] z-10" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0f] via-[#0a0a0f]/20 to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0f] via-[#0a0a0f]/40 to-transparent z-10" />
+        
+        {/* Bottom Fade Out to next section */}
+        <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-[#0a0a0f] to-transparent z-20" />
+        
         {/* Global Darkener */}
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] z-0" />
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-[1px] z-0" />
       </div>
 
       {/* Decorative Glows */}
@@ -152,7 +156,7 @@ export default function ProfileSection({ settings = {}, loading = false }) {
             
               {/* The Image Container with Integrated Small Card */}
             <div
-              className="relative w-full max-w-2xl aspect-[4/5] rounded-3xl overflow-hidden transition-all duration-1000 group-hover:scale-[1.02]"
+              className="relative w-[92vw] sm:w-full max-w-2xl aspect-[4/5] rounded-[2rem] sm:rounded-3xl overflow-hidden transition-all duration-1000 group-hover:scale-[1.02] shadow-2xl"
             >
 
               {profileImages.length > 0 ? (
@@ -161,7 +165,7 @@ export default function ProfileSection({ settings = {}, loading = false }) {
                   alt="Current Showcase"
                   fill
                   sizes="(max-width: 1024px) 100vw, 1000px"
-                  className="object-contain"
+                  className="object-cover transition-transform duration-700 hover:scale-105"
                   unoptimized={profileImages[profileIndex]?.url ? (profileImages[profileIndex].url.startsWith('blob:') ? true : false) : false}
                 />
               ) : (
@@ -179,8 +183,8 @@ export default function ProfileSection({ settings = {}, loading = false }) {
                   alt="Next Preview"
                   fill
                   sizes="(max-width: 1024px) 400px"
-                  className="object-contain"
-                  unoptimized={profileImages[(profileIndex + 1) % profileImages.length]?.url?.startsWith('blob:')}
+                  className="object-cover"
+                  unoptimized={profileImages[(profileIndex + 1) % profileImages.length]?.url ? (profileImages[(profileIndex + 1) % profileImages.length].url.startsWith('blob:') ? true : false) : false}
                 />
               </div>
             )}
