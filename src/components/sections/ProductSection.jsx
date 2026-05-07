@@ -48,7 +48,7 @@ function TiltCard({ children, className, style, onClick }) {
         ...style,
         perspective: '1000px',
         transformStyle: 'preserve-3d',
-        transform: isHovered && window.innerWidth >= 768
+        transform: isHovered && typeof window !== 'undefined' && window.innerWidth >= 768
           ? `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale3d(1.05, 1.05, 1.05)`
           : 'rotateX(0) rotateY(0) scale3d(1, 1, 1)',
         transition: isHovered ? 'transform 0.1s ease-out' : 'transform 0.5s ease-out',
@@ -178,12 +178,9 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
 
   return (
     <section className="bg-[#0a0a0f] overflow-hidden relative" id="products">
-      {/* Seamless Transition Overlay (Link to Previous Section) */}
+      {/* Seamless Transition Overlays */}
       <div className="absolute top-0 inset-x-0 h-64 bg-gradient-to-b from-[#0a0a0f] via-[#0a0a0f]/60 to-transparent z-30 pointer-events-none" />
-      
-      {/* Bottom Transition Overlay (Link to Next Section) */}
       <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-[#0a0a0f] to-transparent z-30 pointer-events-none" />
-
 
       <div className="container mx-auto px-4">
         {/* ================= Section Heading ================= */}
@@ -239,7 +236,7 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
                 WebkitOverflowScrolling: 'touch',
               }}
             >
-              {products.map(product => (
+              {products.map((product) => (
                 <TiltCard
                   key={product.id}
                   onClick={() => handleCardClick(product)}

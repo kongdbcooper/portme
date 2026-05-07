@@ -6,13 +6,13 @@ import EditableBlock from '../admin/EditableBlock'
 
 export default function ProfileSection({ settings = {}, loading = false }) {
   // Profile images (About Me) — settings.prod_profile_images stored as JSON string
-  const profileImages = (() => {
+  const [profileImages, setProfileImages] = useState(() => {
     try {
       return settings.prod_profile_images ? JSON.parse(settings.prod_profile_images) : []
     } catch (e) {
       return []
     }
-  })()
+  })
 
   const [profileIndex, setProfileIndex] = useState(0)
 

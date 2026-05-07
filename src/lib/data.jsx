@@ -6,6 +6,7 @@ export const getCachedProducts = unstable_cache(
   async () => {
     try {
       return await prisma.product.findMany({
+        where: { isActive: true },
         orderBy: { createdAt: 'desc' },
       })
     } catch (error) {

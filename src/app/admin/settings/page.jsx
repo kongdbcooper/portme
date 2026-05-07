@@ -128,7 +128,7 @@ export default function AdminSettingsPage() {
 
   const saveSiteLogo = (url, key) =>
     saveMediaSetting({
-      urlKey: 'site_logo_url',
+      urlKey: 'site_logo',
       keyKey: 'site_logo_key',
       successText: 'Site logo saved.',
     }, url, key)
