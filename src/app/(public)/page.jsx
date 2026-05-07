@@ -9,7 +9,7 @@
 
 import { getABVariant } from '@/lib/ab-test'
 import { getCachedSettings } from '@/lib/settings'
-import { prisma } from '@/lib/prisma'
+import { getCachedProducts, getCachedVideos } from '@/lib/data'
 
 import HeroSection from '@/components/sections/HeroSection'
 import ProductSection from '@/components/sections/ProductSection'
@@ -38,14 +38,11 @@ export default async function HomePage() {
   // ดึงการตั้งค่าเว็บไซต์ทั้งหมด (ผ่าน cache 5 นาที)
   const settingsMap = await getCachedSettings()
 
-  // ดึงวิดีโอที่เปิดใช้งาน
-  const videos = await prisma.video.findMany({
-    where: { isActive: true },
-    orderBy: [
-      { order: 'asc' },
-      { createdAt: 'desc' },
-    ]
-  })
+  // ดึงข้อมูลวิดีโอและโปรดักซ์จาก cache (5 นาที)
+  const [products, videos] = await Promise.all([
+    getCachedProducts(),
+    getCachedVideos(),
+  ])
 
   return (
     <>
@@ -53,10 +50,10 @@ export default async function HomePage() {
       <HeroSection settings={settingsMap} />
 
       {/* Section 2: Products */}
-      <ProductSection abVariant={abVariant} settings={settingsMap} />
+      <ProductSection abVariant={abVariant} settings={settingsMap} initialProducts={products} />
 
       {/* Section 3: Videos */}
-      <VideoSection />
+      <VideoSection initialVideos={videos} />
 
       {/* Section 4: Contact */}
       <ContactSection settings={settingsMap} videos={videos} />

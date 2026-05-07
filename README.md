@@ -33,3 +33,14 @@ Before deploying, verify build passes:
 npm run build
 ```
 If `SESSION_SECRET` is missing, build fails while collecting page data for API routes.
+
+git checkout main
+git pull origin main
+
+git checkout -b feature/xxx
+
+# ทำงาน
+git add .
+git commit -m "feat: add xxx"
+
+git push -u origin feature/xxx

@@ -7,6 +7,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Image from 'next/image'
 import EditableBlock from '../admin/EditableBlock'
 
 export default function HeroSection({ settings = {} }) {
@@ -125,11 +126,19 @@ export default function HeroSection({ settings = {} }) {
           <div
             key={idx}
             className="absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out"
-            style={{
-              opacity: idx === currentImageIndex ? 1 : 0,
-              background: `linear-gradient(rgba(10, 10, 15, 0.7), rgba(17, 17, 24, 0.8)), url(${img}) center/cover no-repeat`
-            }}
-          />
+            style={{ opacity: idx === currentImageIndex ? 1 : 0 }}
+          >
+            <Image
+              src={img}
+              alt={`Hero background ${idx + 1}`}
+              fill
+              priority={idx === 0}
+              className="object-cover"
+              sizes="100vw"
+            />
+            {/* Dark Overlay */}
+            <div className="absolute inset-0 bg-black/60 z-10" />
+          </div>
         ))
       ) : (
         <div
@@ -181,7 +190,7 @@ export default function HeroSection({ settings = {} }) {
         </div>
 
         {/* Main Headline */}
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-black mb-6 animate-fade-up leading-none flex flex-col items-center" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <h1 className="text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-black mb-6 animate-fade-up leading-[1.1] sm:leading-none flex flex-col items-center" style={{ fontFamily: 'Outfit, sans-serif' }}>
           <EditableBlock as="span" className="text-white block text-center" settingKey="hero_title_1" defaultText={settings.hero_title_1 || "จัดการ"} />
           <EditableBlock as="span" className="animated-gradient-text block text-center" settingKey="hero_title_2" defaultText={settings.hero_title_2 || "โปรดักซ์"} />
           <EditableBlock as="span" className="text-white block text-center" settingKey="hero_title_3" defaultText={settings.hero_title_3 || "อย่างมืออาชีพ"} />
@@ -203,7 +212,7 @@ export default function HeroSection({ settings = {} }) {
           <a
             href="#products"
             id="hero-explore-btn"
-            className="btn-gradient text-base px-8 py-4 animate-glow"
+            className="w-full sm:w-auto btn-gradient text-base px-8 py-4 animate-glow"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -213,7 +222,7 @@ export default function HeroSection({ settings = {} }) {
           <a
             href="#contact"
             id="hero-contact-btn"
-            className="btn-ghost text-base px-8 py-4"
+            className="w-full sm:w-auto btn-ghost text-base px-8 py-4"
           >
             <EditableBlock as="span" settingKey="hero_cta_secondary" defaultText={settings.hero_cta_secondary || "ติดต่อเรา"} />
           </a>

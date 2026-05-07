@@ -45,7 +45,7 @@ export default function ProfileSection({ settings = {}, loading = false }) {
       <div className="absolute top-0 right-0 w-[60%] h-full bg-brand-500/10 rounded-full blur-[200px] pointer-events-none animate-pulse" />
 
       <div className="container mx-auto px-4 relative z-20">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-start py-32">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start py-12 md:py-20 lg:py-32">
           {/* Left Side — Content */}
           <div className="space-y-12 sticky top-32" style={{ fontFamily: 'Outfit, sans-serif' }}>
             <div className="inline-flex items-center gap-4 px-6 py-3 rounded-full bg-brand-500/20 border border-brand-500/40 backdrop-blur-3xl text-brand-300 text-sm font-black uppercase tracking-[0.3em] shadow-2xl">
@@ -54,10 +54,10 @@ export default function ProfileSection({ settings = {}, loading = false }) {
 
             <div className="space-y-16">
               {/* Intro Text - Massive Colorful Hero */}
-              <div className="text-6xl md:text-8xl lg:text-9xl font-black uppercase tracking-tighter leading-none">
+              <div className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black uppercase tracking-tighter leading-none">
                 <EditableBlock 
                   as="span" 
-                  className="animated-gradient-text block py-6" 
+                  className="animated-gradient-text block py-4 sm:py-6" 
                   settingKey="prod_title_1" 
                   defaultText={settings.prod_title_1 || "I'm Creative Developer"} 
                 />
@@ -66,7 +66,7 @@ export default function ProfileSection({ settings = {}, loading = false }) {
 
             <div className="space-y-20 max-w-3xl">
                {/* Description - Standardized Left Alignment */}
-               <div className="text-white text-3xl lg:text-4xl leading-relaxed font-bold drop-shadow-2xl opacity-100">
+               <div className="text-white text-xl sm:text-2xl lg:text-4xl leading-relaxed font-bold drop-shadow-2xl opacity-100">
                  <EditableBlock
                    as="div"
                    settingKey="prod_desc"
@@ -76,7 +76,7 @@ export default function ProfileSection({ settings = {}, loading = false }) {
                </div>
 
                {/* Extended Bio Section - Better support for long text */}
-               <div className="text-gray-300 text-xl lg:text-2xl leading-loose font-medium opacity-90 border-l-2 border-brand-500/30 pl-8">
+               <div className="text-gray-300 text-base sm:text-lg lg:text-2xl leading-loose font-medium opacity-90 border-l-2 border-brand-500/30 pl-6 sm:pl-8">
                  <EditableBlock
                    as="div"
                    settingKey="prod_long_bio"
@@ -94,7 +94,7 @@ export default function ProfileSection({ settings = {}, loading = false }) {
                   const contactSection = document.getElementById('contact')
                   if (contactSection) contactSection.scrollIntoView({ behavior: 'smooth' })
                 }}
-                className="inline-flex items-center gap-5 px-16 py-7 bg-brand-500 hover:bg-brand-600 text-white font-black text-xl rounded-[2.5rem] transition-all duration-500 hover:scale-105 shadow-[0_30px_60px_-15px_rgba(90,107,255,0.6)] group/btn"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-5 px-10 py-5 sm:px-16 sm:py-7 bg-brand-500 hover:bg-brand-600 text-white font-black text-lg sm:text-xl rounded-2xl sm:rounded-[2.5rem] transition-all duration-500 hover:scale-105 shadow-[0_30px_60px_-15px_rgba(90,107,255,0.6)] group/btn"
               >
                 <EditableBlock settingKey="prod_cta_text" defaultText={settings.prod_cta_text || "Get Started"} />
                 <svg className="w-7 h-7 group-hover/btn:translate-x-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,7 +118,7 @@ export default function ProfileSection({ settings = {}, loading = false }) {
             
               {/* The Image Container with Integrated Small Card */}
             <div
-              className="relative w-full max-w-2xl aspect-[4/5] rounded-[6rem] overflow-hidden shadow-[0_100px_200px_-40px_rgba(0,0,0,1)] transition-all duration-1000 group-hover:scale-[1.02]"
+              className="relative w-full max-w-2xl aspect-[4/5] rounded-[2rem] sm:rounded-[6rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,1)] lg:shadow-[0_100px_200px_-40px_rgba(0,0,0,1)] transition-all duration-1000 group-hover:scale-[1.02]"
             >
               {profileImages.length > 0 ? (
                 <Image
@@ -157,9 +157,9 @@ export default function ProfileSection({ settings = {}, loading = false }) {
                 {/* Prev Button */}
                   <button
                     onClick={handlePrev}
-                    className="w-12 h-12 rounded-xl bg-surface-800/80 border border-white/20 flex items-center justify-center text-brand-300 hover:bg-brand-500 hover:border-brand-500 hover:text-white transition-all duration-300 active:scale-90 flex-shrink-0"
+                    className="w-10 h-10 md:w-14 md:h-14 rounded-xl bg-surface-800/80 border border-white/20 flex items-center justify-center text-brand-300 hover:bg-brand-500 hover:border-brand-500 hover:text-white transition-all duration-300 active:scale-90 flex-shrink-0"
                   >
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={5} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
@@ -177,9 +177,9 @@ export default function ProfileSection({ settings = {}, loading = false }) {
                  {/* Next Button */}
                  <button
                    onClick={handleNext}
-                   className="w-12 h-12 rounded-xl bg-surface-800/80 border border-white/20 flex items-center justify-center text-brand-300 hover:bg-brand-500 hover:border-brand-500 hover:text-white transition-all duration-300 active:scale-90 flex-shrink-0"
+                   className="w-10 h-10 md:w-14 md:h-14 rounded-xl bg-surface-800/80 border border-white/20 flex items-center justify-center text-brand-300 hover:bg-brand-500 hover:border-brand-500 hover:text-white transition-all duration-300 active:scale-90 flex-shrink-0"
                  >
-                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={5} d="M9 5l7 7-7 7" />
                   </svg>
                 </button>

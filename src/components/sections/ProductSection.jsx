@@ -68,17 +68,19 @@ function TiltCard({ children, className, style, onClick }) {
 }
 
 // ------------------- Main ProductSection Component -------------------
-export default function ProductSection({ abVariant, settings = {} }) {
-  const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(true)
+export default function ProductSection({ abVariant, settings = {}, initialProducts = [] }) {
+  const [products, setProducts] = useState(initialProducts)
+  const [loading, setLoading] = useState(initialProducts.length === 0)
   const [selectedProduct, setSelectedProduct] = useState(null)
   const [isPaused, setIsPaused] = useState(false)
   const scrollRef = useRef(null)
   const autoScrollRef = useRef(null)
   const scrollSpeed = 1 // pixels per frame
 
-  // Fetch ALL products (unlimited)
+  // Fetch products if NOT provided as props (fallback)
   useEffect(() => {
+    if (initialProducts.length > 0) return
+
     async function fetchProducts() {
       try {
         const res = await fetch('/api/products?limit=1000')
@@ -93,7 +95,7 @@ export default function ProductSection({ abVariant, settings = {} }) {
       }
     }
     fetchProducts()
-  }, [])
+  }, [initialProducts.length])
 
   // ------------------- Auto-scroll Logic -------------------
   useEffect(() => {
@@ -125,8 +127,8 @@ export default function ProductSection({ abVariant, settings = {} }) {
   // ------------------- Manual Scroll -------------------
   const scrollBy = (direction) => {
     if (!scrollRef.current) return
-    const cardWidth = 380
-    const gap = 32
+    const cardWidth = window.innerWidth < 640 ? window.innerWidth * 0.85 : 380
+    const gap = window.innerWidth < 640 ? 16 : 32
     const scrollAmount = (cardWidth + gap) * direction
 
     scrollRef.current.scrollBy({
@@ -181,13 +183,13 @@ export default function ProductSection({ abVariant, settings = {} }) {
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-sm font-bold uppercase tracking-widest mb-6">
             <EditableBlock settingKey="prod_badge_label" defaultText="Product Collection" />
           </div>
-          <h2 className="text-5xl font-black text-white mb-6 tracking-tight">
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">
             <EditableBlock as="span" settingKey="prod_section_title_1" defaultText="Explore " />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-brand-600">
               <EditableBlock as="span" settingKey="prod_section_title_2" defaultText="Our Collection" />
             </span>
           </h2>
-          <div className="text-xl text-gray-400 max-w-2xl mx-auto">
+          <div className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto">
             <EditableBlock settingKey="prod_section_desc" defaultText="สัมผัสผลงานและผลิตภัณฑ์ทั้งหมดของเรา เลือกชมรายละเอียดแต่ละชิ้นได้จากรายการด้านล่าง" />
           </div>
         </div>
@@ -205,7 +207,7 @@ export default function ProductSection({ abVariant, settings = {} }) {
             {/* ---- Previous Button ---- */}
             <button
               onClick={() => scrollBy(-1)}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-30 w-12 h-12 bg-surface-800/90 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-xl group"
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 lg:-translate-x-12 z-30 w-12 h-12 bg-surface-800/90 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-xl group"
               aria-label="Previous"
             >
               <svg className="w-5 h-5 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -218,7 +220,7 @@ export default function ProductSection({ abVariant, settings = {} }) {
               ref={scrollRef}
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
-              className="flex gap-8 overflow-x-auto scrollbar-hide scroll-smooth px-2 py-4"
+              className="flex gap-4 sm:gap-8 overflow-x-auto scrollbar-hide scroll-smooth px-4 sm:px-2 py-4"
               style={{
                 scrollbarWidth: 'none',
                 msOverflowStyle: 'none',
@@ -229,8 +231,7 @@ export default function ProductSection({ abVariant, settings = {} }) {
                 <TiltCard
                   key={product.id}
                   onClick={() => handleCardClick(product)}
-                  className="relative group cursor-pointer bg-surface-800/50 backdrop-blur-sm border border-white/5 rounded-2xl shadow-xl overflow-hidden transition-all duration-500 hover:shadow-brand-500/30 hover:border-brand-500/50 focus:shadow-brand-500/30 focus:border-brand-500/40 focus:outline-none flex-shrink-0"
-                  style={{ width: '380px' }}
+                  className="relative group cursor-pointer bg-surface-800/50 backdrop-blur-sm border border-white/5 rounded-2xl shadow-xl overflow-hidden transition-all duration-500 hover:shadow-brand-500/30 hover:border-brand-500/50 focus:shadow-brand-500/30 focus:border-brand-500/40 focus:outline-none flex-shrink-0 w-[85vw] sm:w-[380px]"
                 >
                   <div className="h-72 overflow-hidden bg-black/40 relative">
                     <Image
@@ -240,6 +241,7 @@ export default function ProductSection({ abVariant, settings = {} }) {
                       sizes="(max-width: 768px) 100vw, 380px"
                       className="object-contain transition-transform duration-700 group-hover:scale-105"
                       unoptimized={product.imageUrl?.startsWith('blob:') ? true : false}
+                      priority={products.indexOf(product) < 3} // Priority for first 3 products
                     />
                     
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -278,7 +280,7 @@ export default function ProductSection({ abVariant, settings = {} }) {
             {/* ---- Next Button ---- */}
             <button
               onClick={() => scrollBy(1)}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-30 w-12 h-12 bg-surface-800/90 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-xl group"
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 lg:translate-x-12 z-30 w-12 h-12 bg-surface-800/90 backdrop-blur-md border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-xl group"
               aria-label="Next"
             >
               <svg className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -299,9 +301,9 @@ export default function ProductSection({ abVariant, settings = {} }) {
           <div className="relative w-full max-w-6xl max-h-[90vh] bg-surface-900 border border-white/10 rounded-[3rem] overflow-hidden shadow-2xl flex flex-col md:flex-row">
             <button 
               onClick={() => setSelectedProduct(null)}
-              className="absolute top-8 right-8 z-50 w-12 h-12 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center text-white transition-colors"
+              className="absolute top-4 right-4 md:top-8 md:right-8 z-50 w-10 h-10 md:w-12 md:h-12 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center text-white transition-colors"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -320,7 +322,7 @@ export default function ProductSection({ abVariant, settings = {} }) {
                 <div className="inline-block px-4 py-2 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-bold uppercase tracking-widest">
                   <EditableBlock settingKey="prod_modal_badge" defaultText="Featured Product" />
                 </div>
-                <h3 className="text-5xl md:text-6xl font-black text-white tracking-tighter leading-tight">
+                <h3 className="text-3xl md:text-5xl lg:text-6xl font-black text-white tracking-tighter leading-tight">
                   {selectedProduct.name}
                 </h3>
               </div>
@@ -339,7 +341,7 @@ export default function ProductSection({ abVariant, settings = {} }) {
                   href={selectedProduct.externalUrl || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-12 py-6 bg-brand-500 hover:bg-brand-600 text-white font-black text-lg rounded-2xl transition-all hover:scale-105 shadow-xl shadow-brand-500/20"
+                  className="w-full md:w-auto px-8 md:px-12 py-4 md:py-6 bg-brand-500 hover:bg-brand-600 text-white font-black text-lg rounded-2xl transition-all hover:scale-105 shadow-xl shadow-brand-500/20 text-center"
                 >
                   <EditableBlock settingKey="prod_modal_cta" defaultText="View Live Project" />
                 </a>

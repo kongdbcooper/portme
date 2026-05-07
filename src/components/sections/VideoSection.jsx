@@ -111,10 +111,10 @@ function VideoThumbnail({ video }) {
 }
 
 // ------------------- Main VideoSection Component -------------------
-export default function VideoSection() {
-  const [videos, setVideos] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [selectedVideo, setSelectedVideo] = useState(null)
+export default function VideoSection({ initialVideos = [] }) {
+  const [videos, setVideos] = useState(initialVideos)
+  const [loading, setLoading] = useState(initialVideos.length === 0)
+  const [selectedVideo, setSelectedVideo] = useState(initialVideos[0] || null)
   const [showRelated, setShowRelated] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   
@@ -124,8 +124,10 @@ export default function VideoSection() {
   const autoScrollRef = useRef(null)
   const scrollSpeed = 0.5 // Slow and smooth
 
-  // Fetch ALL videos
+  // Fetch videos if NOT provided as props (fallback)
   useEffect(() => {
+    if (initialVideos.length > 0) return
+
     async function fetchVideos() {
       try {
         const res = await fetch('/api/videos?limit=1000')
@@ -144,7 +146,7 @@ export default function VideoSection() {
       }
     }
     fetchVideos()
-  }, [])
+  }, [initialVideos.length])
 
   // Auto-scroll logic for the carousel
   useEffect(() => {
@@ -174,8 +176,8 @@ export default function VideoSection() {
 
   const scrollBy = (direction) => {
     if (!scrollRef.current) return
-    const cardWidth = 380
-    const gap = 32
+    const cardWidth = window.innerWidth < 640 ? window.innerWidth * 0.85 : 380
+    const gap = window.innerWidth < 640 ? 16 : 32
     const scrollAmount = (cardWidth + gap) * direction
 
     scrollRef.current.scrollBy({
@@ -219,7 +221,7 @@ export default function VideoSection() {
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-sm font-bold uppercase tracking-widest mb-6">
             <EditableBlock settingKey="video_badge" defaultText="Video Showcase" />
           </div>
-          <h2 className="text-5xl font-black text-white mb-6 tracking-tight">
+          <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">
             <EditableBlock as="span" settingKey="video_title_1" defaultText="My " />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-400 to-brand-600">
               <EditableBlock as="span" settingKey="video_title_2" defaultText="Video Collection" />
@@ -247,7 +249,7 @@ export default function VideoSection() {
             {/* Carousel Controls */}
             <button
               onClick={() => scrollBy(-1)}
-              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-6 z-30 w-14 h-14 bg-surface-800/80 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-2xl shadow-brand-500/20 group"
+              className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 lg:-translate-x-16 z-30 w-14 h-14 bg-surface-800/80 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-2xl shadow-brand-500/20 group"
             >
               <svg className="w-6 h-6 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
@@ -258,7 +260,7 @@ export default function VideoSection() {
               ref={scrollRef}
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
-              className="flex gap-8 overflow-x-auto scrollbar-hide scroll-smooth px-8 py-12"
+              className="flex gap-4 sm:gap-8 overflow-x-auto scrollbar-hide scroll-smooth px-4 sm:px-8 py-12"
               style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             >
               {videos.map((video) => (
@@ -266,8 +268,7 @@ export default function VideoSection() {
                   key={video.id}
                   onClick={() => handleCardClick(video)}
                   isActive={selectedVideo?.id === video.id}
-                  className="relative group cursor-pointer bg-surface-800/40 backdrop-blur-md border border-white/5 rounded-[2rem] shadow-2xl overflow-hidden transition-all duration-500 flex-shrink-0"
-                  style={{ width: '380px' }}
+                  className="relative group cursor-pointer bg-surface-800/40 backdrop-blur-md border border-white/5 rounded-[2rem] shadow-2xl overflow-hidden transition-all duration-500 flex-shrink-0 w-[85vw] sm:w-[380px]"
                 >
                   <VideoThumbnail video={video} />
                   <div className="p-8 relative z-20">
@@ -292,7 +293,7 @@ export default function VideoSection() {
 
             <button
               onClick={() => scrollBy(1)}
-              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-6 z-30 w-14 h-14 bg-surface-800/80 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-2xl shadow-brand-500/20 group"
+              className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 lg:translate-x-16 z-30 w-14 h-14 bg-surface-800/80 backdrop-blur-xl border border-white/10 rounded-full flex items-center justify-center text-white hover:bg-brand-500 hover:border-brand-500 hover:scale-110 transition-all duration-300 shadow-2xl shadow-brand-500/20 group"
             >
               <svg className="w-6 h-6 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
@@ -304,7 +305,7 @@ export default function VideoSection() {
         {/* ================= 2. DEDICATED PLAYER AREA ================= */}
         <div ref={playerRef} className="pt-20 scroll-mt-20">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-black text-white mb-4">
+            <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
               <EditableBlock as="span" settingKey="video_player_title_1" defaultText="ผลงานของเรา " />
               <span className="text-brand-500">
                 <EditableBlock as="span" settingKey="video_player_title_2" defaultText="ในรูปแบบวิดีโอ" />
@@ -354,15 +355,15 @@ export default function VideoSection() {
                   <>
                     <button 
                       onClick={playPrev}
-                      className="absolute left-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md"
+                      className="absolute left-2 md:left-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-16 md:h-16 rounded-full bg-black/20 hover:bg-brand-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md z-50 shadow-2xl"
                     >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                      <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" /></svg>
                     </button>
                     <button 
                       onClick={playNext}
-                      className="absolute right-6 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md"
+                      className="absolute right-2 md:right-8 top-1/2 -translate-y-1/2 w-12 h-12 md:w-16 md:h-16 rounded-full bg-black/20 hover:bg-brand-500/80 text-white flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 backdrop-blur-md z-50 shadow-2xl"
                     >
-                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                      <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
                     </button>
                   </>
                 )}
