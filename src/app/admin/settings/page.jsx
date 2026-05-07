@@ -119,6 +119,7 @@ export default function AdminSettingsPage() {
 
       setSettings((prev) => ({ ...prev, hero_background_images: JSON.stringify(updated) }))
       setMessage({ type: 'success', text: 'Hero background removed.' })
+      router.refresh()
     } catch (err) {
       setMessage({ type: 'error', text: err.message })
     } finally {
@@ -186,6 +187,7 @@ export default function AdminSettingsPage() {
 
       setSettings((prev) => ({ ...prev, prod_profile_images: JSON.stringify(updated) }))
       setMessage({ type: 'success', text: 'Profile image removed.' })
+      router.refresh()
     } catch (err) {
       setMessage({ type: 'error', text: err.message })
     } finally {
