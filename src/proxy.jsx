@@ -42,8 +42,16 @@ export async function proxy(req) {
   const isAdminRoute = ADMIN_ROUTES.some((route) => path.startsWith(route)) || path.startsWith('/api/admin')
 
   // 3. Decrypt the session from the cookie
-  const cookie = req.cookies.get('session')?.value
-  const session = await decrypt(cookie)
+  let session = null
+  const sessionCookie = req.cookies.get('session')?.value
+  
+  if (sessionCookie) {
+    try {
+      session = await decrypt(sessionCookie)
+    } catch (err) {
+      console.warn('[Proxy] Session decryption failed:', err.message)
+    }
+  }
 
   // 4. Redirect to /login if the user is not authenticated for admin routes
   if (isAdminRoute && !session) {

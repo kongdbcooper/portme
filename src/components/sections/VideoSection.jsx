@@ -222,7 +222,13 @@ export default function VideoSection({ initialVideos = [] }) {
   }
 
   return (
-    <section className="py-24 bg-[#0a0a0f] overflow-hidden" id="videos">
+    <section className="py-24 bg-[#0a0a0f] overflow-hidden relative" id="videos">
+      {/* Seamless Transition Overlay (Top) */}
+      <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-[#0a0a0f] to-transparent z-10 pointer-events-none" />
+      
+      {/* Seamless Transition Overlay (Bottom) */}
+      <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-[#0a0a0f] to-transparent z-10 pointer-events-none" />
+
       <div className="container mx-auto px-4">
         
         {/* ================= 1. THE COLLECTION AREA ================= */}

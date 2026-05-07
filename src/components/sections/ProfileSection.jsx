@@ -28,27 +28,51 @@ export default function ProfileSection({ settings = {}, loading = false }) {
   }, []);
 
   if (loading) return null;
-  if (profileImages.length === 0 && !isAdmin) return null;
+  // Don't return null if images are missing; show placeholders instead for better UX
+  // if (profileImages.length === 0 && !isAdmin) return null;
 
-  const handleNext = () => setProfileIndex((i) => (i + 1) % profileImages.length)
-  const handlePrev = () => setProfileIndex((i) => (i - 1 + profileImages.length) % profileImages.length)
+  useEffect(() => {
+    // Always fetch fresh settings on client-side to ensure latest R2 uploads are visible
+    async function fetchSettings() {
+      try {
+        const res = await fetch('/api/settings')
+        if (res.ok) {
+          const data = await res.json()
+          if (data.prod_profile_images) {
+            try { setProfileImages(JSON.parse(data.prod_profile_images)) } catch(e){}
+          }
+        }
+      } catch (err) {
+        console.error('Failed to sync profile settings', err)
+      }
+    }
+    fetchSettings()
+  }, [])
+
+  const handleNext = () => profileImages.length > 0 && setProfileIndex((i) => (i + 1) % profileImages.length)
+  const handlePrev = () => profileImages.length > 0 && setProfileIndex((i) => (i - 1 + profileImages.length) % profileImages.length)
 
   return (
     <div className="relative w-full min-h-[85vh] flex items-center overflow-hidden group mb-12 -mt-16">
         {/* 1. MAIN BACKGROUND (Previous Image) - Immersive Blend */}
-      <div
-        className="absolute inset-0 transition-all duration-1000 ease-in-out z-0"
-        style={{
-          backgroundImage: `url(${profileImages[(profileIndex - 1 + profileImages.length) % profileImages.length]?.url || '/picture/blue.jpg'})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      >
+      <div className="absolute inset-0 z-0">
+        <Image
+          src={profileImages[(profileIndex - 1 + profileImages.length) % profileImages.length]?.url || '/picture/blue.jpg'}
+          alt="Background Preview"
+          fill
+          priority
+          className="object-cover object-center transition-all duration-1000 ease-in-out opacity-40 blur-[2px]"
+          sizes="100vw"
+        />
         {/* Ultra-Strong Seamless Gradient Fades */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-transparent to-[#0a0a0f] z-10" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0f] via-[#0a0a0f]/30 to-transparent z-10" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0f] via-[#0a0a0f]/40 to-transparent z-10" />
+        
+        {/* Bottom Fade Out to next section */}
+        <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-[#0a0a0f] to-transparent z-20" />
+        
         {/* Global Darkener */}
-        <div className="absolute inset-0 bg-black/50 backdrop-blur-[3px] z-0" />
+        <div className="absolute inset-0 bg-black/50 backdrop-blur-[1px] z-0" />
       </div>
 
       {/* Decorative Glows */}
@@ -66,9 +90,9 @@ export default function ProfileSection({ settings = {}, loading = false }) {
               />
             </div>
 
-            <div className="space-y-16">
+            <div className="space-y-8 sm:space-y-16">
               {/* Intro Text - Massive Colorful Hero */}
-              <div className="text-3xl sm:text-6xl md:text-8xl lg:text-9xl font-black uppercase tracking-tighter leading-none">
+              <div className="text-4xl sm:text-6xl md:text-7xl lg:text-9xl font-black uppercase tracking-tighter leading-[0.9] sm:leading-none">
                 <EditableBlock 
                   as="span" 
                   className="animated-gradient-text block py-3 sm:py-6" 
@@ -80,22 +104,22 @@ export default function ProfileSection({ settings = {}, loading = false }) {
 
             <div className="space-y-20 max-w-3xl">
                {/* Description - Standardized Left Alignment */}
-               <div className="text-white text-xl sm:text-2xl lg:text-4xl leading-relaxed font-bold drop-shadow-2xl opacity-100">
+               <div className="text-white text-lg sm:text-2xl lg:text-4xl leading-relaxed font-bold drop-shadow-2xl opacity-100">
                  <EditableBlock
                    as="div"
                    settingKey="prod_desc"
                    multiline
-                   defaultText={settings.prod_desc || "I build high-performance, visually stunning digital products that push the boundaries of modern web development."}
+                   defaultText={settings?.prod_desc || "I build high-performance, visually stunning digital products that push the boundaries of modern web development."}
                  />
                </div>
 
                {/* Extended Bio Section - Better support for long text */}
-               <div className="text-gray-300 text-base sm:text-lg lg:text-2xl leading-loose font-medium opacity-90 border-l-2 border-brand-500/30 pl-6 sm:pl-8">
+               <div className="text-gray-300 text-sm sm:text-lg lg:text-2xl leading-loose font-medium opacity-90 border-l-2 border-brand-500/30 pl-4 sm:pl-8">
                  <EditableBlock
                    as="div"
                    settingKey="prod_long_bio"
                    multiline
-                   defaultText={settings.prod_long_bio || "With over 5 years of experience in the industry, I specialize in React, Next.js, and advanced motion graphics. My work focuses on delivering seamless user interactions and pixel-perfect designs that leave a lasting impression."}
+                   defaultText={settings?.prod_long_bio || "With over 5 years of experience in the industry, I specialize in React, Next.js, and advanced motion graphics. My work focuses on delivering seamless user interactions and pixel-perfect designs that leave a lasting impression."}
                  />
                </div>
             </div>
@@ -132,16 +156,17 @@ export default function ProfileSection({ settings = {}, loading = false }) {
             
               {/* The Image Container with Integrated Small Card */}
             <div
-              className="relative w-full max-w-2xl aspect-[4/5] rounded-3xl overflow-hidden transition-all duration-1000 group-hover:scale-[1.02]"
+              className="relative w-[92vw] sm:w-full max-w-2xl aspect-[4/5] rounded-[2rem] sm:rounded-3xl overflow-hidden transition-all duration-1000 group-hover:scale-[1.02] shadow-2xl"
             >
+
               {profileImages.length > 0 ? (
                 <Image
                   src={profileImages[profileIndex]?.url || '/picture/blue.jpg'}
                   alt="Current Showcase"
                   fill
                   sizes="(max-width: 1024px) 100vw, 1000px"
-                  className="object-contain"
-                  unoptimized={profileImages[profileIndex]?.url?.startsWith('blob:') ? true : false}
+                  className="object-cover transition-transform duration-700 hover:scale-105"
+                  unoptimized={profileImages[profileIndex]?.url ? (profileImages[profileIndex].url.startsWith('blob:') ? true : false) : false}
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-brand-500/10 to-transparent" />
@@ -158,8 +183,8 @@ export default function ProfileSection({ settings = {}, loading = false }) {
                   alt="Next Preview"
                   fill
                   sizes="(max-width: 1024px) 400px"
-                  className="object-contain"
-                  unoptimized={profileImages[(profileIndex + 1) % profileImages.length]?.url?.startsWith('blob:')}
+                  className="object-cover"
+                  unoptimized={profileImages[(profileIndex + 1) % profileImages.length]?.url ? (profileImages[(profileIndex + 1) % profileImages.length].url.startsWith('blob:') ? true : false) : false}
                 />
               </div>
             )}

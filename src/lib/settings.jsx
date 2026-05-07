@@ -1,26 +1,28 @@
 import { unstable_cache } from 'next/cache'
 import { prisma } from './prisma'
 
+// ------------------- Get Fresh Settings (No Cache) -------------------
+export async function getFreshSettings() {
+  try {
+    const settings = await prisma.siteSetting.findMany()
+    return settings.reduce((acc, curr) => {
+      acc[curr.key] = curr.value
+      return acc
+    }, {})
+  } catch (error) {
+    console.error('[Settings] Fresh fetch failed:', error)
+    return {}
+  }
+}
+
 // ------------------- Get Cached Settings -------------------
-// ดึงข้อมูล Site Settings จาก Database และ Cache ไว้ 5 นาที (300 วินาที)
-// หากมีการแก้ไขผ่าน Dashboard จะถูก revalidate ทันทีด้วย tag 'site-settings'
 export const getCachedSettings = unstable_cache(
   async () => {
-    try {
-      const settings = await prisma.siteSetting.findMany()
-      const settingsMap = settings.reduce((acc, curr) => {
-        acc[curr.key] = curr.value
-        return acc
-      }, {})
-      return settingsMap
-    } catch (error) {
-      console.error('[Settings] Failed to fetch settings:', error)
-      return {}
-    }
+    return getFreshSettings()
   },
-  ['site-settings-cache'], // unique key
+  ['site-settings-cache-v3'], 
   {
-    revalidate: 300, // 5 minutes
+    revalidate: 60,
     tags: ['site-settings'],
   }
 )

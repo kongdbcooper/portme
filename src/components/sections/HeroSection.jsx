@@ -14,36 +14,36 @@ export default function HeroSection({ settings = {} }) {
   const canvasRef = useRef(null)
   
   const [heroImages, setHeroImages] = useState(() => {
-    if (settings.hero_background_images) {
+    if (settings?.hero_background_images) {
       try { return JSON.parse(settings.hero_background_images).map(img => img.url) } catch(e){}
     }
-    if (settings.hero_background_url) return [settings.hero_background_url]
+    if (settings?.hero_background_url) return [settings.hero_background_url]
     return []
   })
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
 
-  // ดึง background URL จาก settings API
+  // ดึง background URL จาก settings API (Fallback if prop is empty)
   useEffect(() => {
+    // Always fetch fresh settings on client-side to ensure Admin sees latest R2 uploads immediately
     async function fetchSettings() {
       try {
-        const res = await fetch('/api/settings', { cache: 'no-store' })
-        const data = await res.json()
-        if (data.hero_background_images) {
-          try {
-            setHeroImages(JSON.parse(data.hero_background_images).map(img => img.url))
-          } catch(e){}
-        } else if (data.hero_background_url) {
-          setHeroImages([data.hero_background_url])
+        const res = await fetch('/api/settings')
+        if (res.ok) {
+          const data = await res.json()
+          setHeroImages(() => {
+            if (data.hero_background_images) {
+              try { return JSON.parse(data.hero_background_images).map(img => img.url) } catch(e){}
+            }
+            if (data.hero_background_url) return [data.hero_background_url]
+            return []
+          })
         }
-      } catch (error) {
-        console.error('Failed to fetch hero background:', error)
+      } catch (err) {
+        console.error('Failed to sync hero settings', err)
       }
     }
-    
-    if (heroImages.length === 0) {
-      fetchSettings()
-    }
-  }, [heroImages.length])
+    fetchSettings()
+  }, [])
 
   // Carousel Effect
   useEffect(() => {
@@ -71,15 +71,18 @@ export default function HeroSection({ settings = {} }) {
     resize()
     window.addEventListener('resize', resize)
 
+    // ลดจำนวน particles บนมือถือเพื่อ performance
+    const particleCount = window.innerWidth < 768 ? 25 : 60
+
     // สร้าง particles
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
-        vx: (Math.random() - 0.5) * 0.4,
-        vy: (Math.random() - 0.5) * 0.4,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
         size: Math.random() * 2 + 0.5,
-        opacity: Math.random() * 0.4 + 0.1,
+        opacity: Math.random() * 0.3 + 0.1,
         color: Math.random() > 0.5 ? '#5a6bff' : '#f97316',
       })
     }
@@ -133,8 +136,9 @@ export default function HeroSection({ settings = {} }) {
               alt={`Hero background ${idx + 1}`}
               fill
               priority={idx === 0}
-              className="object-cover"
+              className="object-cover object-center sm:object-center transition-all duration-700"
               sizes="100vw"
+              quality={100}
             />
             {/* Dark Overlay */}
             <div className="absolute inset-0 bg-black/60 z-10" />
@@ -190,10 +194,10 @@ export default function HeroSection({ settings = {} }) {
         </div>
 
         {/* Main Headline */}
-        <h1 className="text-3xl sm:text-5xl md:text-7xl lg:text-8xl font-black mb-6 animate-fade-up leading-[1.1] sm:leading-none flex flex-col items-center" style={{ fontFamily: 'Outfit, sans-serif' }}>
-          <EditableBlock as="span" className="text-white block text-center" settingKey="hero_title_1" defaultText={settings.hero_title_1 || "จัดการ"} />
-          <EditableBlock as="span" className="animated-gradient-text block text-center" settingKey="hero_title_2" defaultText={settings.hero_title_2 || "โปรดักซ์"} />
-          <EditableBlock as="span" className="text-white block text-center" settingKey="hero_title_3" defaultText={settings.hero_title_3 || "อย่างมืออาชีพ"} />
+        <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black mb-6 animate-fade-up leading-[1.05] sm:leading-none flex flex-col items-center" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <EditableBlock as="span" className="text-white block text-center" settingKey="hero_title_1" defaultText={settings?.hero_title_1 || "จัดการ"} />
+          <EditableBlock as="span" className="animated-gradient-text block text-center" settingKey="hero_title_2" defaultText={settings?.hero_title_2 || "โปรดักซ์"} />
+          <EditableBlock as="span" className="text-white block text-center" settingKey="hero_title_3" defaultText={settings?.hero_title_3 || "อย่างมืออาชีพ"} />
         </h1>
 
         {/* Subheadline */}
@@ -229,8 +233,11 @@ export default function HeroSection({ settings = {} }) {
         </div>
       </div>
 
+      {/* ------------------- Bottom Seamless Transition ------------------- */}
+      <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/80 to-transparent z-20 pointer-events-none" />
+
       {/* ------------------- Scroll Indicator ------------------- */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce opacity-60">
+      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce opacity-60 z-30">
         <span className="text-white/40 text-[10px] uppercase tracking-widest font-bold">
           <EditableBlock settingKey="hero_scroll_label" defaultText="เลื่อนลง" />
         </span>
