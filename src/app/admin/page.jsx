@@ -120,7 +120,7 @@ export default async function AdminDashboardPage() {
             ดูทั้งหมด →
           </Link>
         </div>
-        <div className="glass-card overflow-hidden">
+        <div className="glass-card overflow-x-auto">
           {recentProducts.length === 0 ? (
             <div className="p-8 text-center text-gray-600">
               <div className="text-4xl mb-2">📦</div>

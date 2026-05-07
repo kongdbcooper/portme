@@ -25,6 +25,7 @@ export default function Navbar({ settings = {} }) {
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
   const logoUrl = settings.site_logo_url || ''
+  const siteName = settings.site_name || 'Monkey'
 
   // ------------------- Scroll Detection -------------------
   useEffect(() => {
@@ -84,6 +85,7 @@ export default function Navbar({ settings = {} }) {
           {/* ------------------- Logo ------------------- */}
           <BrandLogo
             logoUrl={logoUrl}
+            siteName={siteName}
             className="flex items-center gap-3"
             iconClassName="shadow-glow group-hover:scale-110 transition-transform duration-300"
           />

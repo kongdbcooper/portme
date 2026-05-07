@@ -48,8 +48,12 @@ export default function ProfileSection({ settings = {}, loading = false }) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start py-12 md:py-20 lg:py-32">
           {/* Left Side — Content */}
           <div className="space-y-12 sticky top-32" style={{ fontFamily: 'Outfit, sans-serif' }}>
-            <div className="inline-flex items-center gap-4 px-6 py-3 rounded-full bg-brand-500/20 border border-brand-500/40 backdrop-blur-3xl text-brand-300 text-sm font-black uppercase tracking-[0.3em] shadow-2xl">
-              <EditableBlock settingKey="prod_badge" defaultText={settings.prod_badge || "Personal Showcase"} />
+            <div className="inline-block mb-1">
+              <EditableBlock 
+                settingKey="prod_badge" 
+                defaultText={settings.prod_badge || "Personal Showcase"} 
+                className="inline-flex items-center gap-4 px-6 py-3 rounded-full bg-brand-500/20 border border-brand-500/40 backdrop-blur-3xl text-brand-300 text-sm font-black uppercase tracking-[0.3em] shadow-2xl empty:hidden"
+              />
             </div>
 
             <div className="space-y-16">
