@@ -18,7 +18,7 @@ import ContactSection from '@/components/sections/ContactSection'
 
 // ------------------- SEO Metadata -------------------
 export const metadata = {
-  title: 'PortMe — แพลตฟอร์มจัดการโปรดักซ์ยุคใหม่',
+  title: 'Monkey — แพลตฟอร์มจัดการโปรดักซ์ยุคใหม่',
   description:
     'แพลตฟอร์มจัดการโปรดักซ์สำหรับธุรกิจยุคใหม่ พร้อม Admin Dashboard ' +
     'ที่ครบครัน อัปโหลดรูปภาพสู่ Cloudflare R2 อัตโนมัติ และ A/B Testing',

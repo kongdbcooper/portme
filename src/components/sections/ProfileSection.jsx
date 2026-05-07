@@ -54,10 +54,10 @@ export default function ProfileSection({ settings = {}, loading = false }) {
 
             <div className="space-y-16">
               {/* Intro Text - Massive Colorful Hero */}
-              <div className="text-4xl sm:text-6xl md:text-8xl lg:text-9xl font-black uppercase tracking-tighter leading-none">
+              <div className="text-3xl sm:text-6xl md:text-8xl lg:text-9xl font-black uppercase tracking-tighter leading-none">
                 <EditableBlock 
                   as="span" 
-                  className="animated-gradient-text block py-4 sm:py-6" 
+                  className="animated-gradient-text block py-3 sm:py-6" 
                   settingKey="prod_title_1" 
                   defaultText={settings.prod_title_1 || "I'm Creative Developer"} 
                 />
@@ -118,7 +118,7 @@ export default function ProfileSection({ settings = {}, loading = false }) {
             
               {/* The Image Container with Integrated Small Card */}
             <div
-              className="relative w-full max-w-2xl aspect-[4/5] rounded-[2rem] sm:rounded-[6rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,1)] lg:shadow-[0_100px_200px_-40px_rgba(0,0,0,1)] transition-all duration-1000 group-hover:scale-[1.02]"
+              className="relative w-full max-w-2xl aspect-[4/5] rounded-3xl overflow-hidden transition-all duration-1000 group-hover:scale-[1.02]"
             >
               {profileImages.length > 0 ? (
                 <Image

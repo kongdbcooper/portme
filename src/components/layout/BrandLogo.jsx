@@ -5,7 +5,7 @@ import EditableBlock from '../admin/EditableBlock'
 
 export default function BrandLogo({ logoUrl, className = '', iconClassName = '' }) {
   const [isClient, setIsClient] = useState(false)
-  const [siteName, setSiteName] = useState('PortMe')
+  const [siteName, setSiteName] = useState('Monkey')
 
   useEffect(() => {
     setIsClient(true)
@@ -22,9 +22,9 @@ export default function BrandLogo({ logoUrl, className = '', iconClassName = '' 
     return (
       <div className={`flex items-center gap-3 ${className}`}>
         <div className={`w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center ${iconClassName}`}>
-          <span className="text-white font-black text-xl">P</span>
+          <span className="text-white font-black text-xl">M</span>
         </div>
-        <span className="text-2xl font-black text-white tracking-tighter">PortMe</span>
+        <span className="text-2xl font-black text-white tracking-tighter">Monkey</span>
       </div>
     )
   }
@@ -36,7 +36,7 @@ export default function BrandLogo({ logoUrl, className = '', iconClassName = '' 
         {logoUrl ? (
           <img src={logoUrl} alt="Logo" className="w-full h-full object-cover rounded-xl" />
         ) : (
-          <span className="text-white font-black text-xl">P</span>
+          <span className="text-white font-black text-xl">M</span>
         )}
       </div>
 

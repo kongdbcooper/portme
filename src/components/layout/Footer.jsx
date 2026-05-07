@@ -82,7 +82,7 @@ export default function Footer({ settings = {} }) {
         {/* ------------------- Bottom Bar ------------------- */}
         <div className="mt-12 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-gray-600 text-xs">
-            © {currentYear} <EditableBlock as="span" settingKey="footer_copyright" defaultText="PortMe" />. <EditableBlock as="span" settingKey="footer_rights" defaultText="สงวนลิขสิทธิ์ทุกประการ" />
+            © {currentYear} <EditableBlock as="span" settingKey="footer_copyright" defaultText="Monkey" />. <EditableBlock as="span" settingKey="footer_rights" defaultText="สงวนลิขสิทธิ์ทุกประการ" />
           </p>
           <div className="flex items-center gap-4">
             <span className="text-gray-700 text-xs">Built with Next.js 16 + Tailwind CSS</span>
