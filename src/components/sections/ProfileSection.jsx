@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import EditableBlock from '../admin/EditableBlock'
 
@@ -18,7 +18,17 @@ export default function ProfileSection({ settings = {}, loading = false }) {
 
   // Auto-advance disabled as per user request
   
-  if (loading || profileImages.length === 0) return null
+  // ตรวจสอบสิทธิ์ Admin เพื่อไม่ให้ Section หายไปเมื่อไม่มีข้อมูล
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then(res => res.json())
+      .then(data => { if (data.role === 'ADMIN') setIsAdmin(true); })
+      .catch(() => {});
+  }, []);
+
+  if (loading) return null;
+  if (profileImages.length === 0 && !isAdmin) return null;
 
   const handleNext = () => setProfileIndex((i) => (i + 1) % profileImages.length)
   const handlePrev = () => setProfileIndex((i) => (i - 1 + profileImages.length) % profileImages.length)
@@ -149,7 +159,7 @@ export default function ProfileSection({ settings = {}, loading = false }) {
                   fill
                   sizes="(max-width: 1024px) 400px"
                   className="object-contain"
-                  unoptimized={profileImages[(profileIndex + 1) % profileImages.length]?.url?.startsWith('blob:') ? true : false}
+                  unoptimized={profileImages[(profileIndex + 1) % profileImages.length]?.url?.startsWith('blob:')}
                 />
               </div>
             )}

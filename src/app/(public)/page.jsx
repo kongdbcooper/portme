@@ -12,6 +12,7 @@ import { getCachedSettings } from '@/lib/settings'
 import { getCachedProducts, getCachedVideos } from '@/lib/data'
 
 import HeroSection from '@/components/sections/HeroSection'
+import ProfileSection from '@/components/sections/ProfileSection'
 import ProductSection from '@/components/sections/ProductSection'
 import VideoSection from '@/components/sections/VideoSection'
 import ContactSection from '@/components/sections/ContactSection'
@@ -48,6 +49,9 @@ export default async function HomePage() {
     <>
       {/* Section 1: Hero */}
       <HeroSection settings={settingsMap} />
+
+      {/* Section 1.5: Profile (About Me) */}
+      <ProfileSection settings={settingsMap} />
 
       {/* Section 2: Products */}
       <ProductSection abVariant={abVariant} settings={settingsMap} initialProducts={products} />
