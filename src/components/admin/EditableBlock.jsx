@@ -86,11 +86,11 @@ export default function EditableBlock({ settingKey, defaultText, as: Component =
         {hasContent ? (text || defaultText) : <span className="opacity-50 italic">คลิกเพื่อเพิ่มข้อความ</span>}
         
         {/* Edit Badge - Premium Pill Style (Always visible on hover) */}
-        <span className="absolute -top-6 -right-2 bg-brand-500 text-white text-[12px] px-3 py-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none font-black uppercase tracking-tighter shadow-[0_10px_20px_rgba(90,107,255,0.5)] z-[60] flex items-center gap-1.5 scale-90 group-hover:scale-100 border border-white/30 whitespace-nowrap">
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <span className="absolute -top-7 -right-2 bg-brand-500 text-white text-[12px] px-3 py-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 pointer-events-none font-black uppercase tracking-tighter shadow-[0_10px_20px_rgba(90,107,255,0.5)] z-[70] flex items-center justify-center gap-1.5 scale-90 group-hover:scale-100 border border-white/30 whitespace-nowrap min-w-fit">
+          <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
           </svg>
-          EDIT
+          <span className="leading-none inline-block">EDIT</span>
         </span>
       </Component>
     )

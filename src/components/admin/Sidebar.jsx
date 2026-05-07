@@ -92,7 +92,7 @@ export default function Sidebar({ user, logoUrl }) {
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="px-6 py-8 border-b border-white/5">
-        <Link href="/" className="flex items-center gap-4 group">
+        <Link href="/admin" className="flex items-center gap-4 group">
           <div className="relative h-12 flex items-center">
             {logoUrl ? (
               <img

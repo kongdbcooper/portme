@@ -37,7 +37,8 @@ export default async function AdminLayout({ children }) {
     // ไม่ใช้ root layout navbar/footer — admin มี layout แยก
     <div className="min-h-screen" style={{ background: '#0a0a0f' }}>
       {/* Sidebar */}
-      <Sidebar user={{ email: session.email }} logoUrl={settings.site_logo_url} />
+      {/* Sidebar */}
+      <Sidebar user={{ email: session.email }} logoUrl={settings.site_logo || settings.site_logo_url} />
 
       {/* Main Content Area */}
       <div className="lg:ml-64 min-h-screen">
