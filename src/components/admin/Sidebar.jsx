@@ -70,7 +70,7 @@ const MENU_ITEMS = [
   },
 ]
 
-export default function Sidebar({ user, logoUrl }) {
+export default function Sidebar({ user, logoUrl, siteName }) {
   const pathname = usePathname()
   const router = useRouter()
   const [isLoggingOut, setIsLoggingOut] = useState(false)
@@ -108,7 +108,7 @@ export default function Sidebar({ user, logoUrl }) {
           </div>
           <div className="flex flex-col">
             <span className="text-lg font-bold text-white leading-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
-              Monkey<span className="gradient-text"> Admin</span>
+              {siteName || 'Monkey'}<span className="gradient-text"> Admin</span>
             </span>
             <span className="text-[10px] uppercase tracking-[0.2em] text-brand-400 font-bold opacity-80">
               Control Panel

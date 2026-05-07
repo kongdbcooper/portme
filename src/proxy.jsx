@@ -1,5 +1,5 @@
 // =============================================================================
-// src/middleware.js — Route Protection Middleware (Next.js 16 breaking change)
+// src/proxy.jsx — Route Protection Proxy (Next.js 16 breaking change)
 // Runs before request completion for authentication, authorization, and A/B testing.
 // ใช้งานร่วมกับ: src/lib/session.js
 // =============================================================================

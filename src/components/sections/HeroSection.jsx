@@ -50,7 +50,7 @@ export default function HeroSection({ settings = {} }) {
     if (heroImages.length <= 1) return
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % heroImages.length)
-    }, 5000) // เปลี่ยนรูปทุก 5 วินาที
+    }, 6000) // เปลี่ยนรูปทุก 6 วินาที
     return () => clearInterval(interval)
   }, [heroImages.length])
 
@@ -128,18 +128,16 @@ export default function HeroSection({ settings = {} }) {
         heroImages.map((img, idx) => (
           <div
             key={idx}
-            className="absolute inset-0 w-full h-full transition-opacity duration-1000 ease-in-out"
-            style={{ opacity: idx === currentImageIndex ? 1 : 0 }}
+            className="absolute inset-0 w-full h-full transition-all duration-2000 ease-in-out"
+            style={{
+              opacity: idx === currentImageIndex ? 1 : 0,
+              transform: idx === currentImageIndex ? 'scale(1)' : 'scale(1.05)',
+              backgroundImage: `url(${img})`,
+              backgroundSize: 'contain',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+            }}
           >
-            <Image
-              src={img}
-              alt={`Hero background ${idx + 1}`}
-              fill
-              priority={idx === 0}
-              className="object-cover object-center sm:object-center transition-all duration-700"
-              sizes="100vw"
-              quality={100}
-            />
             {/* Dark Overlay */}
             <div className="absolute inset-0 bg-black/60 z-10" />
           </div>
@@ -217,6 +215,16 @@ export default function HeroSection({ settings = {} }) {
             href="#products"
             id="hero-explore-btn"
             className="w-full sm:w-auto btn-gradient text-base px-8 py-4 animate-glow"
+            onClick={(e) => {
+              e.preventDefault()
+              document.querySelector('#products').scrollIntoView({ behavior: 'smooth' })
+              // Track CTA click
+              fetch('/api/ab-test', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ eventType: 'CTA_CLICK' })
+              }).catch(err => console.error('Failed to track CTA', err))
+            }}
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />

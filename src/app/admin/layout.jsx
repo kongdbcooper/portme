@@ -39,7 +39,7 @@ export default async function AdminLayout({ children }) {
     <div className="min-h-screen" style={{ background: '#0a0a0f' }}>
       {/* Sidebar */}
       {/* Sidebar */}
-      <Sidebar user={{ email: session.email }} logoUrl={settings.site_logo_url} />
+      <Sidebar user={{ email: session.email }} logoUrl={settings.site_logo_url} siteName={settings.site_name} />
 
       {/* Main Content Area */}
       <div className="lg:ml-64 min-h-screen">
