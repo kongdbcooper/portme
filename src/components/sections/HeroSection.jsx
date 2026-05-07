@@ -133,7 +133,7 @@ export default function HeroSection({ settings = {} }) {
               opacity: idx === currentImageIndex ? 1 : 0,
               transform: idx === currentImageIndex ? 'scale(1)' : 'scale(1.05)',
               backgroundImage: `url(${img})`,
-              backgroundSize: 'contain',
+              backgroundSize: 'cover',
               backgroundPosition: 'center',
               backgroundRepeat: 'no-repeat',
             }}

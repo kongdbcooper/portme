@@ -182,7 +182,7 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
       <div className="absolute top-0 inset-x-0 h-64 bg-gradient-to-b from-[#0a0a0f] via-[#0a0a0f]/60 to-transparent z-30 pointer-events-none" />
       <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-[#0a0a0f] to-transparent z-30 pointer-events-none" />
 
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-6">
         {/* ================= Section Heading ================= */}
         <div className="text-center mb-16">
           <div className="flex justify-center mb-6">
@@ -347,11 +347,11 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
 
               <div className="pt-10 flex flex-wrap gap-6">
                 <a
-                  href={selectedProduct.externalUrl || '#'}
+                  href={selectedProduct.abVariant || '#'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full md:w-auto px-8 md:px-12 py-4 md:py-6 bg-brand-500 hover:bg-brand-600 text-white font-black text-lg rounded-2xl transition-all hover:scale-105 shadow-xl shadow-brand-500/20 text-center"
-                >
+                  className="w-full md:w-auto px-8 md:px-12 py-4 md:py-6 bg-brand-500 hover:bg-brand-600 text-white font-black text-lg rounded-2xl transition-all hover:scale-105 shadow-xl shadow-brand-500/20 text-center">
+                  <EditableBlock settingKey="prod_modal_cta" defaultText="View Live Project" />
                 </a>
               </div>
             </div>
