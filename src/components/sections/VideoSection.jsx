@@ -35,7 +35,7 @@ function TiltCard({ children, className, style, onClick, isActive }) {
   return (
     <div
       ref={cardRef}
-      className={`${className} ${isActive ? 'ring-2 ring-brand-500 shadow-brand-500/50' : ''}`}
+      className={`${className}`}
       onClick={onClick}
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
@@ -44,24 +44,17 @@ function TiltCard({ children, className, style, onClick, isActive }) {
       onTouchEnd={handleMouseLeave}
       tabIndex={0}
       style={{
-        ...style,
-        perspective: '1000px',
-        transformStyle: 'preserve-3d',
-        transform: isHovered || isActive
-          ? `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale3d(1.05, 1.05, 1.05)`
-          : 'rotateX(0) rotateY(0) scale3d(1, 1, 1)',
-        transition: isHovered ? 'transform 0.1s ease-out' : 'transform 0.5s ease-out',
-        zIndex: isHovered || isActive ? 50 : 1,
-      }}
+          ...style,
+          perspective: '1000px',
+          transformStyle: 'preserve-3d',
+          transform: isHovered && typeof window !== 'undefined' && window.innerWidth >= 768
+            ? `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale3d(1.05, 1.05, 1.05)`
+            : 'rotateX(0) rotateY(0) scale3d(1, 1, 1)',
+          transition: isHovered ? 'transform 0.1s ease-out' : 'transform 0.5s ease-out',
+          zIndex: 1,
+        }}
     >
-      {(isHovered || isActive) && (
-        <div
-          className="absolute inset-0 z-10 pointer-events-none rounded-2xl opacity-60"
-          style={{
-            background: `radial-gradient(circle at ${glowPos.x}% ${glowPos.y}%, rgba(90,107,255,0.2) 0%, transparent 60%)`,
-          }}
-        />
-      )}
+      {/* no hover border/glow for video previews to keep them seamless */}
       {children}
     </div>
   )
@@ -223,11 +216,11 @@ export default function VideoSection({ initialVideos = [] }) {
 
   return (
     <section className="py-24 bg-[#0a0a0f] overflow-hidden relative" id="videos">
-      {/* Seamless Transition Overlay (Top) */}
-      <div className="absolute top-0 inset-x-0 h-48 bg-gradient-to-b from-[#0a0a0f] to-transparent z-10 pointer-events-none" />
+      {/* Subtle Seamless Overlays (shorter + lower opacity) */}
+      <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-[#0a0a0f]/70 to-transparent z-10 pointer-events-none" />
       
-      {/* Seamless Transition Overlay (Bottom) */}
-      <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-[#0a0a0f] to-transparent z-10 pointer-events-none" />
+      {/* Subtle Seamless Overlay (bottom) */}
+      <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-[#0a0a0f]/40 via-[#0a0a0f]/12 to-transparent z-10 pointer-events-none" />
 
       <div className="container mx-auto px-4">
         

@@ -241,8 +241,8 @@ export default function HeroSection({ settings = {} }) {
         </div>
       </div>
 
-      {/* ------------------- Bottom Seamless Transition ------------------- */}
-      <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-[#0a0a0f] via-[#0a0a0f]/80 to-transparent z-20 pointer-events-none" />
+      {/* ------------------- Bottom Seamless Transition (responsive + subtle) ------------------- */}
+      <div className="absolute bottom-0 inset-x-0 h-24 sm:h-32 md:h-36 lg:h-48 bg-gradient-to-t from-[#0a0a0f]/40 via-[#0a0a0f]/12 to-transparent z-10 pointer-events-none" />
 
       {/* ------------------- Scroll Indicator ------------------- */}
       <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce opacity-60 z-30">

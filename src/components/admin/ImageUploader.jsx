@@ -9,6 +9,7 @@
 import { uploadFileWithPresignedUrl } from '@/lib/upload-client'
 import { useState, useRef, useCallback, useEffect } from 'react'
 import Image from 'next/image'
+import EditableBlock from './EditableBlock'
 
 /**
  * ImageUploader — Drag & Drop image upload component
@@ -154,7 +155,7 @@ export default function ImageUploader({ currentImageUrl, initialImage, onUpload,
 
   return (
     <div className={`flex flex-col ${fillHeight ? 'h-full' : 'space-y-3'}`}>
-      <label className="form-label">รูปภาพโปรดักซ์</label>
+      <label className="form-label"><EditableBlock as="span" settingKey="image_uploader_label" defaultText="รูปภาพโปรดักซ์" /></label>
 
       {/* Drop Zone */}
       <div
@@ -200,9 +201,9 @@ export default function ImageUploader({ currentImageUrl, initialImage, onUpload,
               {/* Overlay on hover (only when no pending file) */}
               {!isUploading && !pendingFile && (
                 <div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-center gap-3 cursor-pointer">
-                  <div className="text-center text-white">
+                    <div className="text-center text-white">
                     <div className="text-3xl mb-2">🔄</div>
-                    <p className="text-sm font-medium">เปลี่ยนรูป</p>
+                    <p className="text-sm font-medium"><EditableBlock as="span" settingKey="image_change_label" defaultText="เปลี่ยนรูป" /></p>
                   </div>
                   <div className="w-px h-12 bg-white/20" />
                   <button
@@ -214,7 +215,7 @@ export default function ImageUploader({ currentImageUrl, initialImage, onUpload,
                     className="text-center text-red-400 hover:text-red-300"
                   >
                     <div className="text-3xl mb-2">🗑️</div>
-                    <p className="text-sm font-medium">ลบ</p>
+                    <p className="text-sm font-medium"><EditableBlock as="span" settingKey="image_delete_label" defaultText="ลบ" /></p>
                   </button>
                 </div>
               )}
@@ -222,7 +223,7 @@ export default function ImageUploader({ currentImageUrl, initialImage, onUpload,
               {/* Confirm / Cancel Overlay for Pending File */}
               {!isUploading && pendingFile && (
                 <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center gap-4 z-20">
-                  <p className="text-white font-medium text-center px-4">ต้องการอัปโหลดรูปนี้หรือไม่?</p>
+                  <p className="text-white font-medium text-center px-4"><EditableBlock as="span" settingKey="image_confirm_upload_text" defaultText="ต้องการอัปโหลดรูปนี้หรือไม่?" /></p>
                   <div className="flex gap-3">
                     <button
                       type="button"
@@ -232,7 +233,7 @@ export default function ImageUploader({ currentImageUrl, initialImage, onUpload,
                       }}
                       className="px-6 py-2 bg-brand-500 hover:bg-brand-600 text-white rounded-lg text-sm font-medium transition-colors shadow-lg"
                     >
-                      ตกลง
+                      <EditableBlock as="span" settingKey="image_confirm_ok" defaultText="ตกลง" />
                     </button>
                     <button
                       type="button"
@@ -242,7 +243,7 @@ export default function ImageUploader({ currentImageUrl, initialImage, onUpload,
                       }}
                       className="px-6 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-sm font-medium transition-colors border border-white/20"
                     >
-                      ยกเลิก
+                      <EditableBlock as="span" settingKey="image_confirm_cancel" defaultText="ยกเลิก" />
                     </button>
                   </div>
                 </div>
@@ -256,7 +257,7 @@ export default function ImageUploader({ currentImageUrl, initialImage, onUpload,
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                     </svg>
-                    <span className="text-sm">กำลังอัปโหลด... {progress}%</span>
+                    <span className="text-sm"><EditableBlock as="span" settingKey="image_uploading_prefix" defaultText="กำลังอัปโหลด..." /> {progress}%</span>
                   </div>
                 </div>
               )}
@@ -269,10 +270,10 @@ export default function ImageUploader({ currentImageUrl, initialImage, onUpload,
                 {isDragging ? '📂' : '🖼️'}
               </div>
               <p className="text-white font-medium mb-1">
-                {isDragging ? 'ปล่อยไฟล์ที่นี่' : 'ลากรูปมาวางที่นี่'}
+                {isDragging ? <EditableBlock as="span" settingKey="image_drop_here" defaultText="ปล่อยไฟล์ที่นี่" /> : <EditableBlock as="span" settingKey="image_drag_here" defaultText="ลากรูปมาวางที่นี่" />}
               </p>
-              <p className="text-gray-500 text-sm">หรือ <span className="text-brand-400 underline">คลิกเพื่อเลือกไฟล์</span></p>
-              <p className="text-gray-600 text-xs mt-2">JPEG, PNG, WebP, GIF — ไม่เกิน 5MB</p>
+              <p className="text-gray-500 text-sm">หรือ <span className="text-brand-400 underline"><EditableBlock as="span" settingKey="image_click_to_select" defaultText="คลิกเพื่อเลือกไฟล์" /></span></p>
+              <p className="text-gray-600 text-xs mt-2"><EditableBlock as="span" settingKey="image_types_hint" defaultText="JPEG, PNG, WebP, GIF — ไม่เกิน 5MB" /></p>
             </div>
           )}
         </div>
@@ -304,7 +305,7 @@ export default function ImageUploader({ currentImageUrl, initialImage, onUpload,
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
-          อัปโหลดรูปภาพสำเร็จ (Cloudflare R2)
+          <EditableBlock as="span" settingKey="image_upload_success" defaultText="อัปโหลดรูปภาพสำเร็จ (Cloudflare R2)" />
         </p>
       )}
     </div>

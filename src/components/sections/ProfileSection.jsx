@@ -64,15 +64,15 @@ export default function ProfileSection({ settings = {}, loading = false }) {
           className="object-cover object-center transition-all duration-1000 ease-in-out opacity-40 blur-[2px]"
           sizes="100vw"
         />
-        {/* Ultra-Strong Seamless Gradient Fades */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f] via-transparent to-[#0a0a0f] z-10" />
-        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0f] via-[#0a0a0f]/40 to-transparent z-10" />
-        
-        {/* Bottom Fade Out to next section */}
-        <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-[#0a0a0f] to-transparent z-20" />
-        
-        {/* Global Darkener */}
-        <div className="absolute inset-0 bg-black/50 backdrop-blur-[1px] z-0" />
+        {/* Softer seamless gradients so next-section text remains readable */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0a0a0f]/80 via-transparent to-[#0a0a0f]/60 z-10 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0a0a0f]/70 via-[#0a0a0f]/20 to-transparent z-10 pointer-events-none" />
+
+        {/* Subtle Bottom Fade — reduced height and opacity so text below is visible */}
+        <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-[#0a0a0f]/40 via-[#0a0a0f]/12 to-transparent z-10 pointer-events-none" />
+
+        {/* Global Darkener — lowered opacity and removed extra backdrop blur */}
+        <div className="absolute inset-0 bg-black/30 backdrop-blur-0 z-0 pointer-events-none" />
       </div>
 
       {/* Decorative Glows */}
@@ -129,8 +129,8 @@ export default function ProfileSection({ settings = {}, loading = false }) {
               <button
                 onClick={(e) => {
                   e.stopPropagation()
-                  const contactSection = document.getElementById('contact')
-                  if (contactSection) contactSection.scrollIntoView({ behavior: 'smooth' })
+                  const productsSection = document.getElementById('products')
+                  if (productsSection) productsSection.scrollIntoView({ behavior: 'smooth' })
                 }}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-5 px-10 py-5 sm:px-16 sm:py-7 bg-brand-500 hover:bg-brand-600 text-white font-black text-lg sm:text-xl rounded-2xl sm:rounded-[2.5rem] transition-all duration-500 hover:scale-105 shadow-[0_30px_60px_-15px_rgba(90,107,255,0.6)] group/btn"
               >

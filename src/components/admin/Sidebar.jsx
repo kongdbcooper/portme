@@ -10,6 +10,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import Image from 'next/image'
+import EditableBlock from './EditableBlock'
 
 // เมนู sidebar สำหรับ Admin
 const MENU_ITEMS = [
@@ -108,10 +109,10 @@ export default function Sidebar({ user, logoUrl, siteName }) {
           </div>
           <div className="flex flex-col">
             <span className="text-lg font-bold text-white leading-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
-              {siteName || 'Monkey'}<span className="gradient-text"> Admin</span>
+              {siteName || 'Monkey'}<span className="gradient-text"> <EditableBlock as="span" settingKey="sidebar_admin_label" defaultText="Admin" /></span>
             </span>
             <span className="text-[10px] uppercase tracking-[0.2em] text-brand-400 font-bold opacity-80">
-              Control Panel
+              <EditableBlock as="span" settingKey="sidebar_control_panel_label" defaultText="Control Panel" />
             </span>
           </div>
         </Link>
@@ -119,7 +120,9 @@ export default function Sidebar({ user, logoUrl, siteName }) {
 
       {/* Navigation */}
       <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
-        <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider px-4 mb-3">เมนูหลัก</p>
+        <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider px-4 mb-3">
+          <EditableBlock as="span" settingKey="sidebar_main_menu" defaultText="เมนูหลัก" />
+        </p>
         {MENU_ITEMS.map(({ label, href, icon }) => {
           const isActive = pathname === href || (href !== '/admin' && pathname.startsWith(href))
           return (
@@ -130,7 +133,7 @@ export default function Sidebar({ user, logoUrl, siteName }) {
               className={`sidebar-link ${isActive ? 'active' : ''}`}
             >
               {icon}
-              <span>{label}</span>
+              <span><EditableBlock as="span" settingKey={`sidebar_menu_${href.replace(/[^a-zA-Z0-9]/g,'_')}_label`} defaultText={label} /></span>
               {isActive && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-400" />}
             </Link>
           )
@@ -146,7 +149,7 @@ export default function Sidebar({ user, logoUrl, siteName }) {
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-medium truncate">{user?.email || 'Admin'}</p>
-              <p className="text-brand-400 text-xs">Administrator</p>
+              <p className="text-brand-400 text-xs"><EditableBlock as="span" settingKey="sidebar_user_role" defaultText="Administrator" /></p>
             </div>
           </div>
         </div>
@@ -159,7 +162,7 @@ export default function Sidebar({ user, logoUrl, siteName }) {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          {isLoggingOut ? 'กำลังออก...' : 'ออกจากระบบ'}
+          {isLoggingOut ? <EditableBlock as="span" settingKey="sidebar_logout_in_progress" defaultText="กำลังออก..." /> : <EditableBlock as="span" settingKey="sidebar_logout" defaultText="ออกจากระบบ" />}
         </button>
       </div>
     </div>

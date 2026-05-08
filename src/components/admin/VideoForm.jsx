@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import EditableBlock from './EditableBlock'
 import { useRouter } from 'next/navigation'
 import { uploadFileWithPresignedUrl } from '@/lib/upload-client'
 
@@ -96,7 +97,7 @@ export default function VideoForm({ video = null, mode = 'create' }) {
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
       {/* Upload Section */}
       <div>
-        <label className="form-label">วิดีโอ (ไม่เกิน 500MB) <span className="text-red-400">*</span></label>
+        <label className="form-label"><EditableBlock as="span" settingKey="video_upload_label" defaultText="วิดีโอ (ไม่เกิน 500MB)" /> <span className="text-red-400">*</span></label>
         
         {videoUrl ? (
           <div className="relative rounded-xl overflow-hidden aspect-video bg-black/40 border border-white/10 group mb-4">
@@ -120,9 +121,9 @@ export default function VideoForm({ video = null, mode = 'create' }) {
             }`}
           >
             {isUploading ? (
-              <div className="flex flex-col items-center w-full max-w-xs">
+                <div className="flex flex-col items-center w-full max-w-xs">
                 <span className="w-8 h-8 border-2 border-brand-500 border-t-transparent rounded-full animate-spin mb-4" />
-                <p className="text-brand-400 font-medium mb-2">กำลังอัปโหลด... {uploadProgress}%</p>
+                <p className="text-brand-400 font-medium mb-2"><EditableBlock as="span" settingKey="video_uploading_prefix" defaultText="กำลังอัปโหลด..." /> {uploadProgress}%</p>
                 <div className="w-full bg-white/10 rounded-full h-1.5 overflow-hidden">
                   <div 
                     className="bg-brand-500 h-full transition-all duration-300" 
@@ -137,8 +138,8 @@ export default function VideoForm({ video = null, mode = 'create' }) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                   </svg>
                 </div>
-                <p className="text-white font-medium mb-1">คลิกเพื่ออัปโหลดวิดีโอ</p>
-                <p className="text-gray-500 text-sm text-center">MP4, WebM, OGG สูงสุด 500MB</p>
+                <p className="text-white font-medium mb-1"><EditableBlock as="span" settingKey="video_click_to_upload" defaultText="คลิกเพื่ออัปโหลดวิดีโอ" /></p>
+                <p className="text-gray-500 text-sm text-center"><EditableBlock as="span" settingKey="video_upload_hint" defaultText="MP4, WebM, OGG สูงสุด 500MB" /></p>
               </>
             )}
           </div>
@@ -156,7 +157,7 @@ export default function VideoForm({ video = null, mode = 'create' }) {
       {/* Info Fields */}
       <div>
         <label className="form-label" htmlFor="video-title">
-          ชื่อวิดีโอ <span className="text-red-400">*</span>
+          <EditableBlock as="span" settingKey="video_title_label" defaultText="ชื่อวิดีโอ" /> <span className="text-red-400">*</span>
         </label>
         <input
           id="video-title"
@@ -164,7 +165,10 @@ export default function VideoForm({ video = null, mode = 'create' }) {
           type="text"
           required
           maxLength={200}
-          placeholder="ระบุชื่อวิดีโอ"
+          placeholder={''}
+          placeholder={''}
+          placeholder={''}
+          placeholder={"ระบุชื่อวิดีโอ"}
           defaultValue={video?.title || ''}
           className="form-input"
           disabled={isSubmitting}
@@ -172,12 +176,12 @@ export default function VideoForm({ video = null, mode = 'create' }) {
       </div>
 
       <div>
-        <label className="form-label" htmlFor="video-description">คำอธิบาย</label>
+        <label className="form-label" htmlFor="video-description"><EditableBlock as="span" settingKey="video_description_label" defaultText="คำอธิบาย" /></label>
         <textarea
           id="video-description"
           name="description"
           rows={3}
-          placeholder="อธิบายรายละเอียดวิดีโอ..."
+          placeholder={"อธิบายรายละเอียดวิดีโอ..."}
           defaultValue={video?.description || ''}
           className="form-input resize-none"
           disabled={isSubmitting}
@@ -186,7 +190,7 @@ export default function VideoForm({ video = null, mode = 'create' }) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
         <div>
-          <label className="form-label" htmlFor="video-order">ลำดับการแสดงผล</label>
+          <label className="form-label" htmlFor="video-order"><EditableBlock as="span" settingKey="video_order_label" defaultText="ลำดับการแสดงผล" /></label>
           <input
             id="video-order"
             name="order"
@@ -198,7 +202,7 @@ export default function VideoForm({ video = null, mode = 'create' }) {
         </div>
 
         <div className="flex flex-col justify-center">
-          <label className="form-label">สถานะการแสดงผล</label>
+          <label className="form-label"><EditableBlock as="span" settingKey="video_status_label" defaultText="สถานะการแสดงผล" /></label>
           <label className="flex items-center gap-3 cursor-pointer group" htmlFor="video-isActive">
             <div className="relative">
               <input
@@ -213,13 +217,13 @@ export default function VideoForm({ video = null, mode = 'create' }) {
               <div className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white/30 peer-checked:bg-white peer-checked:translate-x-5 transition-all duration-200" />
             </div>
             <span className="text-gray-300 text-sm group-hover:text-white transition-colors">
-              แสดงบนเว็บไซต์
+              <EditableBlock as="span" settingKey="video_show_on_site" defaultText="แสดงบนเว็บไซต์" />
             </span>
           </label>
         </div>
       </div>
 
-      {submitError && (
+        {submitError && (
         <div className="flex items-center gap-2 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
           <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -234,7 +238,7 @@ export default function VideoForm({ video = null, mode = 'create' }) {
           disabled={isSubmitting || isUploading}
           className="btn-gradient px-8 py-3 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          {isSubmitting ? 'กำลังบันทึก...' : isEdit ? 'บันทึกการแก้ไข' : 'เพิ่มวิดีโอ'}
+          {isSubmitting ? <EditableBlock as="span" settingKey="video_saving" defaultText="กำลังบันทึก..." /> : isEdit ? <EditableBlock as="span" settingKey="video_save_changes" defaultText="บันทึกการแก้ไข" /> : <EditableBlock as="span" settingKey="video_add" defaultText="เพิ่มวิดีโอ" />}
         </button>
         <button
           type="button"
@@ -242,7 +246,7 @@ export default function VideoForm({ video = null, mode = 'create' }) {
           disabled={isSubmitting}
           className="btn-ghost px-6 py-3"
         >
-          ยกเลิก
+          <EditableBlock as="span" settingKey="video_cancel" defaultText="ยกเลิก" />
         </button>
       </div>
     </form>
