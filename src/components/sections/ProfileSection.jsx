@@ -53,11 +53,11 @@ export default function ProfileSection({ settings = {}, loading = false }) {
   const handlePrev = () => profileImages.length > 0 && setProfileIndex((i) => (i - 1 + profileImages.length) % profileImages.length)
 
   return (
-    <div className="relative w-full min-h-[85vh] flex items-center overflow-hidden group mb-12 -mt-16">
+    <div className="relative w-full min-h-[85vh] flex items-center overflow-hidden group mb-12">
         {/* 1. MAIN BACKGROUND (Previous Image) - Immersive Blend */}
       <div className="absolute inset-0 z-0">
         <Image
-          src={profileImages[(profileIndex - 1 + profileImages.length) % profileImages.length]?.url || '/picture/blue.jpg'}
+          src={profileImages[(profileIndex - 1 + profileImages.length) % profileImages.length]?.url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjNWE2YmZmIi8+PC9zdmc+'}
           alt="Background Preview"
           fill
           priority
@@ -161,12 +161,12 @@ export default function ProfileSection({ settings = {}, loading = false }) {
 
               {profileImages.length > 0 ? (
                 <Image
-                  src={profileImages[profileIndex]?.url || '/picture/blue.jpg'}
+                  src={profileImages[profileIndex]?.url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjNWE2YmZmIi8+PC9zdmc+'}
                   alt="Current Showcase"
                   fill
                   sizes="(max-width: 1024px) 100vw, 1000px"
                   className="object-cover transition-transform duration-700 hover:scale-105"
-                  unoptimized={profileImages[profileIndex]?.url ? (profileImages[profileIndex].url.startsWith('blob:') ? true : false) : false}
+                  unoptimized={profileImages[profileIndex]?.url ? (profileImages[profileIndex].url.startsWith('blob:') || profileImages[profileIndex].url.startsWith('data:') ? true : false) : true}
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-brand-500/10 to-transparent" />
@@ -179,12 +179,12 @@ export default function ProfileSection({ settings = {}, loading = false }) {
                 onClick={handleNext}
               >
                 <Image
-                  src={profileImages[(profileIndex + 1) % profileImages.length]?.url || '/picture/blue.jpg'}
+                  src={profileImages[(profileIndex + 1) % profileImages.length]?.url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjNWE2YmZmIi8+PC9zdmc+'}
                   alt="Next Preview"
                   fill
                   sizes="(max-width: 1024px) 400px"
                   className="object-cover"
-                  unoptimized={profileImages[(profileIndex + 1) % profileImages.length]?.url ? (profileImages[(profileIndex + 1) % profileImages.length].url.startsWith('blob:') ? true : false) : false}
+                  unoptimized={profileImages[(profileIndex + 1) % profileImages.length]?.url ? (profileImages[(profileIndex + 1) % profileImages.length].url.startsWith('blob:') || profileImages[(profileIndex + 1) % profileImages.length].url.startsWith('data:') ? true : false) : true}
                 />
               </div>
             )}
