@@ -42,7 +42,7 @@ export default function EditableBlock({ settingKey, defaultText, as: Component =
       setText(defaultText ?? '')
     }, 0)
     return () => clearTimeout(id)
-  }, [defaultText, isEditing, text])
+  })
 
   const handleSave = async () => {
     if (text === (defaultText ?? '')) {
