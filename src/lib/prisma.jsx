@@ -10,18 +10,19 @@ if (!connectionString) {
   console.warn('[Prisma] DATABASE_URL is not defined. Database access will fail.')
 }
 
-const pool = new pg.Pool({ 
+const pool = new pg.Pool({
   connectionString,
-  max: 20,
+  max: 13, // Reduced from 15
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 60000, // Increased timeout
+  allowExitOnIdle: true, // Allow pool to close idle connections
 })
 const adapter = new PrismaPg(pool)
 
 export const prisma =
   globalForPrisma.prisma ||
   new PrismaClient({
-    adapter, 
+    adapter,
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
   })
 
