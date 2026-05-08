@@ -9,15 +9,25 @@ import 'server-only' // ป้องกันไม่ให้ import บน cl
 import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
 
-// Secret key สำหรับ sign JWT — ต้องตั้งค่าใน .env.local
+// Secret key สำหรับ sign JWT — MUST be set in .env.local (critical security requirement)
 const secretKey = process.env.SESSION_SECRET
-const encodedKey = new TextEncoder().encode(secretKey || 'default-secret-key-at-least-32-chars-long')
+const encodedKey = new TextEncoder().encode(secretKey || '')
 
+// SECURITY: Throw error in production if SESSION_SECRET is not set or too short
 if (!secretKey) {
-  console.warn('[Session] SESSION_SECRET is not set. Auth will not work correctly.')
+  const msg = '[Session] CRITICAL: SESSION_SECRET environment variable is not set. JWT signing will fail. Set SESSION_SECRET to a random string ≥32 characters in .env.local or your hosting platform.'
+  console.error(msg)
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(msg)
+  }
 }
+
 if (secretKey && secretKey.length < 32) {
-  console.warn(`[Session] SESSION_SECRET too short (${secretKey.length} chars, need ≥32)`)
+  const msg = `[Session] CRITICAL: SESSION_SECRET is too short (${secretKey.length} chars, need ≥32). Generate a secure random key: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+  console.error(msg)
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(msg)
+  }
 }
 
 // Session duration: 7 วัน
@@ -65,10 +75,10 @@ export async function createSession(userId, role, email) {
 
   const cookieStore = await cookies()
   cookieStore.set('session', session, {
-    httpOnly: true,                                    // JS client ไม่อ่านได้
+    httpOnly: true,                                    // JS client ไม่อ่านได้ (XSS protection)
     secure: process.env.NODE_ENV === 'production',     // HTTPS เฉพาะ production
     expires: expiresAt,
-    sameSite: 'lax',                                   // ป้องกัน CSRF
+    sameSite: 'strict',                                // Strict CSRF protection (no cross-site cookies)
     path: '/',
   })
   console.log(`[Session] Cookie set successfully. Expires: ${expiresAt.toISOString()}`)
@@ -95,7 +105,7 @@ export async function updateSession() {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     expires: expiresAt,
-    sameSite: 'lax',
+    sameSite: 'strict',
     path: '/',
   })
 

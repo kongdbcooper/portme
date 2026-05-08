@@ -48,18 +48,25 @@ const nextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
-          // Content Security Policy (CSP)
+          // Content Security Policy (CSP) - Strong security posture
+          // Removed 'unsafe-inline' and 'unsafe-eval' to prevent XSS injection attacks
           {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://www.googletagmanager.com https://www.google-analytics.com",
-              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-              "font-src 'self' https://fonts.gstatic.com",
+              // script-src: No inline scripts allowed (use bundled/external)
+              // Google Analytics and Tag Manager need special treatment (they use inline scripts)
+              // Alternative: use Google Analytics Script Tag Manager or load via <script> tags only
+              "script-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://www.gstatic.com",
+              // style-src: Use external stylesheets only (Tailwind CSS is bundled)
+              "style-src 'self' https://fonts.googleapis.com",
+              "font-src 'self' data: https://fonts.gstatic.com",
               "img-src 'self' data: blob: https://*.r2.dev https://*.r2.cloudflarestorage.com https://www.google-analytics.com",
               "media-src 'self' blob: https://*.r2.dev https://*.r2.cloudflarestorage.com",
-              "connect-src 'self' https://*.r2.dev https://*.r2.cloudflarestorage.com https://www.google-analytics.com https://analytics.google.com",
+              "connect-src 'self' https://*.r2.dev https://*.r2.cloudflarestorage.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com",
               "frame-ancestors 'none'",
+              "form-action 'self'",
+              "base-uri 'self'",
             ].join('; '),
           },
         ],

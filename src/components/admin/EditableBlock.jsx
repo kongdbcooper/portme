@@ -12,7 +12,7 @@ export default function EditableBlock({ settingKey, defaultText, as: Component =
   const router = useRouter()
   const [isAdmin, setIsAdmin] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
-  const [text, setText] = useState(defaultText || '')
+  const [text, setText] = useState(() => defaultText || '')
   const [isLoading, setIsLoading] = useState(false)
 
   // ตรวจสอบสิทธิ์ Admin เมื่อ Component โหลดฝั่ง Client
@@ -34,9 +34,15 @@ export default function EditableBlock({ settingKey, defaultText, as: Component =
   }, [])
 
   // Sync กับ defaultText หากมีการโหลดข้อมูลใหม่
+  // Avoid synchronous setState in effect to prevent cascading renders.
   useEffect(() => {
-    setText(defaultText ?? '')
-  }, [defaultText])
+    if (isEditing) return // don't overwrite while editing
+    if ((defaultText ?? '') === text) return
+    const id = setTimeout(() => {
+      setText(defaultText ?? '')
+    }, 0)
+    return () => clearTimeout(id)
+  }, [defaultText, isEditing, text])
 
   const handleSave = async () => {
     if (text === (defaultText ?? '')) {

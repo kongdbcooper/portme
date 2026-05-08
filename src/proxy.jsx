@@ -11,17 +11,42 @@ import { decrypt } from './lib/session'
 const PUBLIC_ROUTES = ['/login', '/signup', '/api/auth/login']
 const ADMIN_ROUTES = ['/admin']
 
-// CSRF Protection: Check Origin for state-changing requests
+// CSRF Protection: Check Origin AND Referer for state-changing requests
+// This prevents CSRF attacks by validating that the request comes from the same origin
 function validateOrigin(req) {
   const origin = req.headers.get('origin')
+  const referer = req.headers.get('referer')
   const host = req.headers.get('host')
-  if (!origin) return true 
-  try {
-    const originUrl = new URL(origin)
-    return originUrl.host === host
-  } catch {
+
+  // If both Origin and Referer are missing, block the request (suspicious)
+  if (!origin && !referer) {
+    console.warn('[CSRF] Request missing both Origin and Referer headers')
     return false
   }
+
+  // Check Origin header (preferred)
+  if (origin) {
+    try {
+      const originUrl = new URL(origin)
+      if (originUrl.host === host) return true
+    } catch (e) {
+      console.warn('[CSRF] Invalid Origin header:', e.message)
+    }
+  }
+
+  // Check Referer header (fallback)
+  if (referer) {
+    try {
+      const refererUrl = new URL(referer)
+      if (refererUrl.host === host) return true
+    } catch (e) {
+      console.warn('[CSRF] Invalid Referer header:', e.message)
+    }
+  }
+
+  // No valid origin/referer match found → reject
+  console.warn('[CSRF] Origin/Referer validation failed', { origin, referer, host })
+  return false
 }
 
 /**

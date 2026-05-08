@@ -61,7 +61,9 @@ export default function Footer({ settings = {} }) {
           {/* ------------------- Links Columns ------------------- */}
           {Object.entries(FOOTER_LINKS).map(([title, links]) => (
             <div key={title} className="space-y-4">
-              <h3 className="text-white font-semibold text-sm uppercase tracking-wider">{title}</h3>
+              <h3 className="text-white font-semibold text-sm uppercase tracking-wider">
+                <EditableBlock as="span" settingKey={`footer_links_${title.toLowerCase().replace(/\s+/g,'_')}_title`} defaultText={title} />
+              </h3>
               <ul className="space-y-2.5">
                 {links.map(({ label, href }) => (
                   <li key={href}>
@@ -70,7 +72,7 @@ export default function Footer({ settings = {} }) {
                       className="text-gray-500 text-sm hover:text-gray-300 transition-colors duration-200 flex items-center gap-2 group"
                     >
                       <span className="w-1 h-1 rounded-full bg-gray-600 group-hover:bg-brand-500 transition-colors" />
-                      {label}
+                      <EditableBlock as="span" settingKey={`footer_link_${href.replace(/[^a-zA-Z0-9]/g,'_')}_label`} defaultText={label} />
                     </a>
                   </li>
                 ))}
@@ -85,7 +87,7 @@ export default function Footer({ settings = {} }) {
             © {currentYear} <EditableBlock as="span" settingKey="footer_copyright" defaultText="Monkey" />. <EditableBlock as="span" settingKey="footer_rights" defaultText="สงวนลิขสิทธิ์ทุกประการ" />
           </p>
           <div className="flex items-center gap-4">
-            <span className="text-gray-700 text-xs">Built with Next.js 16 + Tailwind CSS</span>
+            <EditableBlock as="span" className="text-gray-700 text-xs" settingKey="footer_built_with" defaultText="Built with Next.js 16 + Tailwind CSS" />
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               <span className="text-gray-600 text-xs">

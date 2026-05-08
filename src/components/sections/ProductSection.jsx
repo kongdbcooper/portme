@@ -55,14 +55,7 @@ function TiltCard({ children, className, style, onClick }) {
         zIndex: isHovered ? 50 : 1,
       }}
     >
-      {isHovered && (
-        <div
-          className="absolute inset-0 z-10 pointer-events-none rounded-2xl opacity-60"
-          style={{
-            background: `radial-gradient(circle at ${glowPos.x}% ${glowPos.y}%, rgba(90,107,255,0.2) 0%, transparent 60%)`,
-          }}
-        />
-      )}
+      {/* No hover blue glow - keep card seamless and consistent with video previews */}
       {children}
     </div>
   )
@@ -70,6 +63,7 @@ function TiltCard({ children, className, style, onClick }) {
 
 // ------------------- Main ProductSection Component -------------------
 export default function ProductSection({ abVariant, settings = {}, initialProducts = [] }) {
+  const modalRef = useRef(null)
   const [products, setProducts] = useState(initialProducts)
   const [loading, setLoading] = useState(initialProducts.length === 0)
   const [selectedProduct, setSelectedProduct] = useState(null)
@@ -163,15 +157,46 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
 
   // Close modal with Escape key
   useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === 'Escape') setSelectedProduct(null)
+    if (!selectedProduct) return
+
+    const root = modalRef.current
+    const handleKey = (e) => {
+      if (e.key === 'Escape') {
+        setSelectedProduct(null)
+        return
+      }
+      if (e.key !== 'Tab') return
+      if (!root) return
+      const focusable = root.querySelectorAll('a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])')
+      if (!focusable.length) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault()
+          last.focus()
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault()
+          first.focus()
+        }
+      }
     }
-    if (selectedProduct) {
-      document.addEventListener('keydown', handleKeyDown)
-      document.body.style.overflow = 'hidden'
-    }
+
+    document.addEventListener('keydown', handleKey)
+    document.body.style.overflow = 'hidden'
+
+    // Move focus into modal
+    const timer = setTimeout(() => {
+      if (!root) return
+      const focusable = root.querySelectorAll('a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])')
+      if (focusable.length) focusable[0].focus()
+    }, 0)
+
     return () => {
-      document.removeEventListener('keydown', handleKeyDown)
+      clearTimeout(timer)
+      document.removeEventListener('keydown', handleKey)
       document.body.style.overflow = ''
     }
   }, [selectedProduct])
@@ -179,8 +204,8 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
   return (
     <section className="bg-[#0a0a0f] overflow-hidden relative" id="products">
       {/* Seamless Transition Overlays */}
-      <div className="absolute top-0 inset-x-0 h-64 bg-gradient-to-b from-[#0a0a0f] via-[#0a0a0f]/60 to-transparent z-30 pointer-events-none" />
-      <div className="absolute bottom-0 inset-x-0 h-48 bg-gradient-to-t from-[#0a0a0f] to-transparent z-30 pointer-events-none" />
+      <div className="absolute top-0 inset-x-0 h-24 sm:h-32 md:h-36 lg:h-64 bg-gradient-to-b from-[#0a0a0f]/40 via-[#0a0a0f]/12 to-transparent z-10 pointer-events-none" />
+      <div className="absolute bottom-0 inset-x-0 h-20 sm:h-24 md:h-28 lg:h-48 bg-gradient-to-t from-[#0a0a0f]/30 via-[#0a0a0f]/10 to-transparent z-10 pointer-events-none" />
 
       <div className="container mx-auto px-6">
         {/* ================= Section Heading ================= */}
@@ -302,12 +327,12 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
 
       {/* ================= Product Modal ================= */}
       {selectedProduct && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
+        <div ref={modalRef} className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8" role="dialog" aria-modal="true" aria-labelledby="product-modal-title">
           <div 
             className="absolute inset-0 bg-black/90 backdrop-blur-2xl"
             onClick={() => setSelectedProduct(null)}
           />
-          <div className="relative w-full max-w-6xl max-h-[90vh] bg-surface-900 border border-white/10 rounded-[3rem] overflow-hidden shadow-2xl flex flex-col md:flex-row">
+            <div className="relative w-full max-w-6xl max-h-[90vh] bg-surface-900 border border-white/10 rounded-[3rem] overflow-hidden shadow-2xl flex flex-col md:flex-row">
             <button 
               onClick={() => setSelectedProduct(null)}
               className="absolute top-4 right-4 md:top-8 md:right-8 z-50 w-10 h-10 md:w-12 md:h-12 bg-white/5 hover:bg-white/10 rounded-full flex items-center justify-center text-white transition-colors"
@@ -326,34 +351,26 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
               />
             </div>
 
-            <div className="w-full md:w-1/2 p-12 md:p-20 overflow-y-auto space-y-10">
-              <div className="space-y-4">
+            <div className="w-full md:w-1/2 p-8 md:p-24 overflow-y-auto space-y-12">
+                <div className="space-y-4">
                 <div className="inline-block px-4 py-2 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-xs font-bold uppercase tracking-widest">
                   <EditableBlock settingKey="prod_modal_badge" defaultText="Featured Product" />
                 </div>
-                <h3 className="text-3xl md:text-5xl lg:text-6xl font-black text-white tracking-tighter leading-tight">
+                <h3 id="product-modal-title" className="text-3xl md:text-5xl lg:text-6xl font-black text-white tracking-tighter leading-tight">
                   {selectedProduct.name}
                 </h3>
               </div>
 
-              <div className="space-y-6">
+                <div className="space-y-6">
                 <h4 className="text-white text-lg font-bold uppercase tracking-widest opacity-50">
                   <EditableBlock settingKey="prod_modal_desc_label" defaultText="Description" />
                 </h4>
-                <p className="text-xl text-gray-400 leading-relaxed font-medium">
+                <p className="text-base md:text-lg text-gray-300 leading-7 md:leading-8 font-medium max-w-prose whitespace-pre-wrap">
                   {selectedProduct.description}
                 </p>
               </div>
 
-              <div className="pt-10 flex flex-wrap gap-6">
-                <a
-                  href={selectedProduct.abVariant || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full md:w-auto px-8 md:px-12 py-4 md:py-6 bg-brand-500 hover:bg-brand-600 text-white font-black text-lg rounded-2xl transition-all hover:scale-105 shadow-xl shadow-brand-500/20 text-center">
-                  <EditableBlock settingKey="prod_modal_cta" defaultText="View Live Project" />
-                </a>
-              </div>
+              {/* Removed live project button to allow more space for description */}
             </div>
           </div>
         </div>

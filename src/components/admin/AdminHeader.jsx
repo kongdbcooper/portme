@@ -7,6 +7,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
+import EditableBlock from './EditableBlock'
 
 export default function AdminHeader() {
   const router = useRouter()
@@ -30,20 +31,20 @@ export default function AdminHeader() {
         <div className="lg:hidden w-10" /> {/* Spacer for mobile menu button */}
         <div className="flex-1 lg:flex-none">
           <h1 className="text-white font-semibold text-lg" style={{ fontFamily: 'Outfit, sans-serif' }}>
-            Admin Dashboard
+            <EditableBlock settingKey="admin_header_title" defaultText="Admin Dashboard" />
           </h1>
         </div>
         <div className="flex items-center gap-4">
           <span className="hidden sm:flex items-center gap-1.5 text-xs text-gray-500">
             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            Logged in as Admin
+            <EditableBlock settingKey="admin_logged_label" defaultText="Logged in as Admin" />
           </span>
           <button
             onClick={handleLogout}
             disabled={isLoggingOut}
             className="text-xs text-gray-500 hover:text-red-400 transition-colors disabled:opacity-50"
           >
-            {isLoggingOut ? 'Logging out...' : 'Logout'}
+            {isLoggingOut ? <EditableBlock settingKey="admin_logout_loading" defaultText="Logging out..." /> : <EditableBlock settingKey="admin_logout_label" defaultText="Logout" />}
           </button>
         </div>
       </div>
