@@ -1,0 +1,311 @@
+/* =============================================================================
+   src/app/globals.css — Global Styles + Tailwind CSS v3 Directives
+   ใช้งานร่วมกับ: tailwind.config.js, src/app/layout.js
+   =========================================================================== */
+
+/* ------------------- Google Fonts Import ------------------- */
+/* @import ต้องอยู่ก่อน @tailwind directives เสมอ (CSS spec) */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+/* Tailwind CSS v3 directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ------------------- CSS Variables (Design Tokens) ------------------- */
+:root {
+  --font-inter: 'Inter', sans-serif;
+  --font-outfit: 'Outfit', sans-serif;
+
+  /* Brand gradient */
+  --gradient-brand: linear-gradient(135deg, #5a6bff 0%, #7c4dff 50%, #f97316 100%);
+  --gradient-hero: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
+  --gradient-card: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 100%);
+
+  /* Glass effect */
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-blur: 16px;
+}
+
+/* ------------------- Base Styles ------------------- */
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    /* Smooth scrolling สำหรับ anchor links ทุก section */
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px; /* ชดเชย navbar height */
+    font-family: var(--font-inter);
+    /* Prevent font size adjustment in landscape mode */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: #0a0a0f;
+    color: #e2e8f0;
+    line-height: 1.6;
+    min-height: 100vh;
+    /* Custom scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: #5a6bff #1a1a2e;
+  }
+  
+  ::selection {
+    background: #5a6bff;
+    color: #fff;
+    text-shadow: none;
+  }
+
+  input, textarea, select {
+    color: #fff;
+    background-color: transparent;
+  }
+
+  /* Custom scrollbar สำหรับ Webkit browsers */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #1a1a2e;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #5a6bff;
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #7c93ff;
+  }
+
+  /* Typography defaults */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-outfit);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* ------------------- Component Classes (Reusable) ------------------- */
+@layer components {
+
+  /* Glass morphism card */
+  .glass-card {
+    @apply relative overflow-hidden rounded-2xl border;
+    background: var(--glass-bg);
+    border-color: var(--glass-border);
+    /* Backdrop filter - webkit prefix first, then standard */
+    -webkit-backdrop-filter: blur(var(--glass-blur));
+    backdrop-filter: blur(var(--glass-blur));
+    transition: all 0.3s ease;
+  }
+
+  .glass-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(90, 107, 255, 0.3);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4), 0 0 30px rgba(90, 107, 255, 0.15);
+  }
+
+  /* Gradient text */
+  .gradient-text {
+    background: var(--gradient-brand);
+    /* Webkit prefix first, then standard properties */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    background-size: 200%;
+  }
+
+  /* Gradient button */
+  .btn-gradient {
+    @apply relative inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold text-white overflow-hidden transition-all duration-300;
+    background: var(--gradient-brand);
+    background-size: 200%;
+    box-shadow: 0 4px 20px rgba(90, 107, 255, 0.4);
+  }
+
+  .btn-gradient:hover {
+    background-position: right center;
+    box-shadow: 0 8px 30px rgba(90, 107, 255, 0.6);
+    transform: translateY(-2px);
+  }
+
+  .btn-gradient:active {
+    transform: translateY(0);
+  }
+
+  /* Ghost button */
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-semibold border transition-all duration-300;
+    border-color: rgba(90, 107, 255, 0.4);
+    color: #7c93ff;
+    background: transparent;
+  }
+
+  .btn-ghost:hover {
+    border-color: #5a6bff;
+    background: rgba(90, 107, 255, 0.1);
+    color: #fff;
+  }
+
+  /* Section container */
+  .section-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Section heading */
+  .section-heading {
+    @apply text-4xl md:text-5xl font-bold mb-4;
+    font-family: var(--font-outfit);
+  }
+
+  /* Form input */
+  .form-input {
+    @apply w-full px-4 py-3 rounded-xl border bg-transparent text-white placeholder-gray-500 outline-none transition-all duration-200;
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+  }
+
+  .form-input:focus {
+    border-color: #5a6bff;
+    box-shadow: 0 0 0 3px rgba(90, 107, 255, 0.1);
+    background: rgba(90, 107, 255, 0.05);
+  }
+
+  .form-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+  }
+
+  /* Form label */
+  .form-label {
+    @apply block text-sm font-medium text-gray-300 mb-1.5;
+  }
+
+  /* Badge */
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  /* Admin sidebar link */
+  .sidebar-link {
+    @apply flex items-center gap-3 px-4 py-3 rounded-xl text-gray-400 font-medium transition-all duration-200;
+  }
+
+  .sidebar-link:hover {
+    @apply text-white bg-white/5;
+  }
+
+  .sidebar-link.active {
+    @apply text-white;
+    background: rgba(90, 107, 255, 0.2);
+    border: 1px solid rgba(90, 107, 255, 0.3);
+  }
+}
+
+/* ------------------- Utility Classes ------------------- */
+@layer utilities {
+
+  /* Gradient backgrounds */
+  .bg-gradient-brand {
+    background: var(--gradient-brand);
+  }
+
+  .bg-gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  /* Glow effects */
+  .glow-blue {
+    box-shadow: 0 0 30px rgba(90, 107, 255, 0.4);
+  }
+
+  .glow-orange {
+    box-shadow: 0 0 30px rgba(249, 115, 22, 0.4);
+  }
+
+  /* Text gradient animation */
+  .animated-gradient-text {
+    background: linear-gradient(270deg, #5a6bff, #7c4dff, #f97316, #5a6bff);
+    background-size: 300%;
+    /* Webkit prefix first, then standard properties */
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    animation: gradientShift 6s ease infinite;
+  }
+
+  /* Section padding */
+  .section-py {
+    @apply py-20 md:py-28;
+  }
+
+  /* Noise texture overlay */
+  .noise-overlay::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+}
+
+/* globals.css — เพิ่มตรงท้ายไฟล์ */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pop3d {
+  0% {
+    opacity: 0;
+    transform: scale(0.4) rotateX(25deg) translateY(120px);
+  }
+  60% {
+    transform: scale(1.05) rotateX(-3deg) translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotateX(0deg) translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateZ(80px) translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateZ(80px) translateY(0);
+  }
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* เพิ่มท้ายไฟล์ */
+.overflow-x-auto::-webkit-scrollbar {
+  display: none;
+}
