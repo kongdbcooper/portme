@@ -184,7 +184,7 @@ export default function HeroSection({ settings = {} }) {
       />
 
       {/* ------------------- Hero Content ------------------- */}
-      <div className="relative z-10 section-container text-center px-4 flex flex-col items-center">
+      <div className="relative z-10 w-full text-center px-4 flex flex-col items-center">
 
         {/* Badge */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-300 text-sm font-medium mb-8 animate-fade-in">

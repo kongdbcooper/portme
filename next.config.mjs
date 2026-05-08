@@ -54,12 +54,13 @@ const nextConfig = {
             key: 'Content-Security-Policy',
             value: [
               "default-src 'self'",
-              // script-src: No inline scripts allowed (use bundled/external)
-              // Google Analytics and Tag Manager need special treatment (they use inline scripts)
-              // Alternative: use Google Analytics Script Tag Manager or load via <script> tags only
-              "script-src 'self' https://www.googletagmanager.com https://www.google-analytics.com https://www.gstatic.com",
-              // style-src: Use external stylesheets only (Tailwind CSS is bundled)
-              "style-src 'self' https://fonts.googleapis.com",
+              // เพิ่ม 'unsafe-inline' เพื่อให้สคริปต์ในหน้า index รันได้
+              // เพิ่ม 'unsafe-eval' หาก Library บางตัว (เช่นที่ใช้ใน Next 16) จำเป็นต้องใช้
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://www.gstatic.com",
+              
+              // เพิ่ม 'unsafe-inline' เพื่อให้ CSS จาก Tailwind หรือ Library อื่นๆ ที่แทรกใน Tag style ทำงานได้
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              
               "font-src 'self' data: https://fonts.gstatic.com",
               "img-src 'self' data: blob: https://*.r2.dev https://*.r2.cloudflarestorage.com https://www.google-analytics.com",
               "media-src 'self' blob: https://*.r2.dev https://*.r2.cloudflarestorage.com",

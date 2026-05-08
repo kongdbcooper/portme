@@ -165,9 +165,6 @@ export default function VideoForm({ video = null, mode = 'create' }) {
           type="text"
           required
           maxLength={200}
-          placeholder={''}
-          placeholder={''}
-          placeholder={''}
           placeholder={"ระบุชื่อวิดีโอ"}
           defaultValue={video?.title || ''}
           className="form-input"

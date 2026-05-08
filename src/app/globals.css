@@ -168,9 +168,9 @@
   }
 
   /* Section container */
-  .section-container {
-    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
-  }
+.section-container {
+  @apply max-w-none w-full px-4 sm:px-6 lg:px-8;
+}
 
   /* Section heading */
   .section-heading {

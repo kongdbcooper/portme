@@ -268,15 +268,15 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
                   className="relative group cursor-pointer rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-brand-500/10 focus:outline-none flex-shrink-0 w-[82vw] sm:w-[45%] lg:w-[380px]"
                 >
                   <div className="h-64 sm:h-72 lg:h-80 overflow-hidden bg-surface-900 relative">
-                    <Image
-                      src={product.imageUrl || '/picture/blue.jpg'}
-                      alt={product.name || 'Product'}
-                      fill
-                      sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 380px"
-                      className="object-cover transition-transform duration-700 group-hover:scale-110"
-                      unoptimized={product.imageUrl?.startsWith('blob:') ? true : false}
-                      priority={products.indexOf(product) < 3} 
-                    />
+                      <Image
+                        src={product.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjNWE2YmZmIi8+PC9zdmc+'}
+                        alt={product.name || 'Product'}
+                        fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 380px"
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        unoptimized={product.imageUrl?.startsWith('blob:') || product.imageUrl?.startsWith('data:') ? true : false}
+                        priority={products.indexOf(product) < 3}
+                      />
                     
                     <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
@@ -344,7 +344,7 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
 
             <div className="w-full md:w-1/2 h-[40vh] md:h-auto relative bg-black/40">
               <Image
-                src={selectedProduct.imageUrl || '/picture/blue.jpg'}
+                src={selectedProduct.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjNWE2YmZmIi8+PC9zdmc+'}
                 alt={selectedProduct.name}
                 fill
                 className="object-contain p-12"
