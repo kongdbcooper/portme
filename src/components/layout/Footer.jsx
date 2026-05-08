@@ -18,7 +18,7 @@ const FOOTER_LINKS = {
 
 export default function Footer({ settings = {} }) {
   const currentYear = new Date().getFullYear()
-  const logoUrl = settings.site_logo_url || ''
+  const logoUrl = settings.site_logo || ''
 
   return (
     <footer className="relative border-t border-white/5" style={{ background: 'linear-gradient(180deg, #0a0a0f 0%, #0d0d1a 100%)' }}>
