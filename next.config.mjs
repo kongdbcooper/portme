@@ -8,7 +8,7 @@ const nextConfig = {
   // React Compiler (Next.js 16 feature)
   
   reactCompiler: true,
-  serverExternalPackages: ['@prisma/client'],
+  serverExternalPackages: ['@prisma/client', 'pg'],
   
 
   // ------------------- Images -------------------
