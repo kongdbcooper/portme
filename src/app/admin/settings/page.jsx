@@ -247,7 +247,7 @@ export default function AdminSettingsPage() {
             <label className="block text-sm font-medium text-gray-300 mb-4">เปลี่ยนโลโก้ไซต์</label>
             <ImageUploader
               folder="settings"
-              initialImage={settings.site_logo_url}
+              initialImage={settings.site_logo}
               onUpload={({ url, key }) => saveSiteLogo(url, key)}
             />
             <p className="text-xs text-gray-500 italic mt-3">แนะนำ: ขนาด 512x512px (จัตุรัส) หรือแบบแนวยาว (ความสูง 128px) เพื่อความคมชัดและการแสดงผลที่สมบูรณ์ 100%</p>
@@ -256,11 +256,11 @@ export default function AdminSettingsPage() {
           {/* Current Display Block (Seamless) */}
           <div className="p-6">
             <label className="block text-sm font-medium text-gray-400 mb-6">โลโก้ปัจจุบันที่ใช้งานอยู่</label>
-            {settings.site_logo_url ? (
+            {settings.site_logo ? (
               <div className="space-y-6">
                 <div className="flex justify-center items-center py-10 transition-transform hover:scale-105 duration-500">
                   <img 
-                    src={settings.site_logo_url} 
+                    src={settings.site_logo} 
                     className="max-w-full max-h-[320px] object-contain drop-shadow-[0_0_35px_rgba(90,107,255,0.25)]" 
                     alt="Current Logo" 
                   />
