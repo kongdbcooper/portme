@@ -1,123 +1,136 @@
-// =============================================================================
-// src/proxy.jsx — Route Protection Proxy (Next.js 16 breaking change)
-// Runs before request completion for authentication, authorization, and A/B testing.
-// ใช้งานร่วมกับ: src/lib/session.js
-// =============================================================================
-
 import { NextResponse } from 'next/server'
 import { decrypt } from './lib/session'
 
-// 1. Define public, auth, and admin routes
-const PUBLIC_ROUTES = ['/login', '/signup', '/api/auth/login']
-const ADMIN_ROUTES = ['/admin']
+// กำหนดเส้นทางต่างๆ ในระบบให้สอดคล้องกับไฟล์ API ของคุณ
+const PUBLIC_ROUTES = ['/login', '/signup']
+const AUTH_API_ROUTES = ['/api/auth/login', '/api/auth/logout', '/api/auth/me']
+const ADMIN_PATHS = ['/admin', '/api/admin'] // สำหรับ UI และ CRUD API ของ Admin
 
-// CSRF Protection: Check Origin AND Referer for state-changing requests
-// This prevents CSRF attacks by validating that the request comes from the same origin
-function validateOrigin(req) {
+/**
+ * ฟังก์ชันตรวจสอบความปลอดภัย CSRF
+ * ป้องกันการส่ง Request จากโดเมนอื่นที่ไม่ได้อนุญาต
+ */
+function validateCSRF(req) {
+  // ข้ามการเช็คในโหมด Development
+  if (process.env.NODE_ENV === 'development') return true
+
   const origin = req.headers.get('origin')
-  const referer = req.headers.get('referer')
   const host = req.headers.get('host')
+  const referer = req.headers.get('referer')
 
-  // If both Origin and Referer are missing, block the request (suspicious)
-  if (!origin && !referer) {
-    console.warn('[CSRF] Request missing both Origin and Referer headers')
-    return false
-  }
-
-  // Check Origin header (preferred)
   if (origin) {
     try {
-      const originUrl = new URL(origin)
-      if (originUrl.host === host) return true
+      const originHost = new URL(origin).host
+      if (originHost === host) return true
     } catch (e) {
-      console.warn('[CSRF] Invalid Origin header:', e.message)
+      console.error('[CSRF] Invalid Origin format')
     }
   }
 
-  // Check Referer header (fallback)
   if (referer) {
     try {
-      const refererUrl = new URL(referer)
-      if (refererUrl.host === host) return true
+      const refererHost = new URL(referer).host
+      if (refererHost === host) return true
     } catch (e) {
-      console.warn('[CSRF] Invalid Referer header:', e.message)
+      console.error('[CSRF] Invalid Referer format')
     }
   }
 
-  // No valid origin/referer match found → reject
-  console.warn('[CSRF] Origin/Referer validation failed', { origin, referer, host })
   return false
 }
 
 /**
- * Proxy function — Next.js 16 convention
+ * Main Proxy Function — Next.js 16+ Standard
  */
 export async function proxy(req) {
-  const path = req.nextUrl.pathname
+  const { pathname } = req.nextUrl
+  const response = NextResponse.next()
 
-  // 1. CSRF Protection for state-changing requests
+  // 1. CSRF Protection สำหรับ POST Request (เช่น Login, Logout)
   if (['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
-    if (!validateOrigin(req)) {
-      return new NextResponse('Invalid Origin (CSRF Protection)', { status: 403 })
+    if (!validateCSRF(req)) {
+      console.warn(`[Security] CSRF Blocked: ${req.method} ${pathname}`)
+      return new NextResponse(
+        JSON.stringify({ error: 'Security breach: Invalid Origin detected.' }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      )
     }
   }
 
-  // 2. Check route types
-  const isPublicRoute = PUBLIC_ROUTES.includes(path) || path === '/'
-  const isAdminRoute = ADMIN_ROUTES.some((route) => path.startsWith(route)) || path.startsWith('/api/admin')
-
-  // 3. Decrypt the session from the cookie
+  // 2. Session Decryption & Validation
   let session = null
   const sessionCookie = req.cookies.get('session')?.value
-  
+
   if (sessionCookie) {
     try {
       session = await decrypt(sessionCookie)
+      
+      /**
+       * ฟีเจอร์ตรวจสอบรหัสผ่านแบบใช้ Seed:
+       * เพื่อรองรับฟีเจอร์เปลี่ยนรหัสผ่านของคุณ หาก Seed ใน Session ไม่ตรงกับค่าปัจจุบัน
+       * ระบบจะถือว่า Session หมดอายุทันที เพื่อความปลอดภัย
+       */
+      if (session.passwordSeed && session.currentSeed && session.currentSeed !== session.passwordSeed) {
+         throw new Error('Password seed changed - session invalidated')
+      }
     } catch (err) {
-      console.warn('[Proxy] Session decryption failed:', err.message)
+      console.error('[Proxy] Session rejected:', err.message)
+      
+      // ถ้าเป็น API ให้ส่ง 401 Unauthorized
+      if (pathname.startsWith('/api/')) {
+        return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), { status: 401 })
+      }
+      
+      // ถ้าเป็นหน้าเว็บปกติ ให้ Redirect ไปหน้า Login และลบ Cookie ทิ้ง
+      const loginUrl = new URL('/login', req.nextUrl)
+      const responseWithClear = NextResponse.redirect(loginUrl)
+      responseWithClear.cookies.delete('session')
+      return responseWithClear
     }
   }
 
-  // 4. Redirect to /login if the user is not authenticated for admin routes
-  if (isAdminRoute && !session) {
+  // 3. Routing Logic (Authorization)
+  const isAdminPath = ADMIN_PATHS.some(path => pathname.startsWith(path))
+  const isPublicPath = PUBLIC_ROUTES.includes(pathname)
+
+  // กรณี: พยายามเข้าถึงส่วนของ Admin แต่ไม่มี Session (หรือยังไม่ได้ Login)
+  if (isAdminPath && !session) {
+    if (pathname.startsWith('/api/')) {
+      return new NextResponse(JSON.stringify({ error: 'Admin access required' }), { status: 401 })
+    }
     const loginUrl = new URL('/login', req.nextUrl)
-    loginUrl.searchParams.set('callbackUrl', path)
+    loginUrl.searchParams.set('callbackUrl', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
-  // 5. Check for admin role
-  if (isAdminRoute && session?.role !== 'ADMIN') {
+  // กรณี: มี Session แต่ Role ไม่ใช่ ADMIN และพยายามเข้าหน้า Admin
+  if (isAdminPath && session?.role !== 'ADMIN') {
+    console.warn(`[Auth] Forbidden access by ${session?.email || 'unknown'}`)
+    if (pathname.startsWith('/api/')) {
+      return new NextResponse(JSON.stringify({ error: 'Forbidden' }), { status: 403 })
+    }
     return NextResponse.redirect(new URL('/', req.nextUrl))
   }
 
-  // 6. Redirect to /admin if the user is already authenticated as admin and trying to access login
-  if (isPublicRoute && session && session.role === 'ADMIN' && path === '/login') {
+  // กรณี: ถ้าเป็น Admin อยู่แล้ว ไม่ต้องให้เข้าหน้า Login/Signup ซ้ำ
+  if (isPublicPath && session?.role === 'ADMIN') {
     return NextResponse.redirect(new URL('/admin', req.nextUrl))
   }
 
-  // ------------------- A/B Testing & Final Response -------------------
-  const response = NextResponse.next()
-
-  // กำหนด A/B Testing cookie ถ้ายังไม่มี
-  const abCookie = req.cookies.get('ab_variant')?.value
-  if (!abCookie) {
-    const newVariant = Math.random() < 0.5 ? 'A' : 'B'
-    response.cookies.set('ab_variant', newVariant, {
-      httpOnly: false, 
-      secure: process.env.NODE_ENV === 'production',
-      maxAge: 60 * 60 * 24 * 30, // 30 days
-      sameSite: 'lax',
-      path: '/',
-    })
-  }
-
+  // 4. Security Enhancements (Headers)
+  response.headers.set('X-Frame-Options', 'DENY')
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+  
   return response
 }
 
-// Proxy Matcher Config
+/**
+ * Matcher Configuration
+ * กำหนดขอบเขตการทำงานของ Proxy ให้ครอบคลุมทุกส่วน ยกเว้นไฟล์ static
+ */
 export const config = {
   matcher: [
-    // Runs on everything except static assets and auth internal api
-    '/((?!_next/static|_next/image|favicon.ico|public|api/auth/logout).*)',
+    '/((?!_next/static|_next/image|favicon.ico|public).*)',
   ],
 }

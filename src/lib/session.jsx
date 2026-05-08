@@ -13,21 +13,12 @@ import { cookies } from 'next/headers'
 const secretKey = process.env.SESSION_SECRET
 const encodedKey = new TextEncoder().encode(secretKey || '')
 
-// SECURITY: Throw error in production if SESSION_SECRET is not set or too short
+// SECURITY: ตรวจสอบ SESSION_SECRET เฉพาะตอนจะ sign token
+// เพื่อไม่ให้แอพแครชทั้งหน้า layout ตอนแค่ต้องการเช็ค session (จะทำให้ redirect พัง)
 if (!secretKey) {
-  const msg = '[Session] CRITICAL: SESSION_SECRET environment variable is not set. JWT signing will fail. Set SESSION_SECRET to a random string ≥32 characters in .env.local or your hosting platform.'
-  console.error(msg)
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error(msg)
-  }
-}
-
-if (secretKey && secretKey.length < 32) {
-  const msg = `[Session] CRITICAL: SESSION_SECRET is too short (${secretKey.length} chars, need ≥32). Generate a secure random key: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
-  console.error(msg)
-  if (process.env.NODE_ENV === 'production') {
-    throw new Error(msg)
-  }
+  console.warn('[Session] WARNING: SESSION_SECRET environment variable is not set. JWT signing will fail.');
+} else if (secretKey.length < 32) {
+  console.warn(`[Session] WARNING: SESSION_SECRET is too short (${secretKey.length} chars, need ≥32).`);
 }
 
 // Session duration: 7 วัน
