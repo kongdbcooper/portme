@@ -5,6 +5,8 @@ import { requireAdmin } from '@/lib/auth'
 import { deleteFromR2 } from '@/lib/r2'
 import { z } from 'zod'
 
+export const dynamic = 'force-dynamic'
+
 const MEDIA_KEY_SETTINGS = new Set(['hero_background_key', 'site_logo_key'])
 const ALLOWED_KEYS = [
   'site_logo',
