@@ -30,7 +30,7 @@ async function main() {
   for (const s of settings) {
     await prisma.siteSetting.upsert({
       where: { key: s.key },
-      update: { value: s.value },
+      update: {}, // ไม่ต้องไปทับค่าเก่าถ้ามีอยู่แล้ว
       create: s,
     })
   }
