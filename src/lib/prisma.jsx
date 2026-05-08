@@ -12,10 +12,11 @@ if (!connectionString) {
 
 const pool = new pg.Pool({
   connectionString,
-  max: 13, // Reduced from 15
+  max: 10, // Increased to 10 for better concurrent access
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 60000, // Increased timeout
-  allowExitOnIdle: true, // Allow pool to close idle connections
+  connectionTimeoutMillis: 60000,
+  acquireTimeoutMillis: 60000, // Timeout for acquiring connection
+  allowExitOnIdle: true,
 })
 const adapter = new PrismaPg(pool)
 
