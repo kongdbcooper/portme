@@ -8,18 +8,15 @@ import 'server-only' // ป้องกันไม่ให้ import บน cl
 
 import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
+import { prisma } from './prisma'
 
 // Secret key สำหรับ sign JWT — MUST be set in .env.local (critical security requirement)
 const secretKey = process.env.SESSION_SECRET
-const encodedKey = new TextEncoder().encode(secretKey || '')
-
-// SECURITY: ตรวจสอบ SESSION_SECRET เฉพาะตอนจะ sign token
-// เพื่อไม่ให้แอพแครชทั้งหน้า layout ตอนแค่ต้องการเช็ค session (จะทำให้ redirect พัง)
-if (!secretKey) {
-  console.warn('[Session] WARNING: SESSION_SECRET environment variable is not set. JWT signing will fail.');
-} else if (secretKey.length < 32) {
-  console.warn(`[Session] WARNING: SESSION_SECRET is too short (${secretKey.length} chars, need ≥32).`);
+if (!secretKey || secretKey.length < 32) {
+  // Fail-fast: อย่าให้แอปทำงานถ้าคีย์ไม่ถูกต้อง
+  throw new Error('SESSION_SECRET must be set and at least 32 characters long')
 }
+const encodedKey = new TextEncoder().encode(secretKey)
 
 // Session duration: 7 วัน
 const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000
@@ -41,6 +38,23 @@ export async function decrypt(session) {
     const { payload } = await jwtVerify(session, encodedKey, {
       algorithms: ['HS256'],
     })
+    // If JWT contains sessionVersion and userId, validate against DB to support
+    // session invalidation when sessionVersion is incremented (e.g., password change)
+    if (payload && payload.userId && typeof payload.sessionVersion !== 'undefined') {
+      try {
+        const user = await prisma.user.findUnique({ where: { id: payload.userId }, select: { sessionVersion: true } })
+        if (!user) return null
+        if ((user.sessionVersion || 0) !== payload.sessionVersion) {
+          // sessionVersion mismatch -> treat session as invalid
+          console.warn(`[Session] sessionVersion mismatch for user ${payload.userId}`)
+          return null
+        }
+      } catch (err) {
+        console.error('[Session] Error validating sessionVersion:', err)
+        return null
+      }
+    }
+
     return payload
   } catch (error) {
     // Token หมดอายุหรือ invalid
@@ -51,7 +65,7 @@ export async function decrypt(session) {
 // ------------------- Create Session Cookie -------------------
 // ตั้งค่า session cookie หลัง login สำเร็จ
 // HttpOnly + Secure + SameSite = ป้องกัน XSS และ CSRF
-export async function createSession(userId, role, email) {
+export async function createSession(userId, role, email, sessionVersion = 0) {
   const expiresAt = new Date(Date.now() + SESSION_DURATION_MS)
 
   // สร้าง JWT พร้อม payload ที่จำเป็น (ไม่ใส่ข้อมูล sensitive)
@@ -59,6 +73,7 @@ export async function createSession(userId, role, email) {
     userId,
     role,       // ADMIN หรือ USER — ใช้ตรวจ authorization
     email,
+    sessionVersion,
     expiresAt: expiresAt.toISOString(),
   })
 

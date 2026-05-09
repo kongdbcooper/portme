@@ -47,7 +47,7 @@ export async function POST(request) {
     // ------------------- Find User -------------------
     const user = await prisma.user.findUnique({
       where: { email: email.toLowerCase() },
-      select: { id: true, email: true, passwordHash: true, role: true, name: true },
+      select: { id: true, email: true, passwordHash: true, role: true, name: true, sessionVersion: true },
     })
 
     // ตรวจสอบ user และ password (ใช้เวลาเท่ากันเพื่อป้องกัน timing attack)
@@ -64,7 +64,7 @@ export async function POST(request) {
 
     // ------------------- Create Session -------------------
     console.log(`[Login] Creating session for user: ${user.email} (role: ${user.role})`)
-    await createSession(user.id, user.role, user.email)
+    await createSession(user.id, user.role, user.email, user.sessionVersion || 0)
     console.log(`[Login] Session created successfully for ${user.email}`)
 
     return NextResponse.json({

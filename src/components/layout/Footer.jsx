@@ -31,7 +31,7 @@ export default function Footer({ settings = {} }) {
           {/* ------------------- Brand Column ------------------- */}
           <div className="md:col-span-2 space-y-4">
             {/* Logo */}
-            <BrandLogo logoUrl={logoUrl} />
+            <BrandLogo href="/" logoUrl={logoUrl} />
 
             {/* Description */}
             <div className="text-gray-500 text-sm leading-relaxed max-w-sm">

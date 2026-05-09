@@ -64,7 +64,10 @@ export async function proxy(req) {
   if (sessionCookie) {
     try {
       session = await decrypt(sessionCookie)
-      
+
+      // If decrypt returns null (expired/invalid token or version mismatch), treat as invalid
+      if (!session) throw new Error('Invalid or expired session')
+
       /**
        * ฟีเจอร์ตรวจสอบรหัสผ่านแบบใช้ Seed:
        * เพื่อรองรับฟีเจอร์เปลี่ยนรหัสผ่านของคุณ หาก Seed ใน Session ไม่ตรงกับค่าปัจจุบัน
@@ -75,12 +78,12 @@ export async function proxy(req) {
       }
     } catch (err) {
       console.error('[Proxy] Session rejected:', err.message)
-      
+
       // ถ้าเป็น API ให้ส่ง 401 Unauthorized
       if (pathname.startsWith('/api/')) {
         return new NextResponse(JSON.stringify({ error: 'Unauthorized' }), { status: 401 })
       }
-      
+
       // ถ้าเป็นหน้าเว็บปกติ ให้ Redirect ไปหน้า Login และลบ Cookie ทิ้ง
       const loginUrl = new URL('/login', req.nextUrl)
       const responseWithClear = NextResponse.redirect(loginUrl)

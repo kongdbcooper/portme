@@ -3,12 +3,18 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ImageUploader from '@/components/admin/ImageUploader'
+import Image from 'next/image'
 
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState({})
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [message, setMessage] = useState({ type: '', text: '' })
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [isChangingPassword, setIsChangingPassword] = useState(false)
+  const [pwMessage, setPwMessage] = useState({ type: '', text: '' })
   const router = useRouter()
 
   useEffect(() => {
@@ -259,11 +265,15 @@ export default function AdminSettingsPage() {
             {settings.site_logo ? (
               <div className="space-y-6">
                 <div className="flex justify-center items-center py-10 transition-transform hover:scale-105 duration-500">
-                  <img 
-                    src={settings.site_logo} 
-                    className="max-w-full max-h-[320px] object-contain drop-shadow-[0_0_35px_rgba(90,107,255,0.25)]" 
-                    alt="Current Logo" 
-                  />
+                  <div className="relative w-full max-h-[320px] flex items-center justify-center" style={{ height: '320px' }}>
+                    <Image
+                      src={settings.site_logo}
+                      alt="Current Logo"
+                      width={512}
+                      height={320}
+                      className="max-w-full object-contain drop-shadow-[0_0_35px_rgba(90,107,255,0.25)]"
+                    />
+                  </div>
                 </div>
                 <div className="flex items-center justify-center gap-2 text-green-400 font-medium">
                   <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -284,6 +294,98 @@ export default function AdminSettingsPage() {
         <div className="flex items-center gap-3 mb-2">
           <div className="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-400">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zM6 20v-1a4 4 0 014-4h4a4 4 0 014 4v1" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-white">Change Admin Password</h2>
+        </div>
+
+        <div className="p-6 rounded-xl bg-white/5 border border-white/10 max-w-md">
+          {pwMessage.text && (
+            <div className={`p-3 rounded ${pwMessage.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+              {pwMessage.text}
+            </div>
+          )}
+
+          <label className="block text-sm font-medium text-gray-300 mt-4">Current Password</label>
+          <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="w-full mt-2 p-3 rounded bg-white/5 border border-white/5 text-white text-sm" />
+
+          <label className="block text-sm font-medium text-gray-300 mt-4">New Password</label>
+          <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full mt-2 p-3 rounded bg-white/5 border border-white/5 text-white text-sm" />
+
+          <label className="block text-sm font-medium text-gray-300 mt-4">Confirm New Password</label>
+          <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full mt-2 p-3 rounded bg-white/5 border border-white/5 text-white text-sm" />
+
+          <div className="mt-6 flex gap-3">
+            <button
+              onClick={async () => {
+                setPwMessage({ type: '', text: '' })
+                if (!currentPassword || !newPassword) {
+                  setPwMessage({ type: 'error', text: 'กรุณากรอกข้อมูลให้ครบ' })
+                  return
+                }
+                if (newPassword !== confirmPassword) {
+                  setPwMessage({ type: 'error', text: 'รหัสใหม่และยืนยันรหัสไม่ตรงกัน' })
+                  return
+                }
+                setIsChangingPassword(true)
+                try {
+                  const res = await fetch('/api/admin/change-password', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ currentPassword, newPassword }),
+                  })
+
+                  const data = await res.json()
+                  if (!res.ok) {
+                    throw new Error(data.error || 'Failed to change password')
+                  }
+
+                  // Success: do not display plaintext password. Keep the page state unchanged.
+                  setPwMessage({ type: 'success', text: 'รหัสผ่านถูกเปลี่ยนเรียบร้อยแล้ว' })
+
+                  // Optionally refresh the session cookie for the current client to get updated expiration
+                  // This does not affect other devices (they are invalidated by sessionVersion increment)
+                  try {
+                    await fetch('/api/auth/refresh-session', { method: 'POST', credentials: 'include' })
+                  } catch (e) {
+                    console.debug('Refresh session failed (non-fatal):', e)
+                  }
+                  setCurrentPassword('')
+                  setNewPassword('')
+                  setConfirmPassword('')
+                } catch (err) {
+                  setPwMessage({ type: 'error', text: err.message })
+                } finally {
+                  setIsChangingPassword(false)
+                }
+              }}
+              className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-400 disabled:opacity-50"
+              disabled={isChangingPassword}
+            >
+              {isChangingPassword ? 'Processing…' : 'Change Password'}
+            </button>
+
+            <button
+              onClick={() => {
+                setCurrentPassword('')
+                setNewPassword('')
+                setConfirmPassword('')
+                setPwMessage({ type: '', text: '' })
+              }}
+              className="px-4 py-2 bg-white/5 text-white rounded-lg hover:bg-white/10"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-4 pt-4 border-t border-white/5">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-400">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 12m-9 0a9 9 0 1018 0 9 9 0 10-18 0z" />
             </svg>
           </div>
@@ -292,7 +394,7 @@ export default function AdminSettingsPage() {
 
         <div className="p-4 rounded-xl bg-white/5 border border-white/10 mb-4">
           <h3 className="text-sm font-medium text-white mb-1">Profile carousel</h3>
-          <p className="text-xs text-gray-400">รูปภาพเหล่านี้จะถูกนำไปแสดงในส่วน "เกี่ยวกับฉัน" โดยจะหมุนเวียนแสดงเป็น Carousel บนหน้าเว็บ</p>
+          <p className="text-xs text-gray-400">รูปภาพเหล่านี้จะถูกนำไปแสดงในส่วน &ldquo;เกี่ยวกับฉัน&rdquo; โดยจะหมุนเวียนแสดงเป็น Carousel บนหน้าเว็บ</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
@@ -313,11 +415,14 @@ export default function AdminSettingsPage() {
             <div className="grid grid-cols-2 gap-6">
               {(settings.prod_profile_images ? JSON.parse(settings.prod_profile_images) : []).map((img, idx) => (
                 <div key={idx} className="relative group aspect-square transition-all duration-500 hover:scale-105">
-                  <img 
-                    src={img.url} 
-                    className="w-full h-full object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.3)]" 
-                    alt={`Profile ${idx}`} 
-                  />
+                  <div className="w-full h-full relative">
+                    <Image
+                      src={img.url}
+                      alt={`Profile ${idx}`}
+                      fill
+                      className="object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.3)]"
+                    />
+                  </div>
                   <button
                     onClick={() => removeProfileImage(idx)}
                     className="absolute top-0 right-0 w-8 h-8 rounded-full bg-red-500/90 text-white flex items-center justify-center shadow-xl opacity-0 group-hover:opacity-100 transition-all hover:bg-red-600 hover:scale-110 active:scale-95 z-10"
@@ -378,11 +483,14 @@ export default function AdminSettingsPage() {
             <div className="grid grid-cols-1 gap-8">
               {(settings.hero_background_images ? JSON.parse(settings.hero_background_images) : (settings.hero_background_url ? [{url: settings.hero_background_url}] : [])).map((img, idx) => (
                 <div key={idx} className="relative group aspect-video transition-all duration-700 hover:scale-[1.02]">
-                  <img 
-                    src={img.url} 
-                    className="w-full h-full object-contain drop-shadow-[0_12px_30px_rgba(0,0,0,0.5)] rounded-2xl" 
-                    alt={`Hero ${idx}`} 
-                  />
+                  <div className="absolute inset-0">
+                    <Image
+                      src={img.url}
+                      alt={`Hero ${idx}`}
+                      fill
+                      className="object-contain drop-shadow-[0_12px_30px_rgba(0,0,0,0.5)] rounded-2xl"
+                    />
+                  </div>
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center rounded-2xl">
                     <button
                       onClick={() => removeHeroImage(idx)}

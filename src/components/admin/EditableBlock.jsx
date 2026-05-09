@@ -19,7 +19,7 @@ export default function EditableBlock({ settingKey, defaultText, as: Component =
   useEffect(() => {
     async function checkAdmin() {
       try {
-        const res = await fetch('/api/auth/me', { cache: 'no-store' })
+        const res = await fetch('/api/auth/me', { cache: 'no-store', credentials: 'include' })
         if (res.ok) {
           const data = await res.json()
           if (data.authenticated && data.role === 'ADMIN') {
