@@ -1,10 +1,11 @@
-'use client'
+ 'use client'
 
+import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import EditableBlock from '../admin/EditableBlock'
 
-export default function BrandLogo({ logoUrl, siteName = 'Monkey', className = '', iconClassName = '' }) {
-  return (
+export default function BrandLogo({ logoUrl, siteName = 'Monkey', className = '', iconClassName = '', href }) {
+  const content = (
     <div className={`flex items-center gap-3 ${className}`}>
       {/* Brand Icon */}
       <div className={`w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center shadow-lg shadow-brand-500/20 ${iconClassName}`}>
@@ -21,4 +22,14 @@ export default function BrandLogo({ logoUrl, siteName = 'Monkey', className = ''
       </div>
     </div>
   )
+
+  if (href) {
+    return (
+      <Link href={href} aria-label="Home">
+        {content}
+      </Link>
+    )
+  }
+
+  return content
 }

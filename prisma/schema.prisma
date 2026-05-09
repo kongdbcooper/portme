@@ -12,8 +12,10 @@ model User {
   name         String?
   passwordHash String
   role         UserRole @default(USER)
+  sessionVersion Int    @default(0)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  passwordResetTokens PasswordResetToken[]
 
   @@map("users")
 }
@@ -68,6 +70,19 @@ model Video {
   updatedAt   DateTime @updatedAt
 
   @@map("videos")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
 }
 
 enum UserRole {

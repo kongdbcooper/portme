@@ -84,6 +84,7 @@ export default function Navbar({ settings = {} }) {
 
           {/* ------------------- Logo ------------------- */}
           <BrandLogo
+            href="/"
             logoUrl={logoUrl}
             siteName={siteName}
             className="flex items-center gap-3"

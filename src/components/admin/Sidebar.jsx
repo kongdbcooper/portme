@@ -93,7 +93,7 @@ export default function Sidebar({ user, logoUrl, siteName }) {
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="px-6 py-8 border-b border-white/5">
-        <Link href="/admin" className="flex items-center gap-4 group">
+        <Link href="/" className="flex items-center gap-4 group">
           <div className="relative h-12 flex items-center">
             {logoUrl ? (
               <img
@@ -109,10 +109,10 @@ export default function Sidebar({ user, logoUrl, siteName }) {
           </div>
           <div className="flex flex-col">
             <span className="text-lg font-bold text-white leading-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
-              {siteName || 'Monkey'}<span className="gradient-text"> <EditableBlock as="span" settingKey="sidebar_admin_label" defaultText="Admin" /></span>
+              {siteName || 'Monkey'} <span className="gradient-text">Admin</span>
             </span>
             <span className="text-[10px] uppercase tracking-[0.2em] text-brand-400 font-bold opacity-80">
-              <EditableBlock as="span" settingKey="sidebar_control_panel_label" defaultText="Control Panel" />
+              Control Panel
             </span>
           </div>
         </Link>

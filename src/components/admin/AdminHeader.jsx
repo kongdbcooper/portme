@@ -16,7 +16,7 @@ export default function AdminHeader() {
   const handleLogout = async () => {
     setIsLoggingOut(true)
     try {
-      await fetch('/api/auth/logout', { method: 'POST' })
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
       router.push('/')
       router.refresh()
     } catch {
@@ -30,9 +30,9 @@ export default function AdminHeader() {
     <div className="flex items-center justify-between">
       <div className="lg:hidden w-10" /> 
       <div className="flex-1 lg:flex-none">
-        {/* เปลี่ยนจาก h1 > EditableBlock เป็นแบบนี้เพื่อความปลอดภัย */}
+        {/* Static title to avoid inline-edit interaction on dashboard */}
         <div className="text-white font-semibold text-lg" style={{ fontFamily: 'Outfit, sans-serif' }}>
-          <EditableBlock settingKey="admin_header_title" defaultText="Admin Dashboard" />
+          Admin Dashboard
         </div>
       </div>
       
