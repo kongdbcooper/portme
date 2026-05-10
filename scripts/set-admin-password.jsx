@@ -1,26 +1,36 @@
-import { prisma } from '../src/lib/prisma.jsx'
+import { prisma } from './src/lib/prisma.jsx'
 import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 import 'dotenv/config'
 
 async function main() {
   const adminEmail = process.env.SEED_ADMIN_EMAIL || 'admin@portme.com'
-  const newPassword = process.env.NEW_ADMIN_PASSWORD || crypto.randomBytes(12).toString('base64url')
+
+  // 👉 กำหนดรหัสใหม่ตรงนี้
+  const newPassword = process.env.NEW_ADMIN_PASSWORD || '12345678'
+
   const passwordHash = await bcrypt.hash(newPassword, 10)
 
-  const user = await prisma.user.findUnique({ where: { email: adminEmail } })
+  const user = await prisma.user.findUnique({
+    where: { email: adminEmail },
+  })
+
   if (!user) {
-    console.error('Admin user not found:', adminEmail)
+    console.error('❌ ไม่เจอ user:', adminEmail)
     process.exit(1)
   }
 
-  const updated = await prisma.user.update({
+  await prisma.user.update({
     where: { id: user.id },
-    data: { passwordHash, sessionVersion: { increment: 1 } },
+    data: {
+      passwordHash,
+      sessionVersion: { increment: 1 }, // logout ทุก session
+    },
   })
 
-  console.log('✅ Admin password updated for', adminEmail)
-  console.log('New password:', newPassword)
+  console.log('✅ RESET PASSWORD สำเร็จ')
+  console.log('📧 Email:', adminEmail)
+  console.log('🔑 Password ใหม่:', newPassword)
 
   await prisma.$disconnect()
 }
