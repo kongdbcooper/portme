@@ -21,9 +21,11 @@
     "@aws-sdk/node-http-handler": "^3.374.0",
     "@aws-sdk/s3-request-presigner": "^3.1038.0",
     "@prisma/adapter-pg": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "@smithy/node-http-handler": "^4.6.1",
     "@supabase/ssr": "^0.10.2",
     "@supabase/supabase-js": "^2.105.3",
+    "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",
     "cloudflare": "^6.0.0",
     "init": "^0.1.2",
@@ -31,7 +33,6 @@
     "lint": "^1.2.2",
     "lru-cache": "^11.3.6",
     "next": "^16.2.4",
-    "@prisma/client": "^7.8.0",
     "nodemailer": "^6.9.4",
     "pg": "^8.20.0",
     "react": "19.2.4",
@@ -40,7 +41,6 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
-    
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
