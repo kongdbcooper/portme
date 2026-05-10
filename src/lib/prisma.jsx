@@ -11,12 +11,21 @@ if (!connectionString) {
 }
 
 // สร้าง Pool โดยลดจำนวน Max Connection ลงเพื่อไม่ให้เบียดคิวกันเอง
+// ... โค้ดส่วนบนเหมือนเดิม ...
+
 const pool = new pg.Pool({
   connectionString,
-  // ลดเหลือ 2-3 สำหรับ Development เพื่อให้ Next.js หลายๆ process แบ่งกันใช้ได้
-  max: process.env.NODE_ENV === 'development' ? 3 : 10, 
-  idleTimeoutMillis: 10000, // คืน Connection เร็วขึ้น (จาก 30s เหลือ 10s)
-  connectionTimeoutMillis: 5000,
+  /* - ตอน Dev (พัฒนา): ใช้แค่ 2 เพื่อไม่ให้ Next.js จองท่อค้างจนเต็มเวลาเราแก้โค้ดบ่อยๆ
+     - ตอน Prod (ใช้งานจริง): ใช้ 10-15 ท่อ ก็เพียงพอรองรับคนดูพร้อมกันเป็นร้อยเป็นพันคนแล้วครับ
+  */
+  max: process.env.NODE_ENV === 'development' ? 2 : 15, 
+  
+  // ลดเวลาถือท่อว่างๆ ให้เหลือน้อยลง เพื่อรีบคืนให้คนอื่นใช้งาน
+  idleTimeoutMillis: 5000, 
+  
+  // เพิ่มความเร็วในการแจ้งเตือนถ้าต่อไม่ติด
+  connectionTimeoutMillis: 2000, 
+  
   allowExitOnIdle: true,
 })
 
