@@ -1,28 +1,17 @@
-// =============================================================================
-// src/lib/session.js — JWT Session Management
-// ใช้ jose library สำหรับ JWT (Edge Runtime compatible)
-// ใช้งานร่วมกับ: src/app/api/auth/**, src/middleware.js, src/lib/auth.js
-// =============================================================================
-
-import 'server-only' // ป้องกันไม่ให้ import บน client side
-
+import 'server-only'
 import { SignJWT, jwtVerify } from 'jose'
 import { cookies } from 'next/headers'
-import { prisma } from './prisma'
 
-// Secret key สำหรับ sign JWT — MUST be set in .env.local (critical security requirement)
+// หมายเหตุ: ถอด prisma ออกจากไฟล์นี้ถ้าไม่ได้ใช้ในส่วนอื่น เพื่อลดการเปิด connection ค้าง
+// import { prisma } from './prisma' 
+
 const secretKey = process.env.SESSION_SECRET
 if (!secretKey || secretKey.length < 32) {
-  // Fail-fast: อย่าให้แอปทำงานถ้าคีย์ไม่ถูกต้อง
   throw new Error('SESSION_SECRET must be set and at least 32 characters long')
 }
 const encodedKey = new TextEncoder().encode(secretKey)
-
-// Session duration: 7 วัน
 const SESSION_DURATION_MS = 7 * 24 * 60 * 60 * 1000
 
-// ------------------- Encrypt Session -------------------
-// สร้าง JWT token จาก payload (userId, role, email)
 export async function encrypt(payload) {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
@@ -31,67 +20,42 @@ export async function encrypt(payload) {
     .sign(encodedKey)
 }
 
-// ------------------- Decrypt Session -------------------
-// ตรวจสอบและถอดรหัส JWT token
 export async function decrypt(session) {
   try {
     const { payload } = await jwtVerify(session, encodedKey, {
       algorithms: ['HS256'],
     })
-    // If JWT contains sessionVersion and userId, validate against DB to support
-    // session invalidation when sessionVersion is incremented (e.g., password change)
-    if (payload && payload.userId && typeof payload.sessionVersion !== 'undefined') {
-      try {
-        const user = await prisma.user.findUnique({ where: { id: payload.userId }, select: { sessionVersion: true } })
-        if (!user) return null
-        if ((user.sessionVersion || 0) !== payload.sessionVersion) {
-          // sessionVersion mismatch -> treat session as invalid
-          console.warn(`[Session] sessionVersion mismatch for user ${payload.userId}`)
-          return null
-        }
-      } catch (err) {
-        console.error('[Session] Error validating sessionVersion:', err)
-        return null
-      }
-    }
-
+    
+    // --- ตัดส่วนที่ Query Prisma ออกเพื่อป้องกัน Connection Leak/Timeout ---
+    // การเช็ค sessionVersion ให้ไปทำในระดับ Middleware หรือ Server Component เฉพาะจุดที่สำคัญแทน
+    
     return payload
   } catch (error) {
-    // Token หมดอายุหรือ invalid
     return null
   }
 }
 
-// ------------------- Create Session Cookie -------------------
-// ตั้งค่า session cookie หลัง login สำเร็จ
-// HttpOnly + Secure + SameSite = ป้องกัน XSS และ CSRF
 export async function createSession(userId, role, email, sessionVersion = 0) {
   const expiresAt = new Date(Date.now() + SESSION_DURATION_MS)
 
-  // สร้าง JWT พร้อม payload ที่จำเป็น (ไม่ใส่ข้อมูล sensitive)
   const session = await encrypt({
     userId,
-    role,       // ADMIN หรือ USER — ใช้ตรวจ authorization
+    role,
     email,
     sessionVersion,
     expiresAt: expiresAt.toISOString(),
   })
 
-  console.debug(`[Session] Created JWT token (length: ${session.length})`)
-
   const cookieStore = await cookies()
   cookieStore.set('session', session, {
-    httpOnly: true,                                    // JS client ไม่อ่านได้ (XSS protection)
-    secure: process.env.NODE_ENV === 'production',     // HTTPS เฉพาะ production
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
     expires: expiresAt,
-    sameSite: 'strict',                                // Strict CSRF protection (no cross-site cookies)
+    sameSite: 'strict',
     path: '/',
   })
-  console.log(`[Session] Cookie set successfully. Expires: ${expiresAt.toISOString()}`)
 }
 
-// ------------------- Update Session Cookie -------------------
-// ต่ออายุ session เมื่อ user ยังใช้งานอยู่
 export async function updateSession() {
   const cookieStore = await cookies()
   const session = cookieStore.get('session')?.value
@@ -100,8 +64,6 @@ export async function updateSession() {
   if (!session || !payload) return null
 
   const expiresAt = new Date(Date.now() + SESSION_DURATION_MS)
-
-  // Refresh token
   const newSession = await encrypt({
     ...payload,
     expiresAt: expiresAt.toISOString(),
@@ -118,8 +80,6 @@ export async function updateSession() {
   return payload
 }
 
-// ------------------- Delete Session -------------------
-// ลบ session cookie เมื่อ logout
 export async function deleteSession() {
   const cookieStore = await cookies()
   cookieStore.delete('session')
