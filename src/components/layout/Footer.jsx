@@ -41,10 +41,10 @@ export default function Footer({ settings = {} }) {
             {/* Social Icons */}
             <div className="flex items-center gap-3 pt-2">
               {[
-                { label: 'Facebook', icon: 'F', href: '#' },
+                { label: 'Facebook', icon: 'F', href: 'https://www.facebook.com/share/1BCib8bJRz/?mibextid=wwXIfr' },
                 { label: 'Twitter/X', icon: 'X', href: '#' },
-                { label: 'Instagram', icon: 'IG', href: '#' },
-                { label: 'Line', icon: 'L', href: '#' },
+                { label: 'Instagram', icon: 'IG', href: 'https://www.instagram.com/k.xnq_?igsh=MXE3OHB4emd6Nzc4Nw%3D%3D&utm_source=qr' },
+                { label: 'Line', icon: 'L', href: 'https://line.me/ti/p/Mbh0j2qwAH' },
               ].map(({ label, icon, href }) => (
                 <a
                   key={label}
