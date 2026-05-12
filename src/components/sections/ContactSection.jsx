@@ -44,28 +44,32 @@ export default function ContactSection({ settings = {} }) {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 animate-fade-up max-w-4xl mx-auto">
             {/* Email Card */}
             <div className="bg-surface-800/40 backdrop-blur-md border border-white/5 p-8 rounded-[2rem] text-center hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl hover:shadow-brand-500/10 group">
-              <div className="w-16 h-16 bg-brand-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <span className="text-3xl">📧</span>
-              </div>
-              <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">
-                <EditableBlock settingKey="contact_label_1" defaultText={settings.contact_label_1 || "Email"} />
-              </div>
-              <div className="text-white text-lg font-bold">
-                <EditableBlock settingKey="contact_value_1" defaultText={settings.contact_value_1 || "hello@portme.co"} />
-              </div>
+             <a href="https://line.me/ti/p/Mbh0j2qwAH" target="_blank" rel="noopener noreferrer">
+               <div className="w-16 h-16 bg-brand-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                 <span className="text-3xl">📧</span>
+               </div>
+               <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">
+                 <EditableBlock settingKey="contact_label_1" defaultText={settings.contact_label_1 || "Line"} />
+               </div>
+               <div className="text-white text-lg font-bold">
+                 <EditableBlock settingKey="contact_value_1" defaultText={settings.contact_value_1 || "Click my line" }  />
+               </div>
+             </a>
             </div>
 
             {/* Line Card */}
             <div className="bg-surface-800/40 backdrop-blur-md border border-white/5 p-8 rounded-[2rem] text-center hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl hover:shadow-brand-500/10 group">
-              <div className="w-16 h-16 bg-brand-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <span className="text-3xl">📱</span>
-              </div>
-              <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">
-                <EditableBlock settingKey="contact_label_2" defaultText={settings.contact_label_2 || "Line"} />
-              </div>
-              <div className="text-white text-lg font-bold">
-                <EditableBlock settingKey="contact_value_2" defaultText={settings.contact_value_2 || "@portme"} />
-              </div>
+              <a href="tel:+66838218423">
+               <div className="w-16 h-16 bg-brand-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
+                 <span className="text-3xl">📱</span>
+               </div>
+               <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">
+                 <EditableBlock settingKey="contact_label_2" defaultText={settings.contact_label_2 || "Phone"} />
+               </div>
+               <div className="text-white text-lg font-bold">
+                 <EditableBlock settingKey="contact_value_2" defaultText={settings.contact_value_2 || "+66 83-821-8423"} />
+               </div>
+             </a>
             </div>
 
             {/* Hours Card */}
@@ -77,7 +81,7 @@ export default function ContactSection({ settings = {} }) {
                 <EditableBlock settingKey="contact_label_3" defaultText={settings.contact_label_3 || "Business Hours"} />
               </div>
               <div className="text-white text-lg font-bold">
-                <EditableBlock settingKey="contact_value_3" defaultText={settings.contact_value_3 || "Mon-Fri 9:00-18:00"} />
+                <EditableBlock settingKey="contact_value_3" defaultText={settings.contact_value_3 || "Looking for Mywork"} />
               </div>
             </div>
           </div>

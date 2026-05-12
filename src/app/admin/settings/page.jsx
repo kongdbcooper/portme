@@ -15,14 +15,32 @@ export default function AdminSettingsPage() {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [isChangingPassword, setIsChangingPassword] = useState(false)
   const [pwMessage, setPwMessage] = useState({ type: '', text: '' })
+  const [accountEmail, setAccountEmail] = useState('')
+  const [pendingEmail, setPendingEmail] = useState('')
+  const [emailPassword, setEmailPassword] = useState('')
+  const [verificationCode, setVerificationCode] = useState('')
+  const [emailChangeStep, setEmailChangeStep] = useState('request')
+  const [emailChangeTarget, setEmailChangeTarget] = useState('')
+  const [isSendingEmailCode, setIsSendingEmailCode] = useState(false)
+  const [isVerifyingEmailCode, setIsVerifyingEmailCode] = useState(false)
+  const [emailChangeMessage, setEmailChangeMessage] = useState({ type: '', text: '' })
   const router = useRouter()
 
   useEffect(() => {
     async function fetchSettings() {
       try {
-        const res = await fetch('/api/settings')
-        const data = await res.json()
-        setSettings(data)
+        const [settingsRes, authRes] = await Promise.all([
+          fetch('/api/settings'),
+          fetch('/api/auth/me', { credentials: 'include' }),
+        ])
+
+        const settingsData = await settingsRes.json()
+        setSettings(settingsData)
+
+        if (authRes.ok) {
+          const authData = await authRes.json()
+          setAccountEmail(authData?.user?.email || '')
+        }
       } catch (error) {
         console.error('Failed to fetch settings:', error)
       } finally {
@@ -32,6 +50,14 @@ export default function AdminSettingsPage() {
 
     fetchSettings()
   }, [])
+
+  const resetEmailChangeForm = () => {
+    setPendingEmail('')
+    setEmailPassword('')
+    setVerificationCode('')
+    setEmailChangeStep('request')
+    setEmailChangeTarget('')
+  }
 
   const saveMediaSetting = async ({ urlKey, keyKey, successText }, url, key) => {
     setIsSaving(true)
@@ -201,6 +227,168 @@ export default function AdminSettingsPage() {
     }
   }
 
+  const sendEmailChangeCode = async () => {
+    setEmailChangeMessage({ type: '', text: '' })
+
+    if (!pendingEmail || !emailPassword) {
+      setEmailChangeMessage({ type: 'error', text: 'Please enter the new email and current password.' })
+      return
+    }
+
+    setIsSendingEmailCode(true)
+
+    try {
+      const res = await fetch('/api/admin/change-email/request', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newEmail: pendingEmail, currentPassword: emailPassword }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to send verification code')
+      }
+
+      setVerificationCode('')
+      setEmailChangeStep('verify')
+      setEmailChangeTarget(data.targetEmail || pendingEmail)
+      setEmailChangeMessage({
+        type: 'success',
+        text: `Verification code sent to ${data.targetEmail || pendingEmail}. The code expires in ${data.expiresInMinutes || 10} minutes.`,
+      })
+    } catch (error) {
+      setEmailChangeMessage({ type: 'error', text: error.message })
+    } finally {
+      setIsSendingEmailCode(false)
+    }
+  }
+
+  const verifyEmailChangeCode = async () => {
+    setEmailChangeMessage({ type: '', text: '' })
+
+    if (!pendingEmail || !verificationCode) {
+      setEmailChangeMessage({ type: 'error', text: 'Please enter the verification code.' })
+      return
+    }
+
+    setIsVerifyingEmailCode(true)
+
+    try {
+      const res = await fetch('/api/admin/change-email/verify', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newEmail: pendingEmail, code: verificationCode }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to verify email change')
+      }
+
+      setAccountEmail(data.email || pendingEmail.toLowerCase())
+      setEmailChangeMessage({ type: 'success', text: 'Admin email updated successfully.' })
+      resetEmailChangeForm()
+      router.refresh()
+    } catch (error) {
+      setEmailChangeMessage({ type: 'error', text: error.message })
+    } finally {
+      setIsVerifyingEmailCode(false)
+    }
+  }
+
+  const passwordSection = (
+    <section className="space-y-4 pt-4 border-t border-white/5">
+      <div className="flex items-center gap-3 mb-2">
+        <div className="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-400">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zM6 20v-1a4 4 0 014-4h4a4 4 0 014 4v1" />
+          </svg>
+        </div>
+        <h2 className="text-xl font-bold text-white">Change Password</h2>
+      </div>
+
+      <div className="p-6 rounded-xl bg-white/5 border border-white/10 max-w-md">
+        {pwMessage.text && (
+          <div className={`p-3 rounded ${pwMessage.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+            {pwMessage.text}
+          </div>
+        )}
+
+        <label className="block text-sm font-medium text-gray-300 mt-4">Current Password</label>
+        <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="w-full mt-2 p-3 rounded bg-white/5 border border-white/5 text-white text-sm" />
+
+        <label className="block text-sm font-medium text-gray-300 mt-4">New Password</label>
+        <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full mt-2 p-3 rounded bg-white/5 border border-white/5 text-white text-sm" />
+
+        <label className="block text-sm font-medium text-gray-300 mt-4">Confirm New Password</label>
+        <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full mt-2 p-3 rounded bg-white/5 border border-white/5 text-white text-sm" />
+
+        <div className="mt-6 flex gap-3">
+          <button
+            onClick={async () => {
+              setPwMessage({ type: '', text: '' })
+              if (!currentPassword || !newPassword) {
+                setPwMessage({ type: 'error', text: 'กรุณากรอกข้อมูลให้ครบ' })
+                return
+              }
+              if (newPassword !== confirmPassword) {
+                setPwMessage({ type: 'error', text: 'รหัสใหม่และยืนยันรหัสไม่ตรงกัน' })
+                return
+              }
+              setIsChangingPassword(true)
+              try {
+                const res = await fetch('/api/admin/change-password', {
+                  method: 'POST',
+                  credentials: 'include',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ currentPassword, newPassword }),
+                })
+
+                const data = await res.json()
+                if (!res.ok) {
+                  throw new Error(data.error || 'Failed to change password')
+                }
+
+                setPwMessage({ type: 'success', text: 'รหัสผ่านถูกเปลี่ยนเรียบร้อยแล้ว' })
+
+                try {
+                  await fetch('/api/auth/refresh-session', { method: 'POST', credentials: 'include' })
+                } catch (e) {
+                  console.debug('Refresh session failed (non-fatal):', e)
+                }
+                setCurrentPassword('')
+                setNewPassword('')
+                setConfirmPassword('')
+              } catch (err) {
+                setPwMessage({ type: 'error', text: err.message })
+              } finally {
+                setIsChangingPassword(false)
+              }
+            }}
+            className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-400 disabled:opacity-50"
+            disabled={isChangingPassword}
+          >
+            {isChangingPassword ? 'Processing…' : 'Change Password'}
+          </button>
+
+          <button
+            onClick={() => {
+              setCurrentPassword('')
+              setNewPassword('')
+              setConfirmPassword('')
+              setPwMessage({ type: '', text: '' })
+            }}
+            className="px-4 py-2 bg-white/5 text-white rounded-lg hover:bg-white/10"
+          >
+            Reset
+          </button>
+        </div>
+      </div>
+    </section>
+  )
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -241,8 +429,8 @@ export default function AdminSettingsPage() {
         <div className="p-4 rounded-xl bg-white/5 border border-white/10 mb-4">
           <h3 className="text-sm font-medium text-white mb-2">Where it appears</h3>
           <ul className="text-xs text-gray-400 flex flex-wrap gap-x-6 gap-y-2 list-disc list-inside">
-            <li>The navbar and footer use this same logo setting.</li>
-            <li>If no logo is uploaded, the site falls back to the letter P mark.</li>
+            <li>The navbar, login page, and admin dashboard all use this same logo setting.</li>
+            <li>If no logo is uploaded, the site falls back to the first letter of the site name.</li>
             <li>Changing the logo also removes the previous R2 logo object.</li>
           </ul>
         </div>
@@ -286,98 +474,6 @@ export default function AdminSettingsPage() {
                 <p className="text-xs font-medium opacity-40">ยังไม่ได้ตั้งค่าโลโก้</p>
               </div>
             )}
-          </div>
-        </div>
-      </section>
-
-      <section className="space-y-4 pt-4 border-t border-white/5">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-400">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zM6 20v-1a4 4 0 014-4h4a4 4 0 014 4v1" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-bold text-white">Change Admin Password</h2>
-        </div>
-
-        <div className="p-6 rounded-xl bg-white/5 border border-white/10 max-w-md">
-          {pwMessage.text && (
-            <div className={`p-3 rounded ${pwMessage.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-              {pwMessage.text}
-            </div>
-          )}
-
-          <label className="block text-sm font-medium text-gray-300 mt-4">Current Password</label>
-          <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="w-full mt-2 p-3 rounded bg-white/5 border border-white/5 text-white text-sm" />
-
-          <label className="block text-sm font-medium text-gray-300 mt-4">New Password</label>
-          <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full mt-2 p-3 rounded bg-white/5 border border-white/5 text-white text-sm" />
-
-          <label className="block text-sm font-medium text-gray-300 mt-4">Confirm New Password</label>
-          <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full mt-2 p-3 rounded bg-white/5 border border-white/5 text-white text-sm" />
-
-          <div className="mt-6 flex gap-3">
-            <button
-              onClick={async () => {
-                setPwMessage({ type: '', text: '' })
-                if (!currentPassword || !newPassword) {
-                  setPwMessage({ type: 'error', text: 'กรุณากรอกข้อมูลให้ครบ' })
-                  return
-                }
-                if (newPassword !== confirmPassword) {
-                  setPwMessage({ type: 'error', text: 'รหัสใหม่และยืนยันรหัสไม่ตรงกัน' })
-                  return
-                }
-                setIsChangingPassword(true)
-                try {
-                  const res = await fetch('/api/admin/change-password', {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ currentPassword, newPassword }),
-                  })
-
-                  const data = await res.json()
-                  if (!res.ok) {
-                    throw new Error(data.error || 'Failed to change password')
-                  }
-
-                  // Success: do not display plaintext password. Keep the page state unchanged.
-                  setPwMessage({ type: 'success', text: 'รหัสผ่านถูกเปลี่ยนเรียบร้อยแล้ว' })
-
-                  // Optionally refresh the session cookie for the current client to get updated expiration
-                  // This does not affect other devices (they are invalidated by sessionVersion increment)
-                  try {
-                    await fetch('/api/auth/refresh-session', { method: 'POST', credentials: 'include' })
-                  } catch (e) {
-                    console.debug('Refresh session failed (non-fatal):', e)
-                  }
-                  setCurrentPassword('')
-                  setNewPassword('')
-                  setConfirmPassword('')
-                } catch (err) {
-                  setPwMessage({ type: 'error', text: err.message })
-                } finally {
-                  setIsChangingPassword(false)
-                }
-              }}
-              className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-400 disabled:opacity-50"
-              disabled={isChangingPassword}
-            >
-              {isChangingPassword ? 'Processing…' : 'Change Password'}
-            </button>
-
-            <button
-              onClick={() => {
-                setCurrentPassword('')
-                setNewPassword('')
-                setConfirmPassword('')
-                setPwMessage({ type: '', text: '' })
-              }}
-              className="px-4 py-2 bg-white/5 text-white rounded-lg hover:bg-white/10"
-            >
-              Reset
-            </button>
           </div>
         </div>
       </section>
@@ -518,6 +614,111 @@ export default function AdminSettingsPage() {
                 <p className="text-xs text-gray-600 font-medium opacity-40">ยังไม่มีรูปพื้นหลัง (แสดงธีมมาตรฐาน)</p>
               </div>
             )}
+          </div>
+        </div>
+      </section>
+
+
+
+      <section className="space-y-4 pt-4 border-t border-white/5">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-400">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12H8m0 0l3-3m-3 3l3 3m8-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-white">Change Admin Email</h2>
+        </div>
+
+        <div className="p-4 rounded-xl bg-white/5 border border-white/10">
+          <h3 className="text-sm font-medium text-white mb-2">Verification flow</h3>
+          <ul className="text-xs text-gray-400 flex flex-wrap gap-x-6 gap-y-2 list-disc list-inside">
+            <li>The new email receives a 6-digit verification code.</li>
+            <li>You must enter your current password before sending the code.</li>
+            <li>The code expires in 10 minutes and only the latest request stays active.</li>
+          </ul>
+        </div>
+
+        <div className="p-6 rounded-xl bg-white/5 border border-white/10 max-w-xl">
+          {emailChangeMessage.text && (
+            <div className={`p-3 rounded mb-4 ${emailChangeMessage.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+              {emailChangeMessage.text}
+            </div>
+          )}
+
+          <label className="block text-sm font-medium text-gray-300">Current Email</label>
+          <input
+            type="email"
+            value={accountEmail}
+            readOnly
+            className="w-full mt-2 p-3 rounded bg-white/5 border border-white/5 text-gray-400 text-sm"
+          />
+
+          <label className="block text-sm font-medium text-gray-300 mt-4">New Email</label>
+          <input
+            type="email"
+            value={pendingEmail}
+            onChange={(e) => setPendingEmail(e.target.value)}
+            placeholder="new-admin@example.com"
+            className="w-full mt-2 p-3 rounded bg-white/5 border border-white/5 text-white text-sm"
+          />
+
+          <label className="block text-sm font-medium text-gray-300 mt-4">Current Password</label>
+          <input
+            type="password"
+            value={emailPassword}
+            onChange={(e) => setEmailPassword(e.target.value)}
+            placeholder="Current password"
+            className="w-full mt-2 p-3 rounded bg-white/5 border border-white/5 text-white text-sm"
+          />
+
+          {emailChangeStep === 'verify' && (
+            <>
+              <label className="block text-sm font-medium text-gray-300 mt-4">Verification Code</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                value={verificationCode}
+                onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                placeholder="6-digit code"
+                className="w-full mt-2 p-3 rounded bg-white/5 border border-white/5 text-white text-sm tracking-[0.35em]"
+              />
+              <p className="text-xs text-gray-500 mt-2">
+                Enter the code sent to {emailChangeTarget || pendingEmail}.
+              </p>
+            </>
+          )}
+
+          <div className="mt-6 flex flex-wrap gap-3">
+            <button
+              onClick={sendEmailChangeCode}
+              className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-400 disabled:opacity-50"
+              disabled={isSendingEmailCode || isVerifyingEmailCode}
+            >
+              {isSendingEmailCode ? 'Sending…' : emailChangeStep === 'verify' ? 'Resend Code' : 'Send Verification Code'}
+            </button>
+
+            {emailChangeStep === 'verify' && (
+              <button
+                onClick={verifyEmailChangeCode}
+                className="px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/15 disabled:opacity-50"
+                disabled={isVerifyingEmailCode || isSendingEmailCode}
+              >
+                {isVerifyingEmailCode ? 'Verifying…' : 'Verify and Change Email'}
+              </button>
+            )}
+
+            <button
+              onClick={() => {
+                setEmailChangeMessage({ type: '', text: '' })
+                resetEmailChangeForm()
+              }}
+              className="px-4 py-2 bg-white/5 text-white rounded-lg hover:bg-white/10"
+              disabled={isSendingEmailCode || isVerifyingEmailCode}
+            >
+              Reset
+            </button>
           </div>
         </div>
       </section>

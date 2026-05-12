@@ -7,15 +7,17 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  name         String?
-  passwordHash String
-  role         UserRole @default(USER)
-  sessionVersion Int    @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  passwordResetTokens PasswordResetToken[]
+  id                            String                          @id @default(cuid())
+  email                         String                          @unique
+  name                          String?
+  passwordHash                  String
+  role                          UserRole                        @default(USER)
+  createdAt                     DateTime                        @default(now())
+  updatedAt                     DateTime                        @updatedAt
+  sessionVersion                Int                             @default(0)
+  email_change_verifications    email_change_verifications[]
+  password_change_verifications password_change_verifications[]
+  passwordResetTokens           PasswordResetToken[]
 
   @@map("users")
 }
@@ -79,10 +81,38 @@ model PasswordResetToken {
   expiresAt DateTime
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("password_reset_tokens")
+}
+
+model email_change_verifications {
+  id         String    @id
+  userId     String
+  newEmail   String
+  codeHash   String
+  expiresAt  DateTime
+  used       Boolean   @default(false)
+  verifiedAt DateTime?
+  createdAt  DateTime  @default(now())
+  users      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([newEmail, used])
+  @@index([userId, used, expiresAt])
+}
+
+model password_change_verifications {
+  id              String    @id
+  userId          String
+  newPasswordHash String
+  codeHash        String
+  expiresAt       DateTime
+  used            Boolean   @default(false)
+  verifiedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  users           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, used, expiresAt])
 }
 
 enum UserRole {
