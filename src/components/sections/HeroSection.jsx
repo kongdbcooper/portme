@@ -24,10 +24,9 @@ export default function HeroSection({ settings = {} }) {
 
   // ดึง background URL จาก settings API (Fallback if prop is empty)
   useEffect(() => {
-    // Always fetch fresh settings on client-side to ensure Admin sees latest R2 uploads immediately
     async function fetchSettings() {
       try {
-        const res = await fetch('/api/settings')
+        const res = await fetch('/api/settings', { cache: 'no-store' })
         if (res.ok) {
           const data = await res.json()
           setHeroImages(() => {

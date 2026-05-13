@@ -77,7 +77,7 @@ function VideoThumbnail({ video }) {
 
   return (
     <div
-      className="h-72 overflow-hidden bg-transparent relative transition-colors"
+      className="h-48 sm:h-72 overflow-hidden bg-transparent relative transition-colors"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onTouchStart={handleMouseEnter}
@@ -118,7 +118,7 @@ export default function VideoSection({ initialVideos = [] }) {
   const playerRef = useRef(null)
   const videoElementRef = useRef(null)
   const autoScrollRef = useRef(null)
-  const scrollSpeed = 0.5
+  const scrollSpeed = 1
 
   // Fix: คำนวณหา 4 วิดีโอแนะนำที่ไม่ซ้ำกับตัวที่กำลังเล่นอยู่
   const relatedVideos = useMemo(() => {
@@ -132,7 +132,7 @@ export default function VideoSection({ initialVideos = [] }) {
 
     async function fetchVideos() {
       try {
-        const res = await fetch('/api/videos?limit=1000')
+        const res = await fetch('/api/videos?limit=1000', { cache: 'no-store' })
         if (res.ok) {
           const data = await res.json()
           const activeVideos = (data.videos || []).filter(v => v.isActive)
@@ -262,32 +262,32 @@ export default function VideoSection({ initialVideos = [] }) {
               </svg>
             </button>
 
-            <div
-              ref={scrollRef}
-              onMouseEnter={() => setIsPaused(true)}
-              onMouseLeave={() => setIsPaused(false)}
-              className="flex gap-4 sm:gap-8 overflow-x-auto scrollbar-hide scroll-smooth px-4 sm:px-2 py-8 touch-pan-x"
-              style={{
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-                WebkitOverflowScrolling: 'touch',
-              }}
-            >
-              {videos.map((video) => (
-                <TiltCard
-                  key={video.id}
-                  onClick={() => handleCardClick(video)}
-                  isActive={selectedVideo?.id === video.id}
-                  className="relative group cursor-pointer rounded-[2rem] overflow-hidden transition-all duration-500 flex-shrink-0 w-[85vw] sm:w-[380px]"
-                >
-                  <VideoThumbnail video={video} />
-                  <div className="p-8 relative z-20">
-                    <h3 className="text-2xl font-bold text-white mb-3 group-hover:text-brand-400 transition-colors duration-300 line-clamp-1">
-                      {video.title}
-                    </h3>
-                    <p className="text-gray-400 mb-6 h-12 overflow-hidden text-sm leading-relaxed line-clamp-2">
-                      {video.description || 'Watch this amazing video showcase.'}
-                    </p>
+             <div
+               ref={scrollRef}
+               onMouseEnter={() => setIsPaused(true)}
+               onMouseLeave={() => setIsPaused(false)}
+               className="flex gap-3 sm:gap-8 overflow-x-auto scrollbar-hide scroll-smooth px-3 sm:px-2 py-8 touch-pan-x"
+               style={{
+                 scrollbarWidth: 'none',
+                 msOverflowStyle: 'none',
+                 WebkitOverflowScrolling: 'touch',
+               }}
+             >
+               {videos.map((video) => (
+                 <TiltCard
+                   key={video.id}
+                   onClick={() => handleCardClick(video)}
+                   isActive={selectedVideo?.id === video.id}
+                   className="relative group cursor-pointer rounded-xl sm:rounded-[2rem] overflow-hidden transition-all duration-500 flex-shrink-0 w-[70vw] sm:w-[380px]"
+                 >
+                   <VideoThumbnail video={video} />
+                   <div className="p-3 sm:p-8 relative z-20">
+                     <h3 className="text-base sm:text-2xl font-bold text-white mb-2 sm:mb-3 group-hover:text-brand-400 transition-colors duration-300 line-clamp-1">
+                       {video.title}
+                     </h3>
+                     <p className="text-gray-400 mb-3 sm:mb-6 h-8 sm:h-12 overflow-hidden text-xs sm:text-sm leading-relaxed line-clamp-2">
+                       {video.description || 'Watch this amazing video showcase.'}
+                     </p>
                     <div className="flex justify-between items-center">
                       <span className="text-xs font-bold text-brand-500/80 uppercase tracking-widest">
                         <EditableBlock settingKey="video_card_cta_hint" defaultText="Click to play" />

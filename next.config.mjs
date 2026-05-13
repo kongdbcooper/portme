@@ -37,6 +37,10 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
+          // Prevent browser and CDN caching for dynamic content
+          { key: 'Cache-Control', value: 'no-store, no-cache, must-revalidate, proxy-revalidate' },
+          { key: 'Pragma', value: 'no-cache' },
+          { key: 'Expires', value: '0' },
           // ป้องกัน clickjacking
           { key: 'X-Frame-Options', value: 'DENY' },
           // ป้องกัน MIME type sniffing

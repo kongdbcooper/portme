@@ -8,14 +8,17 @@
 // =============================================================================
 
 import { getABVariant } from '@/lib/ab-test'
-import { getCachedSettings } from '@/lib/settings'
-import { getCachedProducts, getCachedVideos } from '@/lib/data'
+import { getFreshSettings } from '@/lib/settings'
+import { getFreshProducts, getFreshVideos } from '@/lib/data'
 
 import HeroSection from '@/components/sections/HeroSection'
 import ProfileSection from '@/components/sections/ProfileSection'
 import ProductSection from '@/components/sections/ProductSection'
 import VideoSection from '@/components/sections/VideoSection'
 import ContactSection from '@/components/sections/ContactSection'
+
+export const dynamic = 'force-dynamic'
+export const revalidate = 0
 
 // ------------------- SEO Metadata -------------------
 export const metadata = {
@@ -36,17 +39,15 @@ export default async function HomePage() {
   // ดึง A/B variant สำหรับ user นี้ (server-side)
   const abVariant = await getABVariant()
 
-  // ดึงการตั้งค่าเว็บไซต์ทั้งหมด (ผ่าน cache)
-  const settingsMap = await getCachedSettings()
-  
+  const settingsMap = await getFreshSettings()
+
   if (process.env.NODE_ENV === 'development') {
     console.log('[HomePage] Settings keys:', Object.keys(settingsMap))
   }
 
-  // ดึงข้อมูลวิดีโอและโปรดักซ์จาก cache (5 นาที)
   const [products, videos] = await Promise.all([
-    getCachedProducts(),
-    getCachedVideos(),
+    getFreshProducts(),
+    getFreshVideos(),
   ])
 
   return (

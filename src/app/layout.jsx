@@ -19,7 +19,7 @@ export const metadata = {
     template: '%s | PortMe', // format: "ชื่อหน้า | PortMe"
   },
   description:
-    'แพลตฟอร์มจัดการโปรดักซ์สำหรับธุรกิจยุคใหม่ พร้อม Admin Dashboard ที่ครบครัน ' +
+    'Admin Dashboard ' +
     'และระบบจัดการรูปภาพบน Cloudflare R2 อัตโนมัติ',
   keywords: ['PortMe', 'admin dashboard', 'product management', 'e-commerce', 'Thailand'],
   authors: [{ name: 'PortMe Team' }],

@@ -78,7 +78,7 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
 
     async function fetchProducts() {
       try {
-        const res = await fetch('/api/products?limit=1000')
+        const res = await fetch('/api/products?limit=1000', { cache: 'no-store' })
         if (res.ok) {
           const data = await res.json()
           setProducts(data.products || [])
@@ -247,27 +247,27 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
               </svg>
             </button>
 
-            {/* ---- Carousel Container ---- */}
-            <div
-              ref={scrollRef}
-              onMouseEnter={() => setIsPaused(true)}
-              onMouseLeave={() => setIsPaused(false)}
-              onTouchStart={() => setIsPaused(true)}
-              onTouchEnd={() => setIsPaused(false)}
-              className="flex gap-4 sm:gap-8 overflow-x-auto scrollbar-hide scroll-smooth px-4 sm:px-2 py-4 touch-pan-x"
-              style={{
-                scrollbarWidth: 'none',
-                msOverflowStyle: 'none',
-                WebkitOverflowScrolling: 'touch',
-              }}
-            >
-              {products.map((product) => (
-                <TiltCard
-                  key={product.id}
-                  onClick={() => handleCardClick(product)}
-                  className="relative group cursor-pointer rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-brand-500/10 focus:outline-none flex-shrink-0 w-[82vw] sm:w-[45%] lg:w-[380px]"
-                >
-                  <div className="h-64 sm:h-72 lg:h-80 overflow-hidden bg-surface-900 relative">
+             {/* ---- Carousel Container ---- */}
+             <div
+               ref={scrollRef}
+               onMouseEnter={() => setIsPaused(true)}
+               onMouseLeave={() => setIsPaused(false)}
+               onTouchStart={() => setIsPaused(true)}
+               onTouchEnd={() => setIsPaused(false)}
+               className="flex gap-3 sm:gap-8 overflow-x-auto scrollbar-hide scroll-smooth px-3 sm:px-2 py-4 touch-pan-x"
+               style={{
+                 scrollbarWidth: 'none',
+                 msOverflowStyle: 'none',
+                 WebkitOverflowScrolling: 'touch',
+               }}
+             >
+               {products.map((product) => (
+                 <TiltCard
+                   key={product.id}
+                   onClick={() => handleCardClick(product)}
+                   className="relative group cursor-pointer rounded-xl sm:rounded-2xl overflow-hidden transition-all duration-500 hover:shadow-brand-500/10 focus:outline-none flex-shrink-0 w-[70vw] sm:w-[45%] lg:w-[380px]"
+                 >
+                   <div className="h-48 sm:h-72 lg:h-80 overflow-hidden bg-surface-900 relative">
                       <Image
                         src={product.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjNWE2YmZmIi8+PC9zdmc+'}
                         alt={product.name || 'Product'}
@@ -287,9 +287,9 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
                       </div>
                     </div>
                   </div>
-                  <div className="p-6 space-y-4">
-                    <h3 className="text-2xl font-black text-white group-hover:text-brand-400 transition-colors line-clamp-1">{product.name}</h3>
-                    <p className="text-gray-400 text-sm line-clamp-2 leading-relaxed">{product.description}</p>
+                   <div className="p-3 sm:p-6 space-y-2 sm:space-y-4">
+                     <h3 className="text-base sm:text-2xl font-black text-white group-hover:text-brand-400 transition-colors line-clamp-1">{product.name}</h3>
+                     <p className="text-gray-400 text-xs sm:text-sm line-clamp-2 leading-relaxed">{product.description}</p>
                     <div className="flex items-center justify-between pt-2">
                       <div className="flex items-center gap-2">
                         <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] text-white/50 font-bold uppercase tracking-wider">
