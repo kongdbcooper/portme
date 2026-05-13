@@ -6,10 +6,12 @@
 
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
-import { getCachedSettings } from '@/lib/settings'
+import { getFreshSettings } from '@/lib/settings'
+
+export const dynamic = 'force-dynamic'
 
 export default async function PublicLayout({ children }) {
-  const settings = await getCachedSettings()
+  const settings = await getFreshSettings()
 
   return (
     <>

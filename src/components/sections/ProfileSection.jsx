@@ -21,21 +21,18 @@ export default function ProfileSection({ settings = {}, loading = false }) {
   // ตรวจสอบสิทธิ์ Admin เพื่อไม่ให้ Section หายไปเมื่อไม่มีข้อมูล
   const [isAdmin, setIsAdmin] = useState(false);
   useEffect(() => {
-    fetch('/api/auth/me')
+    fetch('/api/auth/me', { cache: 'no-store' })
       .then(res => res.json())
       .then(data => { if (data.role === 'ADMIN') setIsAdmin(true); })
       .catch(() => {});
   }, []);
 
   if (loading) return null;
-  // Don't return null if images are missing; show placeholders instead for better UX
-  // if (profileImages.length === 0 && !isAdmin) return null;
 
   useEffect(() => {
-    // Always fetch fresh settings on client-side to ensure latest R2 uploads are visible
     async function fetchSettings() {
       try {
-        const res = await fetch('/api/settings')
+        const res = await fetch('/api/settings', { cache: 'no-store' })
         if (res.ok) {
           const data = await res.json()
           if (data.prod_profile_images) {

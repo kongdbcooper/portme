@@ -14,7 +14,7 @@ export default function GlobalLoading() {
         <div className="relative flex flex-col items-center">
           <div className="w-16 h-16 border-4 border-brand-500/20 border-t-brand-500 rounded-full animate-spin" />
           <p className="mt-6 text-gray-500 font-medium tracking-widest uppercase text-[10px] animate-pulse">
-            Loading Excellence
+            Loading
           </p>
         </div>
       </div>
