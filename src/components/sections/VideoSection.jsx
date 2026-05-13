@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import EditableBlock from '../admin/EditableBlock'
 
 // ------------------- 3D Tilt Card Component -------------------
@@ -44,17 +44,16 @@ function TiltCard({ children, className, style, onClick, isActive }) {
       onTouchEnd={handleMouseLeave}
       tabIndex={0}
       style={{
-          ...style,
-          perspective: '1000px',
-          transformStyle: 'preserve-3d',
-          transform: isHovered && typeof window !== 'undefined' && window.innerWidth >= 768
-            ? `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale3d(1.05, 1.05, 1.05)`
-            : 'rotateX(0) rotateY(0) scale3d(1, 1, 1)',
-          transition: isHovered ? 'transform 0.1s ease-out' : 'transform 0.5s ease-out',
-          zIndex: 1,
-        }}
+        ...style,
+        perspective: '1000px',
+        transformStyle: 'preserve-3d',
+        transform: isHovered && typeof window !== 'undefined' && window.innerWidth >= 768
+          ? `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale3d(1.05, 1.05, 1.05)`
+          : 'rotateX(0) rotateY(0) scale3d(1, 1, 1)',
+        transition: isHovered ? 'transform 0.1s ease-out' : 'transform 0.5s ease-out',
+        zIndex: 1,
+      }}
     >
-      {/* no hover border/glow for video previews to keep them seamless */}
       {children}
     </div>
   )
@@ -119,9 +118,15 @@ export default function VideoSection({ initialVideos = [] }) {
   const playerRef = useRef(null)
   const videoElementRef = useRef(null)
   const autoScrollRef = useRef(null)
-  const scrollSpeed = 0.5 // Slow and smooth
+  const scrollSpeed = 0.5
 
-  // Fetch videos if NOT provided as props (fallback)
+  // Fix: คำนวณหา 4 วิดีโอแนะนำที่ไม่ซ้ำกับตัวที่กำลังเล่นอยู่
+  const relatedVideos = useMemo(() => {
+    return videos
+      .filter(v => v.id !== selectedVideo?.id)
+      .slice(0, 4)
+  }, [videos, selectedVideo])
+
   useEffect(() => {
     if (initialVideos.length > 0) return
 
@@ -132,7 +137,7 @@ export default function VideoSection({ initialVideos = [] }) {
           const data = await res.json()
           const activeVideos = (data.videos || []).filter(v => v.isActive)
           setVideos(activeVideos)
-          if (activeVideos.length > 0) {
+          if (activeVideos.length > 0 && !selectedVideo) {
             setSelectedVideo(activeVideos[0])
           }
         }
@@ -143,9 +148,8 @@ export default function VideoSection({ initialVideos = [] }) {
       }
     }
     fetchVideos()
-  }, [initialVideos.length])
+  }, [initialVideos.length, selectedVideo])
 
-  // Auto-scroll logic for the carousel
   useEffect(() => {
     if (isPaused || !scrollRef.current || videos.length <= 3) return
 
@@ -155,11 +159,9 @@ export default function VideoSection({ initialVideos = [] }) {
     const step = () => {
       if (!container) return
       container.scrollLeft += scrollSpeed
-
       if (container.scrollLeft >= container.scrollWidth - container.clientWidth - 2) {
         container.scrollLeft = 0
       }
-
       animationId = requestAnimationFrame(step)
     }
 
@@ -173,10 +175,8 @@ export default function VideoSection({ initialVideos = [] }) {
 
   const scrollBy = (direction) => {
     if (!scrollRef.current) return
-    
-    // Temporarily pause auto-scroll to allow manual navigation
     setIsPaused(true)
-    setTimeout(() => setIsPaused(false), 5000) // Resume after 5s
+    setTimeout(() => setIsPaused(false), 5000)
 
     const cardWidth = window.innerWidth < 640 ? window.innerWidth * 0.85 : 380
     const gap = window.innerWidth < 640 ? 16 : 32
@@ -191,8 +191,6 @@ export default function VideoSection({ initialVideos = [] }) {
   const handleCardClick = (video) => {
     setSelectedVideo(video)
     setShowRelated(false)
-    
-    // Smooth scroll to player
     if (playerRef.current) {
       playerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
@@ -216,14 +214,11 @@ export default function VideoSection({ initialVideos = [] }) {
 
   return (
     <section className="py-24 bg-[#0a0a0f] overflow-hidden relative" id="videos">
-      {/* Subtle Seamless Overlays (shorter + lower opacity) */}
+      {}
       <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-[#0a0a0f]/70 to-transparent z-10 pointer-events-none" />
-      
-      {/* Subtle Seamless Overlay (bottom) */}
       <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-[#0a0a0f]/40 via-[#0a0a0f]/12 to-transparent z-10 pointer-events-none" />
 
       <div className="container mx-auto px-4">
-        
         {/* ================= 1. THE COLLECTION AREA ================= */}
         <div className="text-center mb-16">
           <div className="flex justify-center mb-6">
@@ -246,6 +241,7 @@ export default function VideoSection({ initialVideos = [] }) {
           </div>
         </div>
 
+        {}
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <div className="w-12 h-12 border-4 border-brand-500 border-t-transparent rounded-full animate-spin" />
@@ -256,7 +252,6 @@ export default function VideoSection({ initialVideos = [] }) {
           </div>
         ) : (
           <div className="relative mb-32">
-            {/* Carousel Controls */}
             <button
               onClick={() => scrollBy(-1)}
               className="absolute -left-4 md:-left-12 lg:-left-28 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-surface-800/90 backdrop-blur-2xl border border-white/10 flex items-center justify-center text-brand-300 hover:bg-brand-500 hover:border-brand-500 hover:text-white transition-all duration-300 active:scale-90 shadow-3xl pointer-events-auto group"
@@ -271,8 +266,6 @@ export default function VideoSection({ initialVideos = [] }) {
               ref={scrollRef}
               onMouseEnter={() => setIsPaused(true)}
               onMouseLeave={() => setIsPaused(false)}
-              onTouchStart={() => setIsPaused(true)}
-              onTouchEnd={() => setIsPaused(false)}
               className="flex gap-4 sm:gap-8 overflow-x-auto scrollbar-hide scroll-smooth px-4 sm:px-2 py-8 touch-pan-x"
               style={{
                 scrollbarWidth: 'none',
@@ -321,6 +314,7 @@ export default function VideoSection({ initialVideos = [] }) {
         )}
 
         {/* ================= 2. DEDICATED PLAYER AREA ================= */}
+        {}
         <div ref={playerRef} className="pt-20 scroll-mt-20">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
@@ -336,10 +330,8 @@ export default function VideoSection({ initialVideos = [] }) {
 
           {selectedVideo && (
             <div className="relative w-full max-w-[95%] lg:max-w-[85%] mx-auto group">
-              {/* Main Player Container */}
               <div className="relative aspect-video bg-black rounded-[2rem] md:rounded-[4rem] overflow-hidden shadow-[0_0_120px_rgba(90,107,255,0.2)] border border-white/10 animate-fade-in">
                 
-                {/* Video Element */}
                 <video
                   ref={videoElementRef}
                   key={selectedVideo.id}
@@ -350,25 +342,76 @@ export default function VideoSection({ initialVideos = [] }) {
                   className={`w-full h-full object-contain ${showRelated ? 'opacity-30 scale-95' : 'opacity-100 scale-100'} transition-all duration-700`}
                 />
 
-                {/* Related Videos Overlay (When ended) */}
+                {}
                 {showRelated && (
-                  <div className="absolute inset-0 z-40 bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center p-8 animate-fade-in">
-                    <h3 className="text-2xl font-bold text-white mb-8">
-                      <EditableBlock settingKey="video_related_title" defaultText="Up Next" />
-                    </h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full max-w-4xl">
-                      {/* ... existing videos map ... */}
+                  <div className="absolute inset-0 z-40 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center p-4 md:p-8 animate-in fade-in duration-500">
+                    <button 
+                      onClick={playNext}
+                      className="group flex flex-col items-center mb-6 md:mb-10 transition-transform hover:scale-105 active:scale-95"
+                    >
+                      <span className="text-brand-400 text-[10px] md:text-xs font-bold uppercase tracking-[0.3em] mb-2">Up Next</span>
+                      <h3 className="text-xl md:text-3xl font-black text-white group-hover:text-brand-400 transition-colors text-center px-4">
+                        <EditableBlock settingKey="video_related_title" defaultText="เล่นวิดีโอถัดไป" />
+                      </h3>
+                      <div className="w-12 h-1 bg-brand-500 mt-3 rounded-full transition-all group-hover:w-24" />
+                    </button>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 w-full max-w-5xl mb-8">
+                      {relatedVideos.map((video) => (
+                        <div 
+                          key={video.id} 
+                          onClick={() => handleCardClick(video)}
+                          className="cursor-pointer group/item flex flex-col"
+                        >
+                          {}
+                          <div className="aspect-video bg-white/5 rounded-lg md:rounded-xl overflow-hidden mb-2 ring-1 ring-white/10 group-hover/item:ring-brand-500 transition-all shadow-xl relative">
+                             {video.thumbnail ? (
+                               <img 
+                                 src={video.thumbnail} 
+                                 alt="" 
+                                 className="w-full h-full object-cover transition-transform group-hover/item:scale-110" 
+                               />
+                             ) : (
+                               <video 
+                                 src={video.videoUrl}
+                                 muted
+                                 playsInline
+                                 preload="metadata"
+                                 className="w-full h-full object-cover transition-transform group-hover/item:scale-110"
+                                 onMouseOver={(e) => e.currentTarget.play()}
+                                 onMouseOut={(e) => {
+                                   e.currentTarget.pause();
+                                   e.currentTarget.currentTime = 0;
+                                 }}
+                               />
+                             )}
+                             <div className="absolute inset-0 bg-black/20 group-hover/item:bg-transparent transition-colors" />
+                             <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-opacity">
+                                <div className="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center shadow-lg">
+                                  <svg className="w-4 h-4 text-white fill-white" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                                </div>
+                             </div>
+                          </div>
+                          <p className="text-[10px] md:text-xs font-bold text-gray-300 truncate group-hover/item:text-brand-400 uppercase tracking-tighter">
+                            {video.title}
+                          </p>
+                        </div>
+                      ))}
                     </div>
+
                     <button 
                       onClick={() => setShowRelated(false)}
-                      className="mt-10 px-8 py-3 rounded-full bg-brand-500 text-white font-bold hover:bg-brand-600 transition-colors shadow-lg shadow-brand-500/30"
+                      className="px-6 py-2.5 md:px-8 md:py-3 rounded-full bg-white/10 text-white text-xs md:text-sm font-bold hover:bg-white/20 transition-all border border-white/10 flex items-center gap-2"
                     >
+                      <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                      </svg>
                       <EditableBlock settingKey="video_replay_btn" defaultText="Replay" />
                     </button>
                   </div>
                 )}
-
-                {/* Navigation Arrows inside player */}
+                
+                {}
                 {!showRelated && (
                   <>
                     <button 
@@ -387,7 +430,7 @@ export default function VideoSection({ initialVideos = [] }) {
                 )}
               </div>
 
-              {/* Video Info below player */}
+              {}
               <div className="mt-10 flex flex-col md:flex-row justify-between items-start gap-8 px-4">
                 <div className="flex-1">
                   <h3 className="text-3xl font-black text-white mb-4 tracking-tight">{selectedVideo.title}</h3>
@@ -408,7 +451,6 @@ export default function VideoSection({ initialVideos = [] }) {
             </div>
           )}
         </div>
-
       </div>
     </section>
   )
