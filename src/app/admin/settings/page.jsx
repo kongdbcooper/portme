@@ -10,11 +10,6 @@ export default function AdminSettingsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [isSaving, setIsSaving] = useState(false)
   const [message, setMessage] = useState({ type: '', text: '' })
-  const [currentPassword, setCurrentPassword] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [isChangingPassword, setIsChangingPassword] = useState(false)
-  const [pwMessage, setPwMessage] = useState({ type: '', text: '' })
   const [accountEmail, setAccountEmail] = useState('')
   const [pendingEmail, setPendingEmail] = useState('')
   const [emailPassword, setEmailPassword] = useState('')
@@ -298,96 +293,7 @@ export default function AdminSettingsPage() {
     }
   }
 
-  const passwordSection = (
-    <section className="space-y-4 pt-4 border-t border-white/5">
-      <div className="flex items-center gap-3 mb-2">
-        <div className="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-400">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 11c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zM6 20v-1a4 4 0 014-4h4a4 4 0 014 4v1" />
-          </svg>
-        </div>
-        <h2 className="text-xl font-bold text-white">Change Password</h2>
-      </div>
 
-      <div className="p-6 rounded-xl bg-white/5 border border-white/10 max-w-md">
-        {pwMessage.text && (
-          <div className={`p-3 rounded ${pwMessage.type === 'success' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-            {pwMessage.text}
-          </div>
-        )}
-
-        <label className="block text-sm font-medium text-gray-300 mt-4">Current Password</label>
-        <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className="w-full mt-2 p-3 rounded bg-white/5 border border-white/5 text-white text-sm" />
-
-        <label className="block text-sm font-medium text-gray-300 mt-4">New Password</label>
-        <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="w-full mt-2 p-3 rounded bg-white/5 border border-white/5 text-white text-sm" />
-
-        <label className="block text-sm font-medium text-gray-300 mt-4">Confirm New Password</label>
-        <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className="w-full mt-2 p-3 rounded bg-white/5 border border-white/5 text-white text-sm" />
-
-        <div className="mt-6 flex gap-3">
-          <button
-            onClick={async () => {
-              setPwMessage({ type: '', text: '' })
-              if (!currentPassword || !newPassword) {
-                setPwMessage({ type: 'error', text: 'กรุณากรอกข้อมูลให้ครบ' })
-                return
-              }
-              if (newPassword !== confirmPassword) {
-                setPwMessage({ type: 'error', text: 'รหัสใหม่และยืนยันรหัสไม่ตรงกัน' })
-                return
-              }
-              setIsChangingPassword(true)
-              try {
-                const res = await fetch('/api/admin/change-password', {
-                  method: 'POST',
-                  credentials: 'include',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ currentPassword, newPassword }),
-                })
-
-                const data = await res.json()
-                if (!res.ok) {
-                  throw new Error(data.error || 'Failed to change password')
-                }
-
-                setPwMessage({ type: 'success', text: 'รหัสผ่านถูกเปลี่ยนเรียบร้อยแล้ว' })
-
-                try {
-                  await fetch('/api/auth/refresh-session', { method: 'POST', credentials: 'include' })
-                } catch (e) {
-                  console.debug('Refresh session failed (non-fatal):', e)
-                }
-                setCurrentPassword('')
-                setNewPassword('')
-                setConfirmPassword('')
-              } catch (err) {
-                setPwMessage({ type: 'error', text: err.message })
-              } finally {
-                setIsChangingPassword(false)
-              }
-            }}
-            className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-400 disabled:opacity-50"
-            disabled={isChangingPassword}
-          >
-            {isChangingPassword ? 'Processing…' : 'Change Password'}
-          </button>
-
-          <button
-            onClick={() => {
-              setCurrentPassword('')
-              setNewPassword('')
-              setConfirmPassword('')
-              setPwMessage({ type: '', text: '' })
-            }}
-            className="px-4 py-2 bg-white/5 text-white rounded-lg hover:bg-white/10"
-          >
-            Reset
-          </button>
-        </div>
-      </div>
-    </section>
-  )
 
   if (isLoading) {
     return (
