@@ -151,8 +151,8 @@ export default function HeroSection({ settings = {}, banners = [] }) {
       <div className="relative z-10 w-full text-center px-4 flex flex-col items-center">
         {/* Badge - Dynamic per Banner Image */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-300 text-sm font-medium mb-8 animate-fade-in">
-          {currentBanner?.description ? (
-            <div>{currentBanner.description}</div>
+          {currentBanner?.subtitle ? (
+            <div className="whitespace-pre-wrap">{currentBanner.subtitle}</div>
           ) : (
             <EditableBlock settingKey="hero_badge" defaultText={settings.hero_badge || "แพลตฟอร์มจัดการโปรดักซ์ยุคใหม่"} />
           )}
@@ -164,17 +164,17 @@ export default function HeroSection({ settings = {}, banners = [] }) {
             <span className="animated-gradient-text block text-center py-2 break-words whitespace-pre-wrap">{currentBanner.title}</span>
           ) : (
             <>
-              <EditableBlock as="span" className="text-white block text-center" settingKey="hero_title_1" defaultText={settings?.hero_title_1 || "จัดการ"} />
-              <EditableBlock as="span" className="animated-gradient-text block text-center" settingKey="hero_title_2" defaultText={settings?.hero_title_2 || "โปรดักซ์"} />
-              <EditableBlock as="span" className="text-white block text-center" settingKey="hero_title_3" defaultText={settings?.hero_title_3 || "อย่างมืออาชีพ"} />
+              <EditableBlock as="span" className="text-white block text-center" settingKey="hero_title_1" multiline defaultText={settings?.hero_title_1 || "จัดการ"} />
+              <EditableBlock as="span" className="animated-gradient-text block text-center" settingKey="hero_title_2" multiline defaultText={settings?.hero_title_2 || "โปรดักซ์"} />
+              <EditableBlock as="span" className="text-white block text-center" settingKey="hero_title_3" multiline defaultText={settings?.hero_title_3 || "อย่างมืออาชีพ"} />
             </>
           )}
         </h1>
 
         {/* Subheadline - Dynamic Sync with Banner Image */}
         <div className="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-10 animate-fade-up text-center" style={{ animationDelay: '0.2s' }}>
-          {currentBanner.subtitle ? (
-            <div className="break-words whitespace-pre-wrap">{currentBanner.subtitle}</div>
+          {currentBanner.description ? (
+            <div className="break-words whitespace-pre-wrap">{currentBanner.description}</div>
           ) : (
             <EditableBlock 
               as="span" 

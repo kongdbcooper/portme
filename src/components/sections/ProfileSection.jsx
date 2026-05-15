@@ -114,6 +114,7 @@ export default function ProfileSection({ settings = {}, banners = [], loading = 
                           as="span" 
                           className="animated-gradient-text block py-3 sm:py-6 leading-[1.1]" 
                           settingKey="prod_title_1" 
+                          multiline
                           defaultText={settings.prod_title_1 || "I'm Creative Developer"} 
                         />
                       )}

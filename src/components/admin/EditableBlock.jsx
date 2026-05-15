@@ -109,7 +109,7 @@ export default function EditableBlock({ settingKey, defaultText, as: Component =
   // --- Early Returns สำหรับคนที่ไม่ใช่ Admin ---
   if (!isAdmin) {
     if (!content) return null
-    return <Component className={className}>{content}</Component>
+    return <Component className={`${className} ${multiline ? 'whitespace-pre-wrap' : ''}`}>{content}</Component>
   }
 
   // --- โหมด Admin: แสดงปกติ (ไม่ได้แก้ไข) ---
@@ -122,7 +122,11 @@ export default function EditableBlock({ settingKey, defaultText, as: Component =
         onClick={() => setIsEditing(true)}
         title="คลิกเพื่อแก้ไข (Admin Only)"
       >
-        {hasContent ? (text || defaultText) : <span className="opacity-50 italic">คลิกเพื่อเพิ่มข้อความ</span>}
+        {hasContent ? (
+          <span className={multiline ? 'whitespace-pre-wrap' : ''}>{text || defaultText}</span>
+        ) : (
+          <span className="opacity-50 italic">คลิกเพื่อเพิ่มข้อความ</span>
+        )}
         
         {/* Edit Badge Portal - แสดงเมื่อ Hover */}
         {typeof document !== 'undefined' && toolbarPos && createPortal(

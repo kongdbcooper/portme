@@ -58,22 +58,22 @@ function BannerItem({ banner, onUpdate, onDelete }) {
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
             <label className="text-[9px] font-black uppercase tracking-widest text-brand-400 px-1">Title</label>
-            <input
-              type="text"
+            <textarea
               value={title}
               onChange={(e) => { setTitle(e.target.value); setHasChanged(true); }}
               placeholder="หัวข้อ..."
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500/50"
+              rows={1}
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500/50 resize-none"
             />
           </div>
           <div className="space-y-1">
             <label className="text-[9px] font-black uppercase tracking-widest text-brand-400 px-1">Subtitle</label>
-            <input
-              type="text"
+            <textarea
               value={subtitle}
               onChange={(e) => { setSubtitle(e.target.value); setHasChanged(true); }}
               placeholder="รายละเอียด 1..."
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500/50"
+              rows={1}
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500/50 resize-none"
             />
           </div>
         </div>
