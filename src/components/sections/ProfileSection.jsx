@@ -29,7 +29,7 @@ export default function ProfileSection({ settings = {}, banners = [], loading = 
   if (loading) return null;
 
   useEffect(() => {
-    async function fetchSettings() {
+    const fetchSettings = async () => {
       try {
         const [settingsRes, bannersRes] = await Promise.all([
           fetch('/api/settings', { cache: 'no-store' }),
@@ -55,7 +55,12 @@ export default function ProfileSection({ settings = {}, banners = [], loading = 
         console.error('Failed to sync profile settings', err)
       }
     }
+
     fetchSettings()
+
+    // Poll every 5 seconds to sync with admin changes
+    const pollInterval = setInterval(fetchSettings, 5000)
+    return () => clearInterval(pollInterval)
   }, [])
 
   const handleNext = () => profileImages.length > 0 && setProfileIndex((i) => (i + 1) % profileImages.length)

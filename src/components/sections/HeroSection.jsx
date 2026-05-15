@@ -26,7 +26,7 @@ export default function HeroSection({ settings = {}, banners = [] }) {
 
   // ดึง background URL จาก settings API (Fallback if prop is empty)
   useEffect(() => {
-    async function fetchSettings() {
+    const fetchSettings = async () => {
       try {
         const [settingsRes, bannersRes] = await Promise.all([
           fetch('/api/settings', { cache: 'no-store' }),
@@ -53,7 +53,12 @@ export default function HeroSection({ settings = {}, banners = [] }) {
         console.error('Failed to sync hero settings', err)
       }
     }
+
     fetchSettings()
+    
+    // Poll every 5 seconds to get the latest admin updates
+    const pollInterval = setInterval(fetchSettings, 5000)
+    return () => clearInterval(pollInterval)
   }, [])
 
   // Carousel Effect
