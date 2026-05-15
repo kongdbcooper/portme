@@ -113,6 +113,7 @@ export default function VideoSection({ initialVideos = [] }) {
   const [selectedVideo, setSelectedVideo] = useState(initialVideos[0] || null)
   const [showRelated, setShowRelated] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
   
   const scrollRef = useRef(null)
   const playerRef = useRef(null)
@@ -191,8 +192,15 @@ export default function VideoSection({ initialVideos = [] }) {
   const handleCardClick = (video) => {
     setSelectedVideo(video)
     setShowRelated(false)
+    setIsPlaying(false)
     if (playerRef.current) {
       playerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }
+
+  const handlePlayClick = () => {
+    if (videoElementRef.current) {
+      videoElementRef.current.play().catch((e) => console.log('Play blocked:', e))
     }
   }
 
@@ -336,11 +344,26 @@ export default function VideoSection({ initialVideos = [] }) {
                   ref={videoElementRef}
                   key={selectedVideo.id}
                   src={selectedVideo.videoUrl}
-                  controls={!showRelated}
-                  autoPlay
+                  controls={!showRelated && isPlaying}
+                  onPlay={() => setIsPlaying(true)}
+                  onPause={() => setIsPlaying(false)}
                   onEnded={handleVideoEnd}
                   className={`w-full h-full object-contain ${showRelated ? 'opacity-30 scale-95' : 'opacity-100 scale-100'} transition-all duration-700`}
                 />
+
+                {/* Play button overlay — visible when video is NOT playing */}
+                {!isPlaying && !showRelated && (
+                  <div
+                    onClick={handlePlayClick}
+                    className="absolute inset-0 z-30 flex items-center justify-center cursor-pointer bg-black/40 backdrop-blur-[2px] transition-opacity duration-300 hover:bg-black/30"
+                  >
+                    <div className="w-20 h-20 md:w-28 md:h-28 rounded-full bg-brand-500/90 backdrop-blur-xl flex items-center justify-center hover:bg-brand-500 hover:scale-110 transition-all duration-300 shadow-[0_0_60px_rgba(90,107,255,0.5)]">
+                      <svg className="w-10 h-10 md:w-14 md:h-14 text-white fill-white ml-1.5 md:ml-2" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  </div>
+                )}
 
                 {}
                 {showRelated && (

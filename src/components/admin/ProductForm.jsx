@@ -1,55 +1,104 @@
 // =============================================================================
 // src/components/admin/ProductForm.js — Create/Edit Product Form
-// ฟอร์มสำหรับสร้างและแก้ไขโปรดักซ์ รวม ImageUploader
-// ใช้งานร่วมกับ: src/components/admin/ImageUploader.js
-//               src/app/admin/products/new/page.js
-//               src/app/admin/products/[id]/edit/page.js
+// ฟอร์มสำหรับสร้างและแก้ไขโปรดักซ์ รวม MultiImageUploader
 // =============================================================================
 
 'use client'
 
-import { useState, useActionState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import ImageUploader from './ImageUploader'
+import MultiImageUploader from './MultiImageUploader'
 
-/**
- * ProductForm — Client Component
- * @param {Object} product - ข้อมูลโปรดักซ์เดิม (กรณี edit) หรือ null (กรณี create)
- * @param {string} mode - 'create' | 'edit'
- */
 export default function ProductForm({ product = null, mode = 'create' }) {
   const router = useRouter()
   const isEdit = mode === 'edit'
 
-  // State สำหรับ image ที่อัปโหลดแล้ว
-  const [uploadedImage, setUploadedImage] = useState({
-    url: product?.imageUrl || '',
-    key: product?.imageKey || '',
-  })
+  // State สำหรับรูปภาพ (array ของ { id?, url, key })
+  const [images, setImages] = useState(
+    product?.images && product.images.length > 0 
+      ? product.images.map(img => ({ id: img.id, url: img.imageUrl, key: img.imageKey }))
+      : (product?.imageUrl ? [{ url: product.imageUrl, key: product.imageKey }] : [])
+  )
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
-  const [isImagePending, setIsImagePending] = useState(false)
-  const [isImageUploading, setIsImageUploading] = useState(false)
 
-  // Submit form — เรียก API ตรงๆ (ไม่ใช้ Server Action เพราะ handle image state ด้วย)
+  const handleAddImage = async ({ url, key }) => {
+    if (isEdit && product?.id) {
+      // เรียก API เพิ่มรูปโดยตรงถ้าระบบเป็น edit mode
+      try {
+        const res = await fetch(`/api/products/${product.id}/images`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageUrl: url, imageKey: key }),
+        })
+        const data = await res.json()
+        if (res.ok && data.image) {
+          setImages(prev => [...prev, { id: data.image.id, url: data.image.imageUrl, key: data.image.imageKey }])
+        }
+      } catch (err) {
+        console.error('Failed to save image to DB:', err)
+      }
+    } else {
+      // Create mode เก็บไว้ใน state รอส่งพร้อม submit
+      setImages(prev => [...prev, { url, key }])
+    }
+  }
+
+  const handleRemoveImage = async (imgToRemove, indexToRemove) => {
+    if (isEdit && imgToRemove.id) {
+      try {
+        await fetch(`/api/products/${product.id}/images?imageId=${imgToRemove.id}`, {
+          method: 'DELETE',
+        })
+        setImages(prev => prev.filter(img => img.id !== imgToRemove.id))
+      } catch (err) {
+        console.error('Failed to delete image:', err)
+      }
+    } else {
+      setImages(prev => prev.filter((_, i) => i !== indexToRemove))
+    }
+  }
+
+  const handleSetCover = async (imgToCover) => {
+    if (isEdit && imgToCover.id) {
+      try {
+        await fetch(`/api/products/${product.id}/images`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ setCoverId: imgToCover.id }),
+        })
+        setImages(prev => {
+          const newImages = [...prev]
+          const targetIndex = newImages.findIndex(img => img.id === imgToCover.id)
+          if (targetIndex > 0) {
+            const [target] = newImages.splice(targetIndex, 1)
+            newImages.unshift(target)
+          }
+          return newImages
+        })
+      } catch (err) {
+        console.error('Failed to set cover:', err)
+      }
+    } else {
+      setImages(prev => {
+        const newImages = [...prev]
+        const targetIndex = newImages.findIndex(img => img === imgToCover)
+        if (targetIndex > 0) {
+          const [target] = newImages.splice(targetIndex, 1)
+          newImages.unshift(target)
+        }
+        return newImages
+      })
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
-    if (isImagePending) {
-      setSubmitError('กรุณากดยืนยันการอัปโหลดรูปภาพ (ตกลง) ก่อนบันทึกโปรดักซ์')
-      return
-    }
-    if (isImageUploading) {
-      setSubmitError('กรุณารอให้รูปภาพอัปโหลดเสร็จสิ้นก่อน')
-      return
-    }
-    
     setIsSubmitting(true)
     setSubmitError('')
 
     const formData = new FormData(e.currentTarget)
-
     const payload = {
       name: formData.get('name'),
       description: formData.get('description') || null,
@@ -57,8 +106,16 @@ export default function ProductForm({ product = null, mode = 'create' }) {
       category: formData.get('category') || null,
       isActive: formData.get('isActive') === 'on',
       abVariant: formData.get('abVariant'),
-      imageUrl: uploadedImage.url || null,
-      imageKey: uploadedImage.key || null,
+    }
+
+    if (!isEdit) {
+      // แนบ images ไปด้วยเฉพาะตอนสร้างใหม่
+      payload.images = images.map(img => ({ imageUrl: img.url, imageKey: img.key }))
+      // ตั้งปกเป็นรูปแรกด้วย (Backward compatibility)
+      if (images.length > 0) {
+        payload.imageUrl = images[0].url
+        payload.imageKey = images[0].key
+      }
     }
 
     try {
@@ -77,7 +134,6 @@ export default function ProductForm({ product = null, mode = 'create' }) {
         throw new Error(data.error || 'เกิดข้อผิดพลาด')
       }
 
-      // Redirect กลับไปหน้า list หลังสำเร็จ
       router.push('/admin/products')
       router.refresh()
     } catch (err) {
@@ -87,33 +143,35 @@ export default function ProductForm({ product = null, mode = 'create' }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-stretch">
+    <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
       {/* Left Column: Image Upload */}
-      <div className="flex flex-col h-full space-y-4 sticky top-24">
+      <div className="flex flex-col space-y-4">
         <div className="flex items-center gap-2 mb-2">
           <div className="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-400">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
-          <h3 className="text-lg font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>รูปภาพโปรดักซ์</h3>
+          <h3 className="text-lg font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>อัลบั้มรูปภาพโปรดักซ์</h3>
         </div>
         
-        <div className="glass-card p-4 border-brand-500/10 flex-1 flex flex-col">
-          <ImageUploader
-            currentImageUrl={product?.imageUrl}
-            onUpload={({ url, key }) => setUploadedImage({ url, key })}
-            onPendingChange={setIsImagePending}
-            onUploadingChange={setIsImageUploading}
-            fillHeight={true}
+        <div className="glass-card p-4 border-brand-500/10">
+          <MultiImageUploader
+            images={images}
+            onAddImage={handleAddImage}
+            onRemoveImage={handleRemoveImage}
+            onSetCover={handleSetCover}
+            disabled={isSubmitting}
           />
         </div>
+        
         <div className="p-4 rounded-xl bg-white/5 border border-white/10">
           <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">คำแนะนำการอัปโหลด</h4>
           <ul className="text-xs text-gray-500 space-y-1.5 list-disc list-inside">
-            <li>แนะนำ: ขนาด 1000x1250px (แนวตั้ง 4:5) เพื่อความคมชัดสูงสุด 100%</li>
+            <li>สามารถอัปโหลดได้หลายรูปพร้อมกัน</li>
+            <li>รูปแรก (ซ้ายบนสุด) จะถูกใช้เป็นหน้าปกเสมอ</li>
+            <li>แนะนำ: ขนาด 1000x1250px (แนวตั้ง 4:5) เพื่อความคมชัดสูงสุด</li>
             <li>ขนาดไฟล์ไม่เกิน 5MB (JPEG, PNG, WebP)</li>
-            <li>รูปภาพจะแสดงผลแบบ Contain (เห็นรูปเต็มใบ)</li>
           </ul>
         </div>
       </div>
@@ -129,7 +187,7 @@ export default function ProductForm({ product = null, mode = 'create' }) {
           <h3 className="text-lg font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>รายละเอียดข้อมูล</h3>
         </div>
 
-        {/* ------------------- Product Name ------------------- */}
+        {/* Product Name */}
         <div>
           <label className="form-label" htmlFor="product-name">
             ชื่อโปรดักซ์ <span className="text-red-400">*</span>
@@ -147,7 +205,7 @@ export default function ProductForm({ product = null, mode = 'create' }) {
           />
         </div>
 
-        {/* ------------------- Description ------------------- */}
+        {/* Description */}
         <div>
           <label className="form-label" htmlFor="product-description">คำอธิบาย</label>
           <textarea
@@ -161,7 +219,7 @@ export default function ProductForm({ product = null, mode = 'create' }) {
           />
         </div>
 
-        {/* ------------------- Price + Category (2-col) ------------------- */}
+        {/* Price + Category */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
             <label className="form-label" htmlFor="product-price">
@@ -198,7 +256,7 @@ export default function ProductForm({ product = null, mode = 'create' }) {
           </div>
         </div>
 
-        {/* ------------------- A/B Variant + Status (2-col) ------------------- */}
+        {/* A/B Variant + Status */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
             <label className="form-label" htmlFor="product-ab-variant">A/B Test Variant</label>
@@ -216,10 +274,7 @@ export default function ProductForm({ product = null, mode = 'create' }) {
 
           <div className="flex flex-col justify-center">
             <label className="form-label">สถานะการแสดงผล</label>
-            <label
-              className="flex items-center gap-3 cursor-pointer group"
-              htmlFor="product-isActive"
-            >
+            <label className="flex items-center gap-3 cursor-pointer group" htmlFor="product-isActive">
               <div className="relative">
                 <input
                   id="product-isActive"
@@ -239,7 +294,7 @@ export default function ProductForm({ product = null, mode = 'create' }) {
           </div>
         </div>
 
-        {/* ------------------- Error Message ------------------- */}
+        {/* Error Message */}
         {submitError && (
           <div className="flex items-center gap-2 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm animate-fade-in">
             <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -249,13 +304,12 @@ export default function ProductForm({ product = null, mode = 'create' }) {
           </div>
         )}
 
-        {/* ------------------- Action Buttons ------------------- */}
+        {/* Action Buttons */}
         <div className="flex items-center gap-3 pt-6 border-t border-white/5">
           <button
             type="submit"
-            id={`product-form-submit-${mode}`}
-            disabled={isSubmitting || isImageUploading}
-            className={`btn-gradient px-10 py-3.5 text-base ${(isSubmitting || isImageUploading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+            disabled={isSubmitting}
+            className={`btn-gradient px-10 py-3.5 text-base ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             {isSubmitting ? (
               <span className="flex items-center gap-2">

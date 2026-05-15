@@ -67,6 +67,7 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
   const [products, setProducts] = useState(initialProducts)
   const [loading, setLoading] = useState(initialProducts.length === 0)
   const [selectedProduct, setSelectedProduct] = useState(null)
+  const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [isPaused, setIsPaused] = useState(false)
   const scrollRef = useRef(null)
   const autoScrollRef = useRef(null)
@@ -140,6 +141,7 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
   const handleProductClick = async (product, e) => {
     e.stopPropagation()
     setSelectedProduct(product) // Open Modal
+    setActiveImageIndex(0)
     try {
       await fetch('/api/ab-test', {
         method: 'POST',
@@ -153,6 +155,7 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
 
   const handleCardClick = (product) => {
     setSelectedProduct(product)
+    setActiveImageIndex(0)
   }
 
   // Close modal with Escape key
@@ -202,7 +205,7 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
   }, [selectedProduct])
 
   return (
-    <section className="bg-[#0a0a0f] overflow-hidden relative" id="products">
+    <section className="bg-[#0a0a0f] overflow-hidden relative pt-12 md:pt-24 lg:pt-32" id="products">
       {/* Seamless Transition Overlays */}
       <div className="absolute top-0 inset-x-0 h-24 sm:h-32 md:h-36 lg:h-64 bg-gradient-to-b from-[#0a0a0f]/40 via-[#0a0a0f]/12 to-transparent z-10 pointer-events-none" />
       <div className="absolute bottom-0 inset-x-0 h-20 sm:h-24 md:h-28 lg:h-48 bg-gradient-to-t from-[#0a0a0f]/30 via-[#0a0a0f]/10 to-transparent z-10 pointer-events-none" />
@@ -342,13 +345,51 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
               </svg>
             </button>
 
-            <div className="w-full md:w-1/2 h-[40vh] md:h-auto relative bg-black/40">
-              <Image
-                src={selectedProduct.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjNWE2YmZmIi8+PC9zdmc+'}
-                alt={selectedProduct.name}
-                fill
-                className="object-contain p-12"
-              />
+            <div className="w-full md:w-1/2 h-[40vh] md:h-auto relative bg-black/40 flex flex-col">
+              <div className="relative flex-1">
+                <Image
+                  src={
+                    (selectedProduct.images && selectedProduct.images.length > 0)
+                      ? selectedProduct.images[activeImageIndex]?.imageUrl || selectedProduct.imageUrl
+                      : (selectedProduct.imageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjNWE2YmZmIi8+PC9zdmc+')
+                  }
+                  alt={selectedProduct.name}
+                  fill
+                  className="object-contain p-12 transition-opacity duration-300"
+                />
+                
+                {selectedProduct.images && selectedProduct.images.length > 1 && (
+                  <>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setActiveImageIndex(i => (i === 0 ? selectedProduct.images.length - 1 : i - 1)) }}
+                      className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/80 rounded-full flex items-center justify-center text-white backdrop-blur-md transition-colors z-10"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
+                    </button>
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); setActiveImageIndex(i => (i === selectedProduct.images.length - 1 ? 0 : i + 1)) }}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-black/50 hover:bg-black/80 rounded-full flex items-center justify-center text-white backdrop-blur-md transition-colors z-10"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* Thumbnails */}
+              {selectedProduct.images && selectedProduct.images.length > 1 && (
+                <div className="h-24 bg-black/60 flex items-center gap-2 overflow-x-auto px-4 py-2 scrollbar-hide border-t border-white/5 shrink-0">
+                  {selectedProduct.images.map((img, idx) => (
+                    <button
+                      key={img.id || idx}
+                      onClick={(e) => { e.stopPropagation(); setActiveImageIndex(idx) }}
+                      className={`relative w-16 h-16 shrink-0 rounded-lg overflow-hidden border-2 transition-all duration-200 ${activeImageIndex === idx ? 'border-brand-500 scale-105 shadow-lg shadow-brand-500/20' : 'border-transparent opacity-50 hover:opacity-100'}`}
+                    >
+                      <Image src={img.imageUrl} alt="Thumbnail" fill className="object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div className="w-full md:w-1/2 p-8 md:p-24 overflow-y-auto space-y-12">

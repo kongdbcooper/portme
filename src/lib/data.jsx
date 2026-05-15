@@ -6,6 +6,7 @@ export async function getFreshProducts() {
     return await prisma.product.findMany({
       where: { isActive: true },
       orderBy: { createdAt: 'desc' },
+      include: { images: { orderBy: { order: 'asc' } } },
     })
   } catch (error) {
     console.error('[Data] Failed to fetch products:', error)
@@ -25,6 +26,19 @@ export async function getFreshVideos() {
     })
   } catch (error) {
     console.error('[Data] Failed to fetch videos:', error)
+    return []
+  }
+}
+
+// ------------------- Get Banners (No Cache) -------------------
+export async function getBanners() {
+  try {
+    return await prisma.banner.findMany({
+      where: { isActive: true },
+      orderBy: { order: 'asc' },
+    })
+  } catch (error) {
+    console.error('[Data] Failed to fetch banners:', error)
     return []
   }
 }
