@@ -23,6 +23,10 @@ const CreateProductSchema = z.object({
   category: z.string().optional().nullable(),
   isActive: z.boolean().default(true),
   abVariant: z.enum(['A', 'B', 'C']).default('A'),
+  images: z.array(z.object({
+    imageUrl: z.string().url(),
+    imageKey: z.string().optional().nullable(),
+  })).optional(),
 })
 
 // ------------------- GET: List Products -------------------
@@ -55,6 +59,7 @@ export async function GET(request) {
         orderBy: { createdAt: 'desc' },
         skip: isPaginationEnabled ? (page - 1) * limit : 0,
         take: limit,
+        include: { images: { orderBy: { order: 'asc' } } },
       }),
       prisma.product.count({ where }),
     ])
@@ -97,11 +102,19 @@ export async function POST(request) {
       )
     }
 
+    const { images, ...productData } = validation.data
+
     const product = await prisma.product.create({
       data: {
-        ...validation.data,
-        price: validation.data.price, // Prisma จัดการ Decimal เอง
+        ...productData,
+        images: images && images.length > 0 ? {
+          create: images.map((img, index) => ({
+            ...img,
+            order: index,
+          })),
+        } : undefined,
       },
+      include: { images: { orderBy: { order: 'asc' } } }
     })
 
     // Invalidate cache

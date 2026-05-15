@@ -9,7 +9,7 @@
 
 import { getABVariant } from '@/lib/ab-test'
 import { getFreshSettings } from '@/lib/settings'
-import { getFreshProducts, getFreshVideos } from '@/lib/data'
+import { getFreshProducts, getFreshVideos, getBanners } from '@/lib/data'
 
 import HeroSection from '@/components/sections/HeroSection'
 import ProfileSection from '@/components/sections/ProfileSection'
@@ -45,18 +45,22 @@ export default async function HomePage() {
     console.log('[HomePage] Settings keys:', Object.keys(settingsMap))
   }
 
-  const [products, videos] = await Promise.all([
+  const [products, videos, banners] = await Promise.all([
     getFreshProducts(),
     getFreshVideos(),
+    getBanners(),
   ])
+
+  const heroBanners = banners.filter(b => b.type === 'HERO')
+  const profileBanners = banners.filter(b => b.type === 'PROFILE')
 
   return (
     <>
       {/* Section 1: Hero */}
-      <HeroSection settings={settingsMap} />
+      <HeroSection settings={settingsMap} banners={heroBanners} />
 
       {/* Section 1.5: Profile (About Me) */}
-      <ProfileSection settings={settingsMap} />
+      <ProfileSection settings={settingsMap} banners={profileBanners} />
 
       {/* Section 2: Products */}
       <ProductSection abVariant={abVariant} settings={settingsMap} initialProducts={products} />

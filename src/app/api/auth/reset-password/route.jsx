@@ -1,49 +1,65 @@
-import { NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs'; // ตรวจสอบว่าใช้ bcrypt หรือ bcryptjs ให้ตรงกับที่ install
-import { prisma } from '@/lib/prisma'; // <--- ดึงตัวแปร prisma จากที่นี่แทน
+export const runtime = 'nodejs'
 
-export async function POST(req) {
+import { NextResponse } from 'next/server'
+import bcrypt from 'bcryptjs'
+import { z } from 'zod'
+import { prisma } from '@/lib/prisma'
+
+const ResetSchema = z.object({
+  token: z.string().min(1, { message: 'Token is required' }),
+  newPassword: z.string().min(8, { message: 'Password must be at least 8 characters' }),
+})
+
+export async function POST(request) {
   try {
-    const body = await req.json();
-    const { email, newPassword } = body;
+    const body = await request.json()
+    const validation = ResetSchema.safeParse(body)
 
-    if (!email || !newPassword) {
+    if (!validation.success) {
       return NextResponse.json(
-        { error: 'Email and newPassword required' },
+        { error: 'Invalid input', details: validation.error.flatten().fieldErrors },
         { status: 400 }
-      );
+      )
     }
 
-    const user = await prisma.users.findUnique({
-      where: { email },
-    });
+    const { token, newPassword } = validation.data
 
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    await prisma.users.update({
-      where: { email },
-      data: {
-        passwordHash: hashedPassword,
+    // Find a valid, unused, non-expired token
+    const resetToken = await prisma.passwordResetToken.findFirst({
+      where: {
+        token,
+        used: false,
+        expiresAt: { gt: new Date() },
       },
-    });
+    })
 
-    return NextResponse.json({
-      message: 'Password reset success',
-    });
+    if (!resetToken) {
+      return NextResponse.json(
+        { error: 'Invalid or expired reset link. Please request a new one.' },
+        { status: 400 }
+      )
+    }
 
+    const hashedPassword = await bcrypt.hash(newPassword, 10)
+
+    // Mark token as used + update user password in a transaction
+    await prisma.$transaction([
+      prisma.passwordResetToken.update({
+        where: { id: resetToken.id },
+        data: { used: true },
+      }),
+      prisma.user.update({
+        where: { id: resetToken.userId },
+        data: {
+          passwordHash: hashedPassword,
+          sessionVersion: { increment: 1 },
+        },
+      }),
+    ])
+
+    return NextResponse.json({ success: true })
   } catch (err) {
-    console.error(err);
-
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+    console.error('[ResetPassword] Error:', err)
+    return NextResponse.json({ error: 'Failed to reset password' }, { status: 500 })
   }
 }

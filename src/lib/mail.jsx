@@ -38,7 +38,7 @@ export async function sendEmail({ to, subject, html, text }) {
 
   // ถ้าไม่มี transporter และเป็น production -> ไม่พิมพ์ token ลง log
   if (process.env.NODE_ENV !== 'development') {
-    console.error('[Mail] No mail transporter configured (production)')
+    console.error('[Mail] No mail transporter configured (production). Set SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS in your .env')
     return false
   }
 
@@ -49,5 +49,6 @@ export async function sendEmail({ to, subject, html, text }) {
   if (text) console.log('Text:', text)
   if (html) console.log('HTML:', html)
   console.log('--- End Email ---')
-  return false
+  // Return true in dev so the OTP flow can continue (code is visible in console)
+  return true
 }

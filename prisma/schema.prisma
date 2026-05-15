@@ -15,28 +15,42 @@ model User {
   createdAt                     DateTime                        @default(now())
   updatedAt                     DateTime                        @updatedAt
   sessionVersion                Int                             @default(0)
-  email_change_verifications    email_change_verifications[]
-  password_change_verifications password_change_verifications[]
+  emailChangeVerifications      EmailChangeVerification[]
+  passwordChangeVerifications   PasswordChangeVerification[]
   passwordResetTokens           PasswordResetToken[]
 
   @@map("users")
 }
 
 model Product {
-  id          String        @id @default(cuid())
+  id          String         @id @default(cuid())
   name        String
   description String?
-  price       Float         @default(0)
+  price       Float          @default(0)
   imageUrl    String?
   imageKey    String?
   category    String?
-  isActive    Boolean       @default(true)
-  abVariant   ABVariant     @default(A)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  isActive    Boolean        @default(true)
+  abVariant   ABVariant      @default(A)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
   events      ABTestEvent[]
+  images      ProductImage[]
 
   @@map("products")
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  imageUrl  String
+  imageKey  String?
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId, order])
+  @@map("product_images")
 }
 
 model ABTestEvent {
@@ -86,8 +100,8 @@ model PasswordResetToken {
   @@map("password_reset_tokens")
 }
 
-model email_change_verifications {
-  id         String    @id
+model EmailChangeVerification {
+  id         String    @id @default(cuid())
   userId     String
   newEmail   String
   codeHash   String
@@ -95,14 +109,15 @@ model email_change_verifications {
   used       Boolean   @default(false)
   verifiedAt DateTime?
   createdAt  DateTime  @default(now())
-  users      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([newEmail, used])
   @@index([userId, used, expiresAt])
+  @@map("email_change_verifications")
 }
 
-model password_change_verifications {
-  id              String    @id
+model PasswordChangeVerification {
+  id              String    @id @default(cuid())
   userId          String
   newPasswordHash String
   codeHash        String
@@ -110,9 +125,10 @@ model password_change_verifications {
   used            Boolean   @default(false)
   verifiedAt      DateTime?
   createdAt       DateTime  @default(now())
-  users           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, used, expiresAt])
+  @@map("password_change_verifications")
 }
 
 enum UserRole {
@@ -130,4 +146,25 @@ enum ABEventType {
   VIEW
   CLICK
   CONVERSION
+}
+
+model Banner {
+  id          String     @id @default(cuid())
+  type        BannerType
+  title       String?
+  subtitle    String?
+  description String?
+  imageUrl    String
+  imageKey    String?
+  order       Int        @default(0)
+  isActive    Boolean    @default(true)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@map("banners")
+}
+
+enum BannerType {
+  HERO
+  PROFILE
 }
