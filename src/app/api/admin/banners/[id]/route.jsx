@@ -13,15 +13,15 @@ export async function PATCH(request, { params }) {
     const body = await request.json()
     const { title, subtitle, description } = body
     
-    // Fallback to Raw SQL if Prisma Client is having sync issues
-    await prisma.$executeRawUnsafe(`
-      UPDATE "banners" 
-      SET "title" = $1, "subtitle" = $2, "description" = $3, "updatedAt" = NOW()
-      WHERE "id" = $4
-    `, title, subtitle, description, id)
-
-    // Return the updated banner (fetching it back)
-    const banner = await prisma.banner.findUnique({ where: { id } })
+    // Update using Prisma (more robust for partial updates)
+    const banner = await prisma.banner.update({
+      where: { id },
+      data: {
+        ...(title !== undefined && { title }),
+        ...(subtitle !== undefined && { subtitle }),
+        ...(description !== undefined && { description }),
+      }
+    })
     
     return NextResponse.json({ success: true, data: banner })
   } catch (error) {
