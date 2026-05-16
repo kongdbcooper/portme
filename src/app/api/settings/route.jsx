@@ -15,7 +15,15 @@ export const runtime = 'nodejs'
 export async function GET() {
   try {
     const settingsMap = await getFreshSettings()
-    return NextResponse.json(settingsMap)
+    return new NextResponse(JSON.stringify(settingsMap), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    })
   } catch (error) {
     console.error('[Settings] Fetch error:', error)
     return NextResponse.json(

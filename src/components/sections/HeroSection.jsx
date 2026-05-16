@@ -30,7 +30,7 @@ export default function HeroSection({ settings = {}, banners = [] }) {
       try {
         const [settingsRes, bannersRes] = await Promise.all([
           fetch('/api/settings', { cache: 'no-store' }),
-          fetch('/api/admin/banners?type=HERO', { cache: 'no-store' })
+          fetch('/api/banners?type=HERO', { cache: 'no-store' })
         ])
 
         let fetchedBanners = []
@@ -83,7 +83,7 @@ export default function HeroSection({ settings = {}, banners = [] }) {
     }
     resize()
     window.addEventListener('resize', resize)
-    const particleCount = window.innerWidth < 768 ? 25 : 60
+    const particleCount = typeof window !== 'undefined' && window.innerWidth < 768 ? 15 : 60
     for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * canvas.width,

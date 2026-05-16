@@ -64,7 +64,7 @@ export async function GET(request) {
       prisma.product.count({ where }),
     ])
 
-    return NextResponse.json({
+    return new NextResponse(JSON.stringify({
       products,
       ...(isPaginationEnabled && {
         pagination: {
@@ -74,6 +74,14 @@ export async function GET(request) {
           totalPages: Math.ceil(total / limit),
         },
       }),
+    }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
     })
 
   } catch (error) {
