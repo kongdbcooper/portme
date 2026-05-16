@@ -58,8 +58,8 @@ export default function ProfileSection({ settings = {}, banners = [], loading = 
 
     fetchSettings()
 
-    // Poll every 5 seconds to sync with admin changes
-    const pollInterval = setInterval(fetchSettings, 5000)
+    // Poll every 30 seconds to sync with admin changes
+    const pollInterval = setInterval(fetchSettings, 30000)
     return () => clearInterval(pollInterval)
   }, [])
 

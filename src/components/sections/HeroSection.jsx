@@ -56,9 +56,8 @@ export default function HeroSection({ settings = {}, banners = [] }) {
 
     fetchSettings()
     
-    // Poll every 30 seconds to get the latest admin updates for guests
-    // Admin will see updates faster through the admin panel itself
-    const pollInterval = setInterval(fetchSettings, 30000)
+    // Poll every 5 seconds to get the latest admin updates
+    const pollInterval = setInterval(fetchSettings, 5000)
     return () => clearInterval(pollInterval)
   }, [])
 
@@ -165,7 +164,7 @@ export default function HeroSection({ settings = {}, banners = [] }) {
         </div>
 
         {/* Main Headline - Dynamic Sync with Banner Image */}
-        <h1 className="text-[2.75rem] sm:text-6xl md:text-7xl lg:text-8xl font-black mb-6 animate-fade-up leading-[1.1] sm:leading-none flex flex-col items-center" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black mb-6 animate-fade-up leading-[1.05] sm:leading-none flex flex-col items-center" style={{ fontFamily: 'Outfit, sans-serif' }}>
           {currentBanner.title ? (
             <span className="animated-gradient-text block text-center py-2 break-words whitespace-pre-wrap">{currentBanner.title}</span>
           ) : (
