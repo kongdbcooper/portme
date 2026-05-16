@@ -33,7 +33,7 @@ export default function ProfileSection({ settings = {}, banners = [], loading = 
       try {
         const [settingsRes, bannersRes] = await Promise.all([
           fetch('/api/settings', { cache: 'no-store' }),
-          fetch('/api/admin/banners?type=PROFILE', { cache: 'no-store' })
+          fetch('/api/banners?type=PROFILE', { cache: 'no-store' })
         ])
         
         let fetchedBanners = []

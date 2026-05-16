@@ -10,7 +10,7 @@ const options = {
 
 const tokenCache = new LRUCache(options)
 
-export async function rateLimit(request, limit = 10) {
+export async function rateLimit(request, limit = 100) {
   const ip = request.headers.get('x-forwarded-for') || '127.0.0.1'
   const currentCount = tokenCache.get(ip) || 0
   

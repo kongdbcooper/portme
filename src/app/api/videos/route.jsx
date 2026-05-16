@@ -30,7 +30,15 @@ export async function GET(request) {
       ],
       take: limit,
     })
-    return NextResponse.json({ videos })
+    return new NextResponse(JSON.stringify({ videos }), {
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json',
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+      },
+    })
   } catch (error) {
     console.error('[API] Fetch videos error:', error)
     return NextResponse.json({ error: 'Failed to fetch videos' }, { status: 500 })
