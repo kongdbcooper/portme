@@ -66,7 +66,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               
               "font-src 'self' data: https://fonts.gstatic.com",
-              "img-src 'self' data: blob: https://*.r2.dev https://*.r2.cloudflarestorage.com https://www.google-analytics.com",
+              "img-src 'self' data: blob: https://*.r2.dev https://*.r2.cloudflarestorage.com https://www.google-analytics.com https://images.unsplash.com",
               "media-src 'self' blob: https://*.r2.dev https://*.r2.cloudflarestorage.com",
               "connect-src 'self' https://*.r2.dev https://*.r2.cloudflarestorage.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com",
               "frame-ancestors 'none'",

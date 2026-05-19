@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { revalidateTag } from 'next/cache'
+import { revalidateTag, revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
 import { deleteFromR2 } from '@/lib/r2'
@@ -7,7 +7,7 @@ import { z } from 'zod'
 
 export const dynamic = 'force-dynamic'
 
-const MEDIA_KEY_SETTINGS = new Set(['hero_background_key', 'site_logo_key'])
+const MEDIA_KEY_SETTINGS = new Set(['hero_background_key', 'site_logo_key', 'about_image_key'])
 const ALLOWED_KEYS = [
   'site_logo',
   'site_logo_key',
@@ -15,6 +15,9 @@ const ALLOWED_KEYS = [
   'hero_background_key',
   'hero_background_images',
   'prod_profile_images',
+  'about_image_url',
+  'about_image_key',
+  'about_team_images',
 ]
 
 const SettingSchema = z.object({
@@ -47,6 +50,9 @@ export async function POST(request) {
     })
 
     revalidateTag('site-settings')
+    revalidatePath('/')
+    revalidatePath('/products')
+    revalidatePath('/about')
 
     // If this is a single-media key, delete previous R2 object
     if (MEDIA_KEY_SETTINGS.has(key)) {
@@ -55,8 +61,8 @@ export async function POST(request) {
       }
     }
 
-    // If this is the profile images array, compare previous and new keys and delete removed objects
-    if (key === 'prod_profile_images') {
+    // If this is a profile or team images array, compare previous and new keys and delete removed objects
+    if (key === 'prod_profile_images' || key === 'about_team_images') {
       try {
         const prevArr = previous?.value ? JSON.parse(previous.value) : []
         const newArr = value ? JSON.parse(value) : []
@@ -70,7 +76,7 @@ export async function POST(request) {
           }
         }
       } catch (err) {
-        console.error('[Admin Settings] Failed to diff profile images for cleanup:', err)
+        console.error('[Admin Settings] Failed to diff images for cleanup:', err)
       }
     }
 

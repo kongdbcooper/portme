@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import EditableBlock from '../admin/EditableBlock'
 
-export default function BrandLogo({ logoUrl, siteName = 'Monkey', className = '', iconClassName = '', href }) {
+export default function BrandLogo({ logoUrl, siteName = 'Monkey', className = '', iconClassName = '', href, onClick }) {
   const content = (
     <div className={`flex items-center gap-3 ${className}`}>
       {/* Brand Icon */}
@@ -25,7 +25,7 @@ export default function BrandLogo({ logoUrl, siteName = 'Monkey', className = ''
 
   if (href) {
     return (
-      <Link href={href} aria-label="Home">
+      <Link href={href} aria-label="Home" onClick={onClick}>
         {content}
       </Link>
     )

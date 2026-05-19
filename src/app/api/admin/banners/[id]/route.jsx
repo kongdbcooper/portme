@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { revalidateTag, revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
 import { deleteFromR2 } from '@/lib/r2'
@@ -22,6 +23,9 @@ export async function PATCH(request, { params }) {
         ...(description !== undefined && { description }),
       }
     })
+
+    revalidateTag('banners')
+    revalidatePath('/')
     
     return NextResponse.json({ success: true, data: banner })
   } catch (error) {
@@ -50,6 +54,9 @@ export async function DELETE(request, { params }) {
     if (banner.imageKey) {
       await deleteFromR2(banner.imageKey).catch(err => console.error('Failed to delete image from R2', err))
     }
+
+    revalidateTag('banners')
+    revalidatePath('/')
     
     return NextResponse.json({ success: true })
   } catch (error) {

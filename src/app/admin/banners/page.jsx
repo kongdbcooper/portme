@@ -194,7 +194,7 @@ export default function AdminBannersPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           <div className="glass-card p-8 border-white/5 bg-white/2 sticky top-24">
             <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest opacity-50">Upload New Hero</h3>
-            <ImageUploader folder="banners" onUploadSuccess={({ url, key }) => addBanner('HERO', url, key)} />
+            <ImageUploader folder="hero" onUploadSuccess={({ url, key }) => addBanner('HERO', url, key)} />
           </div>
           <div className="space-y-6">
             <h3 className="text-sm font-bold text-white mb-2 uppercase tracking-widest opacity-50">Active Banners</h3>
@@ -220,7 +220,7 @@ export default function AdminBannersPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           <div className="glass-card p-8 border-white/5 bg-white/2 sticky top-24">
             <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest opacity-50">Upload New Profile</h3>
-            <ImageUploader folder="banners" onUploadSuccess={({ url, key }) => addBanner('PROFILE', url, key)} />
+            <ImageUploader folder="profile" onUploadSuccess={({ url, key }) => addBanner('PROFILE', url, key)} />
           </div>
           <div className="space-y-6">
             <h3 className="text-sm font-bold text-white mb-2 uppercase tracking-widest opacity-50">Active Banners</h3>

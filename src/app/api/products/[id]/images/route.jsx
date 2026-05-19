@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
 import { deleteFromR2 } from '@/lib/r2'
+import { revalidateTag, revalidatePath } from 'next/cache'
 
 // POST: Add image to product
 export async function POST(request, { params }) {
@@ -41,6 +42,10 @@ export async function POST(request, { params }) {
         data: { imageUrl, imageKey: imageKey || null },
       })
     }
+
+    revalidateTag('products')
+    revalidatePath('/')
+    revalidatePath('/products')
 
     return NextResponse.json({ image }, { status: 201 })
   } catch (error) {
@@ -94,6 +99,10 @@ export async function DELETE(request, { params }) {
         },
       })
     }
+
+    revalidateTag('products')
+    revalidatePath('/')
+    revalidatePath('/products')
 
     return NextResponse.json({ success: true })
   } catch (error) {
@@ -153,6 +162,10 @@ export async function PATCH(request, { params }) {
           }),
         ])
       }
+
+      revalidateTag('products')
+      revalidatePath('/')
+      revalidatePath('/products')
 
       return NextResponse.json({ success: true })
     }

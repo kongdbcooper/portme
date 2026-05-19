@@ -48,6 +48,29 @@ export default async function AdminDashboardPage() {
     take: 5,
   })
 
+  // ─── Inventory stats จาก Google Sheets (best-effort) ───
+  let inventoryStats = null
+  try {
+    const sheetId  = process.env.GOOGLE_SHEET_ID
+    const apiKey   = process.env.GOOGLE_SHEETS_API_KEY
+    if (sheetId && apiKey) {
+      const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/Inventory!A1:Z500?key=${apiKey}`
+      const res = await fetch(url, { cache: 'no-store' })
+      if (res.ok) {
+        const raw = await res.json()
+        const [headers, ...rows] = raw.values || []
+        if (headers) {
+          const qtyIdx = headers.findIndex(h => ['จำนวนคงเหลือ','qty','quantity','คงเหลือ'].includes(h?.trim()))
+          const minIdx = headers.findIndex(h => ['จำนวนขั้นต่ำ','min_qty','minimum','ขั้นต่ำ'].includes(h?.trim()))
+          const total  = rows.length
+          const out    = rows.filter(r => parseInt(r[qtyIdx] || 0) <= 0).length
+          const low    = rows.filter(r => { const q = parseInt(r[qtyIdx]||0); const m = parseInt(r[minIdx]||5); return q > 0 && q <= m }).length
+          inventoryStats = { total, out, low }
+        }
+      }
+    }
+  } catch { /* Google Sheets ยังไม่ได้ตั้งค่า — ข้ามไป */ }
+
   return (
     <div className="space-y-8">
       {/* Page Header */}
@@ -66,10 +89,22 @@ export default async function AdminDashboardPage() {
         <StatsCard label="A/B Test Events" value={totalABEvents.toLocaleString()} icon="🧪" color="bg-accent-500/20" change={8} />
       </div>
 
+      {/* Inventory Stats (แสดงเฉพาะเมื่อเชื่อม Google Sheets แล้ว) */}
+      {inventoryStats && (
+        <div>
+          <h3 className="text-white font-semibold mb-4">📊 สรุปคลังสินค้า <span className="text-xs text-gray-600 font-normal ml-1">(Google Sheets · real-time)</span></h3>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <StatsCard label="วัสดุทั้งหมด"  value={inventoryStats.total} icon="🗄️" color="bg-brand-500/20" />
+            <StatsCard label="ใกล้หมด"       value={inventoryStats.low}   icon="⚠️" color="bg-yellow-500/20" />
+            <StatsCard label="หมดสต็อก"      value={inventoryStats.out}   icon="🚫" color="bg-red-500/20" />
+          </div>
+        </div>
+      )}
+
       {/* Quick Actions */}
       <div>
         <h3 className="text-white font-semibold mb-4">การดำเนินการด่วน</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           <Link
             href="/admin/products/new"
             id="dashboard-add-product-btn"
@@ -107,6 +142,19 @@ export default async function AdminDashboardPage() {
             <div>
               <p className="text-white font-medium text-sm">A/B Testing</p>
               <p className="text-gray-600 text-xs">ดูผลลัพธ์</p>
+            </div>
+          </Link>
+          <Link
+            href="/admin/inventory"
+            id="dashboard-inventory-btn"
+            className="glass-card p-5 flex items-center gap-4 hover:border-brand-500/30 transition-all group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+              🗄️
+            </div>
+            <div>
+              <p className="text-white font-medium text-sm">คลังสินค้า</p>
+              <p className="text-gray-600 text-xs">เบิก-จ่าย วัสดุ · Google Sheets</p>
             </div>
           </Link>
         </div>

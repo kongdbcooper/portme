@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
 import { deleteFromR2 } from '@/lib/r2'
-import { revalidateTag } from 'next/cache'
+import { revalidateTag, revalidatePath } from 'next/cache'
 
 const UpdateProductSchema = z.object({
   name: z.string().min(1).max(200).optional(),
@@ -69,6 +69,11 @@ export async function PATCH(request, { params }) {
       await deleteFromR2(oldProduct.imageKey)
     }
 
+    // Invalidate cache
+    revalidateTag('products')
+    revalidatePath('/')
+    revalidatePath('/products')
+
     return NextResponse.json({ product })
   } catch (error) {
     if (error.message?.includes('Unauthorized')) {
@@ -101,6 +106,8 @@ export async function DELETE(request, { params }) {
 
     // Invalidate cache
     revalidateTag('products')
+    revalidatePath('/')
+    revalidatePath('/products')
 
     return NextResponse.json({ success: true, message: 'Product deleted' })
   } catch (error) {

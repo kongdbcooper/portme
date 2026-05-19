@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
 import { deleteFromR2 } from '@/lib/r2'
-import { revalidateTag } from 'next/cache'
+import { revalidateTag, revalidatePath } from 'next/cache'
 
 const UpdateVideoSchema = z.object({
   title: z.string().min(1).max(200).optional(),
@@ -54,6 +54,7 @@ export async function PUT(request, { params }) {
 
     // Invalidate cache
     revalidateTag('videos')
+    revalidatePath('/')
 
     return NextResponse.json(video)
   } catch (error) {
@@ -88,6 +89,7 @@ export async function DELETE(request, { params }) {
 
     // Invalidate cache
     revalidateTag('videos')
+    revalidatePath('/')
 
     return NextResponse.json({ success: true })
   } catch (error) {

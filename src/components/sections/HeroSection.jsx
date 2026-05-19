@@ -215,12 +215,16 @@ export default function HeroSection({ settings = {}, banners = [] }) {
 
       <div className="absolute bottom-0 inset-x-0 h-24 sm:h-32 md:h-36 lg:h-48 bg-gradient-to-t from-[#0a0a0f]/40 via-[#0a0a0f]/12 to-transparent z-10 pointer-events-none" />
 
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-bounce opacity-60 z-30">
-        <span className="text-white/40 text-[10px] uppercase tracking-widest font-bold">
-          <EditableBlock settingKey="hero_scroll_label" defaultText="เลื่อนลง" />
-        </span>
-        <div className="w-5 h-8 rounded-full border border-white/20 flex items-start justify-center p-1">
-          <div className="w-1 h-2 bg-brand-500 rounded-full" />
+      {/* Centering Wrapper (Static Transform) */}
+      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+        {/* Bouncing Wrapper */}
+        <div className="flex flex-col items-center gap-2 animate-bounce opacity-60">
+          <span className="text-white/40 text-[10px] uppercase tracking-widest font-bold">
+            <EditableBlock settingKey="hero_scroll_label" defaultText="เลื่อนลง" />
+          </span>
+          <div className="w-5 h-8 rounded-full border border-white/20 flex items-start justify-center p-1">
+            <div className="w-1 h-2 bg-brand-500 rounded-full" />
+          </div>
         </div>
       </div>
     </section>

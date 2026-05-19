@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
-import { revalidateTag } from 'next/cache'
+import { revalidateTag, revalidatePath } from 'next/cache'
 
 const CreateVideoSchema = z.object({
   title: z.string().min(1).max(200),
@@ -74,6 +74,7 @@ export async function POST(request) {
 
     // Invalidate cache
     revalidateTag('videos')
+    revalidatePath('/')
 
     return NextResponse.json(video)
   } catch (error) {
