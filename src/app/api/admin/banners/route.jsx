@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { revalidateTag, revalidatePath } from 'next/cache'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
 
@@ -60,6 +61,9 @@ export async function POST(request) {
         isActive
       }
     })
+
+    revalidateTag('banners')
+    revalidatePath('/')
     
     return NextResponse.json({ success: true, data: banner }, { status: 201 })
   } catch (error) {

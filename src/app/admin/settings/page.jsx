@@ -161,6 +161,105 @@ export default function AdminSettingsPage() {
       successText: 'Site logo saved.',
     }, url, key)
 
+  const addTeamMember = async (url, key) => {
+    setIsSaving(true)
+    setMessage({ type: '', text: '' })
+
+    try {
+      const current = settings.about_team_images ? JSON.parse(settings.about_team_images) : []
+      const newMember = {
+        id: Date.now().toString(),
+        name: 'ชื่อทีมงานใหม่',
+        role: 'ตำแหน่ง',
+        desc: 'คำอธิบายสั้นๆ เกี่ยวกับทีมงานคนนี้',
+        url,
+        key
+      }
+      const updated = [...current, newMember]
+
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'about_team_images', value: JSON.stringify(updated) }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to add team member')
+      }
+
+      setSettings((prev) => ({ ...prev, about_team_images: JSON.stringify(updated) }))
+      setMessage({ type: 'success', text: 'เพิ่มสมาชิกทีมเรียบร้อยแล้ว' })
+      router.refresh()
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const updateTeamMember = async (id, updatedFields) => {
+    setIsSaving(true)
+    setMessage({ type: '', text: '' })
+
+    try {
+      const current = settings.about_team_images ? JSON.parse(settings.about_team_images) : []
+      const updated = current.map(m => m.id === id ? { ...m, ...updatedFields } : m)
+
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'about_team_images', value: JSON.stringify(updated) }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to update team member details')
+      }
+
+      setSettings((prev) => ({ ...prev, about_team_images: JSON.stringify(updated) }))
+      setMessage({ type: 'success', text: 'อัปเดตข้อมูลสมาชิกทีมเรียบร้อยแล้ว' })
+      router.refresh()
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const removeTeamMember = async (id) => {
+    setIsSaving(true)
+    setMessage({ type: '', text: '' })
+
+    try {
+      const current = settings.about_team_images ? JSON.parse(settings.about_team_images) : []
+      const memberToRemove = current.find(m => m.id === id)
+      const updated = current.filter(m => m.id !== id)
+
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'about_team_images', value: JSON.stringify(updated) }),
+      })
+
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || 'Failed to remove team member')
+      }
+
+      setSettings((prev) => ({ ...prev, about_team_images: JSON.stringify(updated) }))
+      setMessage({ type: 'success', text: 'ลบสมาชิกทีมเรียบร้อยแล้ว' })
+      router.refresh()
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   // ------------------- Profile Images (carousel) -------------------
   const addProfileImage = async (url, key) => {
     setIsSaving(true)
@@ -346,7 +445,7 @@ export default function AdminSettingsPage() {
           <div className="glass-card p-6 border-brand-500/10">
             <label className="block text-sm font-medium text-gray-300 mb-4">เปลี่ยนโลโก้ไซต์</label>
             <ImageUploader
-              folder="settings"
+              folder="logo"
               initialImage={settings.site_logo}
               onUpload={({ url, key }) => saveSiteLogo(url, key)}
             />
@@ -385,6 +484,85 @@ export default function AdminSettingsPage() {
       </section>
 
       <section className="space-y-4 pt-4 border-t border-white/5">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-400">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-white">About Us Team Members</h2>
+        </div>
+
+        <div className="p-4 rounded-xl bg-white/5 border border-white/10 mb-4">
+          <h3 className="text-sm font-medium text-white mb-2">Where it appears</h3>
+          <ul className="text-xs text-gray-400 flex flex-wrap gap-x-6 gap-y-2 list-disc list-inside">
+            <li>The "About Us" page renders these members as high-end 3D tilt cards.</li>
+            <li>Recommended: 4 to 5 members. High-resolution portrait images (aspect ratio 3:4 or 1:1) look best.</li>
+            <li>Removing a member automatically deletes their image file from Cloudflare R2.</li>
+          </ul>
+        </div>
+
+        <div className="space-y-6">
+          {/* Uploader Dropzone */}
+          <div className="glass-card p-6 border-brand-500/10 max-w-xl">
+            <label className="block text-sm font-medium text-gray-300 mb-4">เพิ่มสมาชิกทีมคนใหม่ (อัปโหลดรูปภาพ)</label>
+            <ImageUploader
+              folder="about"
+              onUpload={({ url, key }) => addTeamMember(url, key)}
+            />
+          </div>
+
+          {/* Current Team Members Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {settings.about_team_images && JSON.parse(settings.about_team_images).length > 0 ? (
+              JSON.parse(settings.about_team_images).map((member) => (
+                <div key={member.id} className="p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col gap-4 relative group">
+                  <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-black/40">
+                    <Image
+                      src={member.url}
+                      alt={member.name || 'Team member'}
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <TeamMemberField
+                      label="ชื่อสมาชิก"
+                      value={member.name}
+                      onSave={(newVal) => updateTeamMember(member.id, { name: newVal })}
+                    />
+                    <TeamMemberField
+                      label="ตำแหน่ง"
+                      value={member.role}
+                      onSave={(newVal) => updateTeamMember(member.id, { role: newVal })}
+                    />
+                    <TeamMemberField
+                      label="คำอธิบาย"
+                      value={member.desc}
+                      isTextarea={true}
+                      onSave={(newVal) => updateTeamMember(member.id, { desc: newVal })}
+                    />
+                  </div>
+                  <button
+                    onClick={() => removeTeamMember(member.id)}
+                    className="mt-2 w-full py-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/20 text-xs font-bold transition-all"
+                  >
+                    ลบสมาชิกทีม
+                  </button>
+                </div>
+              ))
+            ) : (
+              <div className="col-span-full py-12 border-2 border-dashed border-white/5 rounded-3xl flex flex-col items-center justify-center text-gray-600">
+                <span className="text-4xl mb-3 opacity-20">👥</span>
+                <p className="text-xs font-medium opacity-40">ยังไม่มีการเพิ่มรูปภาพทีมแบบกำหนดเอง (กำลังแสดงรายชื่อเริ่มต้น 5 คน)</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="space-y-4 pt-4 border-t border-[#ffffff10]">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-8 h-8 rounded-lg bg-brand-500/20 flex items-center justify-center text-brand-400">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -486,6 +664,33 @@ export default function AdminSettingsPage() {
           </div>
         </div>
       </section>
+    </div>
+  )
+}
+
+function TeamMemberField({ label, value, onSave, isTextarea = false }) {
+  const [localVal, setLocalVal] = useState(value || '')
+
+  useEffect(() => {
+    setLocalVal(value || '')
+  }, [value])
+
+  const Element = isTextarea ? 'textarea' : 'input'
+
+  return (
+    <div>
+      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">{label}</label>
+      <Element
+        value={localVal}
+        onChange={(e) => setLocalVal(e.target.value)}
+        onBlur={() => {
+          if (localVal !== value) {
+            onSave(localVal)
+          }
+        }}
+        rows={isTextarea ? 2 : undefined}
+        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:border-brand-500 focus:outline-none transition-colors resize-none"
+      />
     </div>
   )
 }

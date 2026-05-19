@@ -11,7 +11,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { requireAdmin } from '@/lib/auth'
-import { revalidateTag } from 'next/cache'
+import { revalidateTag, revalidatePath } from 'next/cache'
 
 // Schema สำหรับ validate create product
 const CreateProductSchema = z.object({
@@ -36,6 +36,7 @@ export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url)
     const category = searchParams.get('category')
+    const q = searchParams.get('q')
     const limit = parseInt(searchParams.get('limit') || '12')
     const page = parseInt(searchParams.get('page') || '1')
     const adminView = searchParams.get('admin') === 'true'
@@ -47,6 +48,13 @@ export async function GET(request) {
     const where = {
       ...(adminView ? {} : { isActive: true }), // admin เห็นทั้งหมด
       ...(category ? { category } : {}),
+      ...(q ? {
+        OR: [
+          { name: { contains: q, mode: 'insensitive' } },
+          { description: { contains: q, mode: 'insensitive' } },
+          { category: { contains: q, mode: 'insensitive' } },
+        ]
+      } : {}),
     }
 
     // เมื่อมีการระบุ limit แบบเฉพาะเจาะจง (เช่น limit=1000 สำหรับ frontend carousel)
@@ -127,6 +135,8 @@ export async function POST(request) {
 
     // Invalidate cache
     revalidateTag('products')
+    revalidatePath('/')
+    revalidatePath('/products')
 
     return NextResponse.json({ product }, { status: 201 })
 

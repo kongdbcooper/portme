@@ -164,7 +164,7 @@ export default function ProfileSection({ settings = {}, banners = [], loading = 
                         const productsSection = document.getElementById('products')
                         if (productsSection) productsSection.scrollIntoView({ behavior: 'smooth' })
                       }}
-                      className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 py-3 sm:px-10 sm:py-4 bg-brand-500 hover:bg-brand-600 text-white font-black text-sm sm:text-base rounded-xl transition-all duration-500 hover:scale-105 shadow-[0_15px_30px_-5px_rgba(90,107,255,0.6)] group/btn"
+                      className="hidden lg:inline-flex w-full sm:w-auto items-center justify-center gap-3 px-6 py-3 sm:px-10 sm:py-4 bg-brand-500 hover:bg-brand-600 text-white font-black text-sm sm:text-base rounded-xl transition-all duration-500 hover:scale-105 shadow-[0_15px_30px_-5px_rgba(90,107,255,0.6)] group/btn"
                     >
                       <EditableBlock settingKey="prod_cta_text" defaultText={settings.prod_cta_text || "Get Started"} />
                       <svg className="w-7 h-7 group-hover/btn:translate-x-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -236,6 +236,23 @@ export default function ProfileSection({ settings = {}, banners = [], loading = 
                         </svg>
                       </button>
                     </div>
+                  </div>
+
+                  {/* Mobile CTA Button - Only visible on screens < lg */}
+                  <div className="w-full max-w-sm lg:hidden mt-4 z-50 px-4 sm:px-0">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        const productsSection = document.getElementById('products')
+                        if (productsSection) productsSection.scrollIntoView({ behavior: 'smooth' })
+                      }}
+                      className="w-full inline-flex items-center justify-center gap-3 px-6 py-3.5 bg-brand-500 hover:bg-brand-600 text-white font-black text-base rounded-xl transition-all duration-500 hover:scale-105 shadow-[0_15px_30px_-5px_rgba(90,107,255,0.6)] group/btn"
+                    >
+                      <EditableBlock settingKey="prod_cta_text" defaultText={settings.prod_cta_text || "Get Started"} />
+                      <svg className="w-7 h-7 group-hover/btn:translate-x-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </button>
                   </div>
                 </div>
               </>

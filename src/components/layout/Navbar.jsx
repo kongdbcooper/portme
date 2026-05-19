@@ -8,6 +8,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter, usePathname } from 'next/navigation'
 import BrandLogo from './BrandLogo'
 import EditableBlock from '../admin/EditableBlock'
 
@@ -24,6 +25,12 @@ export default function Navbar({ settings = {} }) {
   const [activeSection, setActiveSection] = useState('hero')
   const [isVisible, setIsVisible] = useState(true)
   const [lastScrollY, setLastScrollY] = useState(0)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [suggestions, setSuggestions] = useState([])
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter()
+  const pathname = usePathname()
   const logoUrl = settings.site_logo || ''
   const siteName = settings.site_name || 'Monkey'
 
@@ -69,6 +76,53 @@ export default function Navbar({ settings = {} }) {
     return () => observer.disconnect()
   }, [])
 
+  // ------------------- Autocomplete / Live Search Suggestions -------------------
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSuggestions([])
+      setShowDropdown(false)
+      return
+    }
+
+    const delayDebounce = setTimeout(async () => {
+      setIsLoading(true)
+      try {
+        const res = await fetch(`/api/products?q=${encodeURIComponent(searchQuery.trim())}&limit=5`)
+        if (res.ok) {
+          const data = await res.json()
+          setSuggestions(data.products || [])
+          setShowDropdown(true)
+        }
+      } catch (err) {
+        console.error('Failed to fetch search suggestions:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }, 250) // 250ms debounce delay
+
+    return () => clearTimeout(delayDebounce)
+  }, [searchQuery])
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('#navbar-search-container')) {
+        setShowDropdown(false)
+      }
+    }
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [])
+
+  // ------------------- Search Handler -------------------
+  const handleSearch = (e) => {
+    e.preventDefault()
+    if (!searchQuery.trim()) return
+    setIsMobileMenuOpen(false)
+    setShowDropdown(false)
+    router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
+  }
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 transform ${
@@ -80,52 +134,133 @@ export default function Navbar({ settings = {} }) {
       }`}
     >
       <nav className="section-container">
-        <div className="flex items-center justify-between h-20">
+        <div className="flex items-center justify-between h-20 gap-2 sm:gap-4">
 
-          {/* ------------------- Logo ------------------- */}
-          <BrandLogo
-            href="/"
-            logoUrl={logoUrl}
-            siteName={siteName}
-            className="flex items-center gap-3"
-            iconClassName="shadow-glow group-hover:scale-110 transition-transform duration-300"
-          />
+          {/* ------------------- Left: Logo ------------------- */}
+          <div className="flex items-center shrink-0 w-auto lg:w-1/4">
+            <BrandLogo
+              href="/"
+              logoUrl={logoUrl}
+              siteName={siteName}
+              className="flex items-center gap-2 sm:gap-3"
+              iconClassName="shadow-glow group-hover:scale-110 transition-transform duration-300"
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+          </div>
 
-          {/* ------------------- Desktop Nav Links ------------------- */}
-          <ul className="hidden md:flex items-center gap-1">
-            <li>
-              <a href="#hero" className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeSection === 'hero' ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-                <EditableBlock settingKey="nav_link_1" defaultText="Home" />
-                {activeSection === 'hero' && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-brand-500 rounded-full" />}
-              </a>
-            </li>
-            <li>
-              <a href="#products" className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeSection === 'products' ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-                <EditableBlock settingKey="nav_link_2" defaultText="Products" />
-                {activeSection === 'products' && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-brand-500 rounded-full" />}
-              </a>
-            </li>
-            <li>
-              <a href="#contact" className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeSection === 'contact' ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
-                <EditableBlock settingKey="nav_link_3" defaultText="About Me" />
-                {activeSection === 'contact' && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-brand-500 rounded-full" />}
-              </a>
-            </li>
-          </ul>
+          {/* ------------------- Center: Search Bar & Desktop Nav Links ------------------- */}
+          <div className="flex items-center justify-end lg:justify-center flex-1 gap-4">
+            {/* Global Search Bar (Responsive) with Autocomplete */}
+            <div id="navbar-search-container" className="relative w-full max-w-[160px] sm:max-w-xs md:max-w-xs">
+              <form onSubmit={handleSearch} className="relative group">
+                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-brand-500 transition-colors">🔍</span>
+                <input 
+                  type="text" 
+                  placeholder="ค้นหา..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onFocus={() => searchQuery.trim() && setShowDropdown(true)}
+                  className="w-full bg-surface-800/80 border border-white/10 rounded-full py-1.5 pl-8 pr-3 text-xs sm:text-sm text-white placeholder-gray-400 focus:outline-none focus:border-brand-500/50 focus:bg-surface-800 transition-all duration-300"
+                />
+                {isLoading && (
+                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-500"></span>
+                  </span>
+                )}
+              </form>
 
-          {/* ------------------- CTA Buttons ------------------- */}
-          <div className="hidden md:flex items-center gap-3">
+              {/* Suggestions Dropdown */}
+              {showDropdown && (suggestions.length > 0 || isLoading) && (
+                <div className="absolute right-0 w-[280px] sm:left-0 sm:right-0 sm:w-full mt-2 bg-surface-900/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-[100] animate-fade-in">
+                  <div className="p-2 max-h-60 overflow-y-auto space-y-1 scrollbar-thin">
+                    {suggestions.map((product) => (
+                      <button
+                        key={product.id}
+                        onClick={() => {
+                          setShowDropdown(false)
+                          setSearchQuery('')
+                          router.push(`/search?q=${encodeURIComponent(product.name)}`)
+                        }}
+                        className="w-full text-left flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 transition-all duration-200"
+                      >
+                        <div className="w-10 h-10 rounded-lg overflow-hidden bg-surface-800 shrink-0 border border-white/5">
+                          {product.imageUrl ? (
+                            <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white/20">
+                              {product.name.charAt(0)}
+                            </div>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <h4 className="text-xs sm:text-sm font-semibold text-white truncate">{product.name}</h4>
+                          <span className="text-[10px] text-brand-400">{product.category || 'สินค้า'}</span>
+                        </div>
+                        <div className="text-[11px] font-black text-white shrink-0">
+                          ฿{Number(product.price).toLocaleString()}
+                        </div>
+                      </button>
+                    ))}
+
+                    {!isLoading && suggestions.length === 0 && (
+                      <div className="text-center py-4 text-xs text-gray-500">
+                        ไม่พบสินค้าที่ตรงกัน
+                      </div>
+                    )}
+                  </div>
+
+                  {suggestions.length > 0 && (
+                    <button
+                      onClick={() => {
+                        setShowDropdown(false)
+                        router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`)
+                      }}
+                      className="w-full text-center py-2.5 text-[11px] text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 transition-colors border-t border-white/5 font-medium"
+                    >
+                      ดูผลลัพธ์ทั้งหมดสำหรับ "{searchQuery}"
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Desktop Nav Links */}
+            <ul className="hidden lg:flex items-center gap-1 shrink-0">
+              <li>
+                <a href="/#hero" className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${pathname === '/' ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+                  <EditableBlock settingKey="nav_link_1" defaultText="Home" />
+                  {pathname === '/' && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-brand-500 rounded-full" />}
+                </a>
+              </li>
+              <li>
+                <Link href="/products" className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${pathname.startsWith('/products') ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+                  <EditableBlock settingKey="nav_link_2" defaultText="Products" />
+                  {pathname.startsWith('/products') && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-brand-500 rounded-full" />}
+                </Link>
+              </li>
+              <li>
+                <Link href="/about" className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${pathname.startsWith('/about') ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+                  <EditableBlock settingKey="nav_link_3" defaultText="About Me" />
+                  {pathname.startsWith('/about') && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-brand-500 rounded-full" />}
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* ------------------- Right: CTA Buttons & Hamburger ------------------- */}
+          <div className="flex items-center justify-end shrink-0 w-auto lg:w-1/4 gap-3">
             <Link
               href="/login"
               id="navbar-login-btn"
-              className="btn-ghost text-sm px-4 py-2"
+              className="hidden lg:inline-flex btn-ghost text-sm px-4 py-2"
             >
               <EditableBlock settingKey="nav_login_label" defaultText={settings.nav_login_label || "Admin"} />
             </Link>
             <a
               href="#contact"
               id="navbar-contact-btn"
-              className="btn-gradient text-sm px-4 py-2"
+              className="hidden lg:inline-flex btn-gradient text-sm px-4 py-2"
             >
               <EditableBlock settingKey="nav_contact_label" defaultText={settings.nav_contact_label || "Contact Me"} />
             </a>
@@ -134,7 +269,7 @@ export default function Navbar({ settings = {} }) {
           {/* ------------------- Mobile Hamburger ------------------- */}
           <button
             id="navbar-mobile-menu-btn"
-            className="md:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+            className="lg:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label="Toggle mobile menu"
             aria-expanded={isMobileMenuOpen}
@@ -149,44 +284,46 @@ export default function Navbar({ settings = {} }) {
 
         {/* ------------------- Mobile Menu ------------------- */}
         <div
-          className={`md:hidden overflow-hidden transition-all duration-500 ease-in-out ${
+          className={`lg:hidden overflow-hidden transition-all duration-500 ease-in-out ${
             isMobileMenuOpen ? 'max-h-screen opacity-100 py-4' : 'max-h-0 opacity-0'
           }`}
         >
           <div className="bg-surface-900/98 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 mt-2 space-y-1 shadow-2xl">
+            
+            {/* Note: Mobile search is now in the main header, but we can keep a larger one here if needed, or remove it. I'll remove it to avoid duplicate states or keep it simple. */}
             <a
-              href="#hero"
+              href="/#hero"
               onClick={() => setIsMobileMenuOpen(false)}
               className={`block px-4 py-3 rounded-xl transition-all duration-300 font-medium ${
-                activeSection === 'hero' 
+                pathname === '/' 
                   ? 'text-white bg-brand-500/20 border border-brand-500/30' 
                   : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
             >
               <EditableBlock settingKey="nav_link_1" defaultText="Home" />
             </a>
-            <a
-              href="#products"
+            <Link
+              href="/products"
               onClick={() => setIsMobileMenuOpen(false)}
               className={`block px-4 py-3 rounded-xl transition-all duration-300 font-medium ${
-                activeSection === 'products' 
+                pathname.startsWith('/products') 
                   ? 'text-white bg-brand-500/20 border border-brand-500/30' 
                   : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
             >
               <EditableBlock settingKey="nav_link_2" defaultText="Products" />
-            </a>
-            <a
-              href="#contact"
+            </Link>
+            <Link
+              href="/about"
               onClick={() => setIsMobileMenuOpen(false)}
               className={`block px-4 py-3 rounded-xl transition-all duration-300 font-medium ${
-                activeSection === 'contact' 
+                pathname.startsWith('/about') 
                   ? 'text-white bg-brand-500/20 border border-brand-500/30' 
                   : 'text-gray-400 hover:text-white hover:bg-white/5'
               }`}
             >
               <EditableBlock settingKey="nav_link_3" defaultText="About Me" />
-            </a>
+            </Link>
             
             <div className="pt-2 border-t border-white/10 flex flex-col gap-2">
               <Link

@@ -47,7 +47,7 @@ function createR2Client() {
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024
 const MAX_VIDEO_SIZE = 500 * 1024 * 1024
-const ALLOWED_FOLDERS = new Set(['products', 'settings', 'videos', 'banners'])
+const ALLOWED_FOLDERS = new Set(['products', 'settings', 'videos', 'banners', 'hero', 'profile', 'logo', 'about'])
 
 function sanitizeFilename(filename) {
   return filename.replace(/[\\/:*?"<>|]+/g, '-').replace(/\s+/g, '-')

@@ -168,3 +168,11 @@ enum BannerType {
   HERO
   PROFILE
 }
+
+model SearchLog {
+  id        String   @id @default(cuid())
+  query     String
+  createdAt DateTime @default(now())
+
+  @@map("search_logs")
+}

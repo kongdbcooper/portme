@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server'
 import { decrypt } from './lib/session'
 
-// กำหนดเส้นทางต่างๆ ในระบบให้สอดคล้องกับไฟล์ API ของคุณ
+// กำหนดเส้นทางต่างๆ ในระบบ
 const PUBLIC_ROUTES = ['/login', '/signup']
-const AUTH_API_ROUTES = ['/api/auth/login', '/api/auth/logout', '/api/auth/me']
 const ADMIN_PATHS = ['/admin', '/api/admin'] // สำหรับ UI และ CRUD API ของ Admin
 
 /**
@@ -40,7 +39,7 @@ function validateCSRF(req) {
 }
 
 /**
- * Main Proxy Function — Next.js 16+ Standard
+ * Next.js 16 Standard Proxy (Interception Layer)
  */
 export async function proxy(req) {
   const { pathname } = req.nextUrl
@@ -130,7 +129,6 @@ export async function proxy(req) {
 
 /**
  * Matcher Configuration
- * กำหนดขอบเขตการทำงานของ Proxy ให้ครอบคลุมทุกส่วน ยกเว้นไฟล์ static
  */
 export const config = {
   matcher: [
