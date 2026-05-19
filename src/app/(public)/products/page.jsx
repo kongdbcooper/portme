@@ -3,7 +3,7 @@
 // แสดงสินค้าทั้งหมด แยกตามหมวดหมู่
 // =============================================================================
 
-import { prisma } from '@/lib/prisma'
+import { getCachedProducts } from '@/lib/products-cache'
 import Link from 'next/link'
 import Image from 'next/image'
 
@@ -20,11 +20,8 @@ export default async function AllProductsPage({ searchParams }) {
   const resolvedSearchParams = await searchParams
   const categoryParam = resolvedSearchParams?.category || 'all'
 
-  // ดึงสินค้าทั้งหมดที่ใช้งานอยู่
-  const products = await prisma.product.findMany({
-    where: { isActive: true },
-    orderBy: { createdAt: 'desc' },
-  })
+  // ดึงสินค้าทั้งหมดที่ใช้งานอยู่ ผ่าน caching layer (ความเร็วระดับ ms)
+  const products = await getCachedProducts('all')
 
   // สร้างรายการหมวดหมู่ที่ไม่ซ้ำ
   const categories = ['all', ...new Set(products.map(p => p.category).filter(Boolean))]
@@ -79,7 +76,7 @@ export default async function AllProductsPage({ searchParams }) {
             {filteredProducts.map(product => (
               <div key={product.id} className="glass-card group flex flex-col h-full hover:border-brand-500/50 transition-all duration-300">
                 {/* Product Image */}
-                <div className="relative w-full aspect-[4/3] bg-surface-800 overflow-hidden">
+                <Link href={`/products/${product.id}`} className="relative block w-full aspect-[4/3] bg-surface-800 overflow-hidden cursor-pointer">
                   {product.imageUrl ? (
                     <img
                       src={product.imageUrl}
@@ -99,22 +96,29 @@ export default async function AllProductsPage({ searchParams }) {
                       </span>
                     </div>
                   )}
-                </div>
+                </Link>
 
                 {/* Product Info */}
                 <div className="p-6 flex flex-col flex-grow">
-                  <h3 className="text-xl font-bold text-white mb-2 line-clamp-1" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                    {product.name}
-                  </h3>
+                  <Link href={`/products/${product.id}`}>
+                    <h3 className="text-xl font-bold text-white mb-2 line-clamp-1 hover:text-brand-400 transition-colors" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                      {product.name}
+                    </h3>
+                  </Link>
                   <p className="text-gray-400 text-sm line-clamp-2 mb-4 flex-grow">
                     {product.description || 'ไม่มีรายละเอียดสินค้า'}
                   </p>
                   
-                  <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5">
+                  <div className="flex items-center justify-between mt-auto pt-4 border-t border-white/5 gap-2">
                     <span className="text-xl font-black text-brand-400">
                       ฿{Number(product.price).toLocaleString('th-TH')}
                     </span>
-                    <ProductTrackerButton product={product} />
+                    <Link 
+                      href={`/products/${product.id}`}
+                      className="px-4 py-2 rounded-xl text-sm font-semibold border border-brand-500/30 bg-brand-500/10 text-brand-300 hover:bg-brand-500 hover:text-white transition-all duration-300 active:scale-95"
+                    >
+                      ดูรายละเอียด
+                    </Link>
                   </div>
                 </div>
               </div>

@@ -186,20 +186,23 @@ export default function ProfileSection({ settings = {}, banners = [], loading = 
                   {/* Background Glow */}
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-brand-500/10 rounded-full blur-[150px] scale-90 group-hover:scale-110 transition-transform duration-1000 pointer-events-none" />
                   
-                  {/* The Image Container */}
-                  <div className="relative w-full max-w-md lg:max-w-2xl aspect-[4/5] lg:aspect-square rounded-[3rem] overflow-hidden shadow-2xl bg-white/5 border border-white/10">
+                  {/* The Image Container - Adaptive to image's natural aspect ratio */}
+                  <div className="relative w-full max-w-md lg:max-w-2xl flex items-center justify-center">
                     {profileImages.length > 0 ? (
-                        <Image
-                          src={profileImages[profileIndex]?.imageUrl || profileImages[profileIndex]?.url || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjNWE2YmZmIi8+PC9zdmc+'}
-                          alt="Current Showcase"
-                          fill
-                          sizes="(max-width: 1024px) 100vw, 1200px"
-                          className="object-cover transition-transform duration-700 hover:scale-105"
-                          priority
-                          unoptimized
+                      <div className="relative w-auto max-w-full h-auto max-h-[75vh] rounded-[2rem] sm:rounded-[3rem] overflow-hidden shadow-2xl border border-white/10 flex items-center justify-center">
+                        {/* Blurred background backing for horizontal/vertical banner fit */}
+                        <div 
+                          className="absolute inset-0 bg-cover bg-center blur-3xl opacity-35 scale-110 pointer-events-none"
+                          style={{ backgroundImage: `url(${profileImages[profileIndex]?.imageUrl || profileImages[profileIndex]?.url})` }}
                         />
+                        <img
+                          src={profileImages[profileIndex]?.imageUrl || profileImages[profileIndex]?.url}
+                          alt="Current Showcase"
+                          className="relative z-10 max-w-full h-auto max-h-[75vh] object-contain transition-transform duration-700 hover:scale-102"
+                        />
+                      </div>
                     ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-brand-500/10 to-transparent" />
+                      <div className="w-full aspect-square rounded-[3rem] bg-gradient-to-br from-brand-500/10 to-transparent border border-white/10" />
                     )}
                   </div>
 

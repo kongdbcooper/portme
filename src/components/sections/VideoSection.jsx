@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
 import EditableBlock from '../admin/EditableBlock'
 
 // ------------------- 3D Tilt Card Component -------------------
-function TiltCard({ children, className, style, onClick, isActive }) {
+function TiltCard({ children, className, style, onClick }) {
   const cardRef = useRef(null)
   const [tilt, setTilt] = useState({ rotateX: 0, rotateY: 0 })
   const [isHovered, setIsHovered] = useState(false)
@@ -35,7 +35,7 @@ function TiltCard({ children, className, style, onClick, isActive }) {
   return (
     <div
       ref={cardRef}
-      className={`${className}`}
+      className={`${className} relative transition-all duration-500`}
       onClick={onClick}
       onMouseMove={handleMouseMove}
       onMouseEnter={handleMouseEnter}
@@ -48,27 +48,40 @@ function TiltCard({ children, className, style, onClick, isActive }) {
         perspective: '1000px',
         transformStyle: 'preserve-3d',
         transform: isHovered && typeof window !== 'undefined' && window.innerWidth >= 768
-          ? `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale3d(1.05, 1.05, 1.05)`
+          ? `rotateX(${tilt.rotateX}deg) rotateY(${tilt.rotateY}deg) scale3d(1.03, 1.03, 1.03)`
           : 'rotateX(0) rotateY(0) scale3d(1, 1, 1)',
         transition: isHovered ? 'transform 0.1s ease-out' : 'transform 0.5s ease-out',
         zIndex: 1,
       }}
     >
+      <div 
+        className="absolute inset-0 z-30 pointer-events-none transition-opacity duration-500 rounded-xl sm:rounded-[2rem]"
+        style={{
+          background: isHovered 
+            ? `radial-gradient(280px circle at ${glowPos.x}% ${glowPos.y}%, rgba(249, 115, 22, 0.15), rgba(90, 107, 255, 0.05), transparent 70%)` 
+            : 'none',
+          opacity: isHovered ? 1 : 0
+        }}
+      />
       {children}
     </div>
   )
 }
 
-// ------------------- Video Thumbnail Component -------------------
+// ------------------- VideoThumbnail Component -------------------
 function VideoThumbnail({ video }) {
+  const [isPlaying, setIsPlaying] = useState(false)
   const videoRef = useRef(null)
 
   const handleMouseEnter = () => {
+    setIsPlaying(true)
     if (videoRef.current) {
-      videoRef.current.play().catch((e) => console.log('Autoplay blocked:', e))
+      videoRef.current.play().catch(() => {})
     }
   }
+
   const handleMouseLeave = () => {
+    setIsPlaying(false)
     if (videoRef.current) {
       videoRef.current.pause()
       videoRef.current.currentTime = 0
@@ -77,24 +90,32 @@ function VideoThumbnail({ video }) {
 
   return (
     <div
-      className="h-48 sm:h-72 overflow-hidden bg-transparent relative transition-colors"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onTouchStart={handleMouseEnter}
-      onTouchEnd={handleMouseLeave}
+      className="relative aspect-video w-full overflow-hidden bg-black/40"
     >
+      {video.thumbnail ? (
+        <img
+          src={video.thumbnail}
+          alt={video.title}
+          className={`w-full h-full object-cover transition-transform duration-700 ${isPlaying ? 'scale-105 opacity-0' : 'scale-100 opacity-100'}`}
+        />
+      ) : null}
+      
       <video
         ref={videoRef}
         src={video.videoUrl}
         muted
-        loop
         playsInline
-        className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110"
+        loop
+        preload="metadata"
+        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${isPlaying ? 'opacity-100' : 'opacity-0'}`}
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0f]/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-90 group-hover:scale-100">
-        <div className="w-16 h-16 rounded-full bg-brand-500/80 backdrop-blur-md flex items-center justify-center hover:bg-brand-500 transition-all shadow-lg shadow-brand-500/30">
-          <svg className="w-8 h-8 text-white fill-white ml-1" viewBox="0 0 24 24">
+      
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-brand-500/80 backdrop-blur-md flex items-center justify-center hover:bg-brand-500 transition-all shadow-lg shadow-brand-500/30">
+          <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white fill-white ml-0.5 sm:ml-1" viewBox="0 0 24 24">
             <path d="M8 5v14l11-7z" />
           </svg>
         </div>
@@ -115,19 +136,34 @@ export default function VideoSection({ initialVideos = [] }) {
   const [isPaused, setIsPaused] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   
-  const scrollRef = useRef(null)
+  const [centerIndex, setCenterIndex] = useState(0)
+  const [windowWidth, setWindowWidth] = useState(1200)
+
   const playerRef = useRef(null)
   const videoElementRef = useRef(null)
-  const autoScrollRef = useRef(null)
-  const scrollSpeed = 1
 
-  // Fix: คำนวณหา 4 วิดีโอแนะนำที่ไม่ซ้ำกับตัวที่กำลังเล่นอยู่
-  const relatedVideos = useMemo(() => {
-    return videos
-      .filter(v => v.id !== selectedVideo?.id)
-      .slice(0, 4)
-  }, [videos, selectedVideo])
+  // Track window resizing for 3D layout offsets
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setWindowWidth(window.innerWidth)
+      const handleResize = () => setWindowWidth(window.innerWidth)
+      window.addEventListener('resize', handleResize)
+      return () => window.removeEventListener('resize', handleResize)
+    }
+  }, [])
 
+  // Sync videos if initialVideos changes
+  useEffect(() => {
+    if (initialVideos.length > 0) {
+      setVideos(initialVideos)
+      setCenterIndex(Math.floor(initialVideos.length / 2))
+      if (!selectedVideo) {
+        setSelectedVideo(initialVideos[0])
+      }
+    }
+  }, [initialVideos])
+
+  // Fetch videos if NOT provided as props
   useEffect(() => {
     if (initialVideos.length > 0) return
 
@@ -138,6 +174,7 @@ export default function VideoSection({ initialVideos = [] }) {
           const data = await res.json()
           const activeVideos = (data.videos || []).filter(v => v.isActive)
           setVideos(activeVideos)
+          setCenterIndex(Math.floor(activeVideos.length / 2))
           if (activeVideos.length > 0 && !selectedVideo) {
             setSelectedVideo(activeVideos[0])
           }
@@ -149,45 +186,95 @@ export default function VideoSection({ initialVideos = [] }) {
       }
     }
     fetchVideos()
-  }, [initialVideos.length, selectedVideo])
+  }, [initialVideos.length])
 
+  // Auto-rotate center card every 4 seconds
   useEffect(() => {
-    if (isPaused || !scrollRef.current || videos.length <= 3) return
+    if (isPaused || videos.length <= 1) return
 
-    const container = scrollRef.current
-    let animationId
+    const interval = setInterval(() => {
+      setCenterIndex((prev) => (prev + 1) % videos.length)
+    }, 4000)
 
-    const step = () => {
-      if (!container) return
-      container.scrollLeft += scrollSpeed
-      if (container.scrollLeft >= container.scrollWidth - container.clientWidth - 2) {
-        container.scrollLeft = 0
-      }
-      animationId = requestAnimationFrame(step)
-    }
+    return () => clearInterval(interval)
+  }, [isPaused, videos.length])
 
-    animationId = requestAnimationFrame(step)
-    autoScrollRef.current = animationId
-
-    return () => {
-      if (animationId) cancelAnimationFrame(animationId)
-    }
-  }, [isPaused, videos])
-
-  const scrollBy = (direction) => {
-    if (!scrollRef.current) return
+  // Rotate manually using arrows or card clicks
+  const rotateBy = (direction) => {
     setIsPaused(true)
-    setTimeout(() => setIsPaused(false), 5000)
+    setTimeout(() => setIsPaused(false), 8000) // Hold auto-scroll for 8 seconds
 
-    const cardWidth = window.innerWidth < 640 ? window.innerWidth * 0.85 : 380
-    const gap = window.innerWidth < 640 ? 16 : 32
-    const scrollAmount = (cardWidth + gap) * direction
-
-    scrollRef.current.scrollBy({
-      left: scrollAmount,
-      behavior: 'smooth',
+    setCenterIndex((prev) => {
+      const nextIdx = prev + direction
+      if (nextIdx < 0) return videos.length - 1
+      if (nextIdx >= videos.length) return 0
+      return nextIdx
     })
   }
+
+  // Calculate circular offset relative to centerIndex
+  const getOffset = (index) => {
+    let offset = index - centerIndex
+    if (offset < -Math.floor(videos.length / 2)) {
+      offset += videos.length
+    } else if (offset > Math.floor(videos.length / 2)) {
+      offset -= videos.length
+    }
+    return offset
+  }
+
+  // Generate 3D transform matrices dynamically based on screen sizes
+  const getCardStyle = (offset) => {
+    const isMobile = windowWidth < 640
+    const isTablet = windowWidth >= 640 && windowWidth < 1024
+    
+    let xOffset = 300
+    let scaleStep = 0.15
+    let rotateYDeg = 30
+    
+    if (isMobile) {
+      xOffset = 100
+      scaleStep = 0.15
+      rotateYDeg = 15
+    } else if (isTablet) {
+      xOffset = 210
+      scaleStep = 0.15
+      rotateYDeg = 25
+    }
+    
+    const absOffset = Math.abs(offset)
+    
+    // Hide cards that are beyond 2 offsets (out of 5 visible slots)
+    if (absOffset > 2) {
+      return {
+        transform: `translateX(${offset > 0 ? 120 : -120}%) scale(0.4) rotateY(${offset > 0 ? -40 : 40}deg) translateZ(-300px)`,
+        opacity: 0,
+        zIndex: 0,
+        pointerEvents: 'none',
+      }
+    }
+    
+    const translateX = offset * xOffset
+    const scale = 1 - absOffset * scaleStep
+    const rotateY = -offset * rotateYDeg
+    const opacity = absOffset === 0 ? 1 : absOffset === 1 ? 0.85 : 0.4
+    const zIndex = 30 - absOffset * 10
+    
+    return {
+      transform: `translateX(${translateX}px) scale(${scale}) rotateY(${rotateY}deg) translateZ(${-absOffset * 100}px)`,
+      opacity,
+      zIndex,
+      pointerEvents: 'auto',
+      transition: 'all 0.8s cubic-bezier(0.25, 1, 0.5, 1)',
+    }
+  }
+
+  // Fix: คำนวณหา 4 วิดีโอแนะนำที่ไม่ซ้ำกับตัวที่กำลังเล่นอยู่
+  const relatedVideos = useMemo(() => {
+    return videos
+      .filter(v => v.id !== selectedVideo?.id)
+      .slice(0, 4)
+  }, [videos, selectedVideo])
 
   const handleCardClick = (video) => {
     setSelectedVideo(video)
@@ -222,7 +309,6 @@ export default function VideoSection({ initialVideos = [] }) {
 
   return (
     <section className="py-24 bg-[#0a0a0f] overflow-hidden relative" id="videos">
-      {}
       <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-b from-[#0a0a0f]/70 to-transparent z-10 pointer-events-none" />
       <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-[#0a0a0f]/40 via-[#0a0a0f]/12 to-transparent z-10 pointer-events-none" />
 
@@ -249,7 +335,6 @@ export default function VideoSection({ initialVideos = [] }) {
           </div>
         </div>
 
-        {}
         {loading ? (
           <div className="flex items-center justify-center h-64">
             <div className="w-12 h-12 border-4 border-brand-500 border-t-transparent rounded-full animate-spin" />
@@ -261,7 +346,7 @@ export default function VideoSection({ initialVideos = [] }) {
         ) : (
           <div className="relative mb-32">
             <button
-              onClick={() => scrollBy(-1)}
+              onClick={() => rotateBy(-1)}
               className="absolute -left-4 md:-left-12 lg:-left-28 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-surface-800/90 backdrop-blur-2xl border border-white/10 flex items-center justify-center text-brand-300 hover:bg-brand-500 hover:border-brand-500 hover:text-white transition-all duration-300 active:scale-90 shadow-3xl pointer-events-auto group"
               aria-label="Previous"
             >
@@ -270,47 +355,71 @@ export default function VideoSection({ initialVideos = [] }) {
               </svg>
             </button>
 
-             <div
-               ref={scrollRef}
-               onMouseEnter={() => setIsPaused(true)}
-               onMouseLeave={() => setIsPaused(false)}
-               className="flex gap-3 sm:gap-8 overflow-x-auto scrollbar-hide scroll-smooth px-3 sm:px-2 py-8 touch-pan-x"
-               style={{
-                 scrollbarWidth: 'none',
-                 msOverflowStyle: 'none',
-                 WebkitOverflowScrolling: 'touch',
-               }}
-             >
-               {videos.map((video) => (
-                 <TiltCard
-                   key={video.id}
-                   onClick={() => handleCardClick(video)}
-                   isActive={selectedVideo?.id === video.id}
-                   className="relative group cursor-pointer rounded-xl sm:rounded-[2rem] overflow-hidden transition-all duration-500 flex-shrink-0 w-[70vw] sm:w-[380px]"
-                 >
-                   <VideoThumbnail video={video} />
-                   <div className="p-3 sm:p-8 relative z-20">
-                     <h3 className="text-base sm:text-2xl font-bold text-white mb-2 sm:mb-3 group-hover:text-brand-400 transition-colors duration-300 line-clamp-1">
-                       {video.title}
-                     </h3>
-                     <p className="text-gray-400 mb-3 sm:mb-6 h-8 sm:h-12 overflow-hidden text-xs sm:text-sm leading-relaxed line-clamp-2">
-                       {video.description || 'Watch this amazing video showcase.'}
-                     </p>
-                    <div className="flex justify-between items-center">
-                      <span className="text-xs font-bold text-brand-500/80 uppercase tracking-widest">
-                        <EditableBlock settingKey="video_card_cta_hint" defaultText="Click to play" />
-                      </span>
-                      <div className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-brand-500 transition-colors">
-                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                      </div>
+            {/* ---- 3D Coverflow Container ---- */}
+            <div
+              className="relative w-full h-[320px] sm:h-[450px] lg:h-[480px] flex items-center justify-center overflow-visible select-none"
+              style={{ perspective: '1200px', transformStyle: 'preserve-3d' }}
+              onMouseEnter={() => setIsPaused(true)}
+              onMouseLeave={() => setIsPaused(false)}
+              onTouchStart={() => setIsPaused(true)}
+              onTouchEnd={() => setIsPaused(false)}
+            >
+              {videos.map((video, idx) => {
+                const offset = getOffset(idx)
+                const style = getCardStyle(offset)
+                const isActive = offset === 0
+
+                return (
+                  <div
+                    key={video.id}
+                    style={style}
+                    className="absolute transition-all duration-700 ease-out w-[240px] sm:w-[380px] h-full"
+                    onClick={() => {
+                      if (!isActive) {
+                        rotateBy(offset)
+                      } else {
+                        handleCardClick(video)
+                      }
+                    }}
+                  >
+                    <div
+                      style={{
+                        animation: 'breathScale 6s ease-in-out infinite',
+                        animationDelay: `${idx * 0.5}s`
+                      }}
+                      className="w-full h-full"
+                    >
+                      <TiltCard
+                        onClick={() => {}}
+                        isActive={selectedVideo?.id === video.id}
+                        className="w-full h-full relative group cursor-pointer rounded-xl sm:rounded-[2rem] overflow-hidden bg-gradient-to-br from-surface-950/90 to-surface-900/70 border border-white/5 shadow-[0_0_20px_rgba(249,115,22,0.03)] hover:border-brand-500/40 hover:shadow-[0_0_45px_rgba(249,115,22,0.22)] focus:outline-none"
+                      >
+                        <VideoThumbnail video={video} />
+                        <div className="p-3 sm:p-8 relative z-20">
+                          <h3 className="text-xs sm:text-2xl font-bold text-white mb-1 sm:mb-3 group-hover:text-brand-400 transition-colors duration-300 line-clamp-1">
+                            {video.title}
+                          </h3>
+                          <p className="text-gray-400 mb-1 sm:mb-6 h-6 sm:h-12 overflow-hidden text-[10px] sm:text-sm leading-relaxed line-clamp-2">
+                            {video.description || 'Watch this amazing video showcase.'}
+                          </p>
+                          <div className="flex justify-between items-center">
+                            <span className="text-[10px] sm:text-xs font-bold text-brand-500/80 uppercase tracking-widest">
+                              <EditableBlock settingKey="video_card_cta_hint" defaultText="Click to play" />
+                            </span>
+                            <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-brand-500 transition-colors">
+                              <svg className="w-3 h-3 sm:w-4 sm:h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                            </div>
+                          </div>
+                        </div>
+                      </TiltCard>
                     </div>
                   </div>
-                </TiltCard>
-              ))}
+                )
+              })}
             </div>
 
             <button
-              onClick={() => scrollBy(1)}
+              onClick={() => rotateBy(1)}
               className="absolute -right-4 md:-right-12 lg:-right-28 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-surface-800/90 backdrop-blur-2xl border border-white/10 flex items-center justify-center text-brand-300 hover:bg-brand-500 hover:border-brand-500 hover:text-white transition-all duration-300 active:scale-90 shadow-3xl pointer-events-auto group"
               aria-label="Next"
             >
@@ -322,7 +431,6 @@ export default function VideoSection({ initialVideos = [] }) {
         )}
 
         {/* ================= 2. DEDICATED PLAYER AREA ================= */}
-        {}
         <div ref={playerRef} className="pt-20 scroll-mt-20">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
@@ -338,7 +446,7 @@ export default function VideoSection({ initialVideos = [] }) {
 
           {selectedVideo && (
             <div className="relative w-full max-w-[95%] lg:max-w-[85%] mx-auto group">
-              <div className="relative aspect-video bg-black rounded-[2rem] md:rounded-[4rem] overflow-hidden shadow-[0_0_120px_rgba(90,107,255,0.2)] border border-white/10 animate-fade-in">
+              <div className="relative w-full bg-[#0a0a0f]/60 rounded-[2rem] md:rounded-[4rem] overflow-hidden shadow-[0_0_120px_rgba(90,107,255,0.15)] border border-white/10 animate-fade-in flex items-center justify-center">
                 
                 <video
                   ref={videoElementRef}
@@ -348,7 +456,7 @@ export default function VideoSection({ initialVideos = [] }) {
                   onPlay={() => setIsPlaying(true)}
                   onPause={() => setIsPlaying(false)}
                   onEnded={handleVideoEnd}
-                  className={`w-full h-full object-contain ${showRelated ? 'opacity-30 scale-95' : 'opacity-100 scale-100'} transition-all duration-700`}
+                  className={`w-full h-auto max-h-[75vh] md:max-h-[85vh] object-contain ${showRelated ? 'opacity-30 scale-95' : 'opacity-100 scale-100'} transition-all duration-700`}
                 />
 
                 {/* Play button overlay — visible when video is NOT playing */}
@@ -365,7 +473,6 @@ export default function VideoSection({ initialVideos = [] }) {
                   </div>
                 )}
 
-                {}
                 {showRelated && (
                   <div className="absolute inset-0 z-40 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center p-4 md:p-8 animate-in fade-in duration-500">
                     <button 
@@ -386,7 +493,6 @@ export default function VideoSection({ initialVideos = [] }) {
                           onClick={() => handleCardClick(video)}
                           className="cursor-pointer group/item flex flex-col"
                         >
-                          {}
                           <div className="aspect-video bg-white/5 rounded-lg md:rounded-xl overflow-hidden mb-2 ring-1 ring-white/10 group-hover/item:ring-brand-500 transition-all shadow-xl relative">
                              {video.thumbnail ? (
                                <img 
@@ -406,7 +512,7 @@ export default function VideoSection({ initialVideos = [] }) {
                                    e.currentTarget.pause();
                                    e.currentTarget.currentTime = 0;
                                  }}
-                               />
+                                />
                              )}
                              <div className="absolute inset-0 bg-black/20 group-hover/item:bg-transparent transition-colors" />
                              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-opacity">
@@ -434,7 +540,6 @@ export default function VideoSection({ initialVideos = [] }) {
                   </div>
                 )}
                 
-                {}
                 {!showRelated && (
                   <>
                     <button 
@@ -453,7 +558,6 @@ export default function VideoSection({ initialVideos = [] }) {
                 )}
               </div>
 
-              {}
               <div className="mt-10 flex flex-col md:flex-row justify-between items-start gap-8 px-4">
                 <div className="flex-1">
                   <h3 className="text-3xl font-black text-white mb-4 tracking-tight">{selectedVideo.title}</h3>

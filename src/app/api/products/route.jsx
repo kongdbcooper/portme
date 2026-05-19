@@ -10,6 +10,7 @@ export const runtime = 'nodejs';
 import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
+import { getCachedProducts } from '@/lib/products-cache'
 import { requireAdmin } from '@/lib/auth'
 import { revalidateTag, revalidatePath } from 'next/cache'
 
@@ -61,16 +62,26 @@ export async function GET(request) {
     // จะไม่ใช้ pagination
     const isPaginationEnabled = limit <= 100
 
-    const [products, total] = await Promise.all([
-      prisma.product.findMany({
-        where,
-        orderBy: { createdAt: 'desc' },
-        skip: isPaginationEnabled ? (page - 1) * limit : 0,
-        take: limit,
-        include: { images: { orderBy: { order: 'asc' } } },
-      }),
-      prisma.product.count({ where }),
-    ])
+    let products
+    let total
+
+    if (!adminView && !q && !isPaginationEnabled) {
+      products = await getCachedProducts(category || 'all')
+      total = products.length
+    } else {
+      const [dbProducts, dbTotal] = await Promise.all([
+        prisma.product.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          skip: isPaginationEnabled ? (page - 1) * limit : 0,
+          take: limit,
+          include: { images: { orderBy: { order: 'asc' } } },
+        }),
+        prisma.product.count({ where }),
+      ])
+      products = dbProducts
+      total = dbTotal
+    }
 
     return new NextResponse(JSON.stringify({
       products,
