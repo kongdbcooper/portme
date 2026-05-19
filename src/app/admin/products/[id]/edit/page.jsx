@@ -24,7 +24,10 @@ export default async function EditProductPage({ params }) {
   const { id } = await params
 
   // ดึงข้อมูลโปรดักซ์จาก database
-  const product = await prisma.product.findUnique({ where: { id } })
+  const product = await prisma.product.findUnique({
+    where: { id },
+    include: { images: { orderBy: { order: 'asc' } } }
+  })
 
   // ถ้าไม่พบ → 404
   if (!product) notFound()
