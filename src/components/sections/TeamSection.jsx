@@ -172,9 +172,9 @@ export default function TeamSection({ settings = {} }) {
               className="font-black uppercase"
               style={{ 
                 fontFamily: 'Outfit, sans-serif',
-                fontSize: '20rem',
+                fontSize: '22rem',
                 letterSpacing: '0.15em',
-                transform: 'scaleY(1.1)',
+                transform: 'scaleY(1.3)',
                 transformOrigin: 'bottom'
               }}
               fill="url(#glow-grad)"
@@ -189,9 +189,9 @@ export default function TeamSection({ settings = {} }) {
               className="font-black uppercase"
               style={{ 
                 fontFamily: 'Outfit, sans-serif',
-                fontSize: '20rem',
+                fontSize: '22rem',
                 letterSpacing: '0.15em',
-                transform: 'scaleY(1.1)',
+                transform: 'scaleY(1.3)',
                 transformOrigin: 'bottom'
               }}
               fill="url(#glow-grad)"
