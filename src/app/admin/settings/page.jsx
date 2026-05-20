@@ -5,6 +5,117 @@ import { useRouter } from 'next/navigation'
 import ImageUploader from '@/components/admin/ImageUploader'
 import Image from 'next/image'
 
+function AdminTeamMemberCard({ member, onUpdate, onRemove, isGlobalSaving }) {
+  const [localData, setLocalData] = useState({
+    name: member.name || '',
+    role: member.role || '',
+    desc: member.desc || '',
+    url: member.url || '',
+    key: member.key || ''
+  });
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Sync with prop changes if modified externally
+  useEffect(() => {
+    setLocalData({
+      name: member.name || '',
+      role: member.role || '',
+      desc: member.desc || '',
+      url: member.url || '',
+      key: member.key || ''
+    });
+  }, [member]);
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    setSaveSuccess(false);
+    await onUpdate(member.id, localData);
+    setIsSaving(false);
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 2000);
+  };
+
+  const handleImageUpdate = ({ url, key }) => {
+    setLocalData(prev => ({ ...prev, url, key }));
+  };
+
+  return (
+    <div className="p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col gap-4 relative group">
+      <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-black/40 group/image">
+        <Image
+          src={localData.url}
+          alt={localData.name || 'Team member'}
+          fill
+          className="object-cover"
+          unoptimized
+        />
+        {/* Overlay to change image */}
+        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/image:opacity-100 transition-opacity flex flex-col items-center justify-center p-4">
+          <span className="text-white text-xs font-bold mb-2">เปลี่ยนรูปภาพ</span>
+          <ImageUploader folder="about" onUpload={handleImageUpdate} />
+        </div>
+      </div>
+      
+      <div className="space-y-3 flex-1">
+        <div>
+          <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">ชื่อสมาชิก</label>
+          <input
+            type="text"
+            value={localData.name}
+            onChange={(e) => setLocalData({ ...localData, name: e.target.value })}
+            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:border-brand-500 focus:outline-none transition-colors"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">ตำแหน่ง</label>
+          <input
+            type="text"
+            value={localData.role}
+            onChange={(e) => setLocalData({ ...localData, role: e.target.value })}
+            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:border-brand-500 focus:outline-none transition-colors"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">คำอธิบาย</label>
+          <textarea
+            value={localData.desc}
+            onChange={(e) => setLocalData({ ...localData, desc: e.target.value })}
+            rows={2}
+            className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:border-brand-500 focus:outline-none transition-colors resize-none"
+          />
+        </div>
+
+        <div className="flex gap-2 pt-2">
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isSaving || isGlobalSaving}
+            className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all disabled:opacity-50 border ${
+              saveSuccess 
+                ? 'bg-green-500 text-white border-green-500' 
+                : 'bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white border-emerald-500/20'
+            }`}
+          >
+            {isSaving ? 'กำลังบันทึก...' : saveSuccess ? '✓ บันทึกแล้ว' : 'บันทึกข้อมูล'}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => onRemove(member.id)}
+            disabled={isSaving || isGlobalSaving}
+            className="flex-1 py-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/20 text-xs font-bold transition-all disabled:opacity-50"
+          >
+            ลบสมาชิก
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminSettingsPage() {
   const [settings, setSettings] = useState({})
   const [isLoading, setIsLoading] = useState(true)
@@ -161,6 +272,13 @@ export default function AdminSettingsPage() {
       successText: 'Site logo saved.',
     }, url, key)
 
+  const saveAboutMainImage = (url, key) =>
+    saveMediaSetting({
+      urlKey: 'about_image_url',
+      keyKey: 'about_image_key',
+      successText: 'About Us main image saved.',
+    }, url, key)
+
   const addTeamMember = async (url, key) => {
     setIsSaving(true)
     setMessage({ type: '', text: '' })
@@ -220,7 +338,6 @@ export default function AdminSettingsPage() {
       }
 
       setSettings((prev) => ({ ...prev, about_team_images: JSON.stringify(updated) }))
-      setMessage({ type: 'success', text: 'อัปเดตข้อมูลสมาชิกทีมเรียบร้อยแล้ว' })
       router.refresh()
     } catch (err) {
       setMessage({ type: 'error', text: err.message })
@@ -485,16 +602,57 @@ export default function AdminSettingsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-white">About Us Team Members</h2>
+          <h2 className="text-xl font-bold text-white">About Us Main Image & Team</h2>
         </div>
 
         <div className="p-4 rounded-xl bg-white/5 border border-white/10 mb-4">
           <h3 className="text-sm font-medium text-white mb-2">Where it appears</h3>
           <ul className="text-xs text-gray-400 flex flex-wrap gap-x-6 gap-y-2 list-disc list-inside">
-            <li>The "About Us" page renders these members as high-end 3D tilt cards.</li>
-            <li>Recommended: 4 to 5 members. High-resolution portrait images (aspect ratio 3:4 or 1:1) look best.</li>
+            <li>The "About Us" page renders the main image at the top and team members as 3D tilt cards.</li>
+            <li>Recommended for main image: High-resolution portrait images (aspect ratio 4:5).</li>
             <li>Removing a member automatically deletes their image file from Cloudflare R2.</li>
           </ul>
+        </div>
+
+        {/* About Us Main Image Uploader */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch mb-8">
+          <div className="glass-card p-6 border-brand-500/10">
+            <label className="block text-sm font-medium text-gray-300 mb-4">เปลี่ยนรูปภาพหลักหน้า About Us</label>
+            <ImageUploader
+              folder="about_main"
+              initialImage={settings.about_image_url}
+              onUpload={({ url, key }) => saveAboutMainImage(url, key)}
+            />
+            <p className="text-xs text-gray-500 italic mt-3">แนะนำ: ภาพแนวตั้งอัตราส่วน 4:5 เพื่อให้พอดีกับกรอบรูปบนหน้าเว็บ</p>
+          </div>
+
+          <div className="p-6">
+            <label className="block text-sm font-medium text-gray-400 mb-6">รูปภาพปัจจุบันที่ใช้งานอยู่</label>
+            {settings.about_image_url ? (
+              <div className="space-y-6">
+                <div className="flex justify-center items-center py-4 transition-transform hover:scale-105 duration-500">
+                  <div className="relative w-full max-w-[280px] aspect-[4/5] rounded-xl overflow-hidden shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+                    <Image
+                      src={settings.about_image_url}
+                      alt="About Main"
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center justify-center gap-2 text-green-400 font-medium">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <span className="text-xs uppercase tracking-widest">Active on Site</span>
+                </div>
+              </div>
+            ) : (
+              <div className="aspect-[4/5] w-full max-w-[240px] mx-auto border-2 border-dashed border-white/5 rounded-3xl flex flex-col items-center justify-center text-gray-600">
+                <span className="text-4xl mb-3 opacity-20">🖼️</span>
+                <p className="text-xs font-medium opacity-40">ใช้รูปภาพเริ่มต้น</p>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="space-y-6">
@@ -509,71 +667,13 @@ export default function AdminSettingsPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {settings.about_team_images && JSON.parse(settings.about_team_images).length > 0 ? (
               JSON.parse(settings.about_team_images).map((member) => (
-                <div key={member.id} className="p-6 rounded-2xl bg-white/5 border border-white/10 flex flex-col gap-4 relative group">
-                  <div className="relative aspect-[3/4] w-full rounded-xl overflow-hidden bg-black/40">
-                    <Image
-                      src={member.url}
-                      alt={member.name || 'Team member'}
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
-                  </div>
-                  
-                  <div className="space-y-3 flex-1">
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">ชื่อสมาชิก</label>
-                      <input
-                        type="text"
-                        value={member.name || ''}
-                        onChange={(e) => updateTeamMember(member.id, { name: e.target.value })}
-                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:border-brand-500 focus:outline-none transition-colors"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">ตำแหน่ง</label>
-                      <input
-                        type="text"
-                        value={member.role || ''}
-                        onChange={(e) => updateTeamMember(member.id, { role: e.target.value })}
-                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:border-brand-500 focus:outline-none transition-colors"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">คำอธิบาย</label>
-                      <textarea
-                        value={member.desc || ''}
-                        onChange={(e) => updateTeamMember(member.id, { desc: e.target.value })}
-                        rows={2}
-                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:border-brand-500 focus:outline-none transition-colors resize-none"
-                      />
-                    </div>
-
-                    {/* เพิ่มกลุ่มปุ่มกดควบคุม: บันทึก และ ลบสมาชิก */}
-                    <div className="flex gap-2 pt-2">
-                      <button
-                        type="button"
-                        onClick={() => updateTeamMember(member.id, { name: member.name, role: member.role, desc: member.desc })}
-                        disabled={isSaving}
-                        className="flex-1 py-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white border border-emerald-500/20 text-xs font-bold transition-all disabled:opacity-50"
-                      >
-                        {isSaving ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => removeTeamMember(member.id)}
-                        disabled={isSaving}
-                        className="flex-1 py-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/20 text-xs font-bold transition-all disabled:opacity-50"
-                      >
-                        ลบสมาชิก
-                      </button>
-                    </div>
-
-                  </div>
-                </div>
+                <AdminTeamMemberCard
+                  key={member.id}
+                  member={member}
+                  onUpdate={updateTeamMember}
+                  onRemove={removeTeamMember}
+                  isGlobalSaving={isSaving}
+                />
               ))
             ) : (
               <div className="col-span-full py-12 border-2 border-dashed border-white/5 rounded-3xl flex flex-col items-center justify-center text-gray-600">

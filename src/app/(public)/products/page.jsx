@@ -15,7 +15,10 @@ export const metadata = {
 // Revalidate ทุกๆ 60 วินาที
 export const revalidate = 60
 
+
+
 export default async function AllProductsPage({ searchParams }) {
+
   // รับค่าหมวดหมู่จาก URL Query
   const resolvedSearchParams = await searchParams
   const categoryParam = resolvedSearchParams?.category || 'all'

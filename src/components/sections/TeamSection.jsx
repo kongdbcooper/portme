@@ -140,13 +140,13 @@ export default function TeamSection({ settings = {} }) {
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
         
         {/* Background text "TEAM" - curved arc path positioned directly behind the cards */}
-        <div className="absolute top-[15%] -translate-y-1/2 left-1/2 -translate-x-1/2 pointer-events-none select-none z-0 w-full md:w-[120%] max-w-[1600px] aspect-[1600/600] overflow-visible">
-          <svg viewBox="0 0 1600 600" className="w-full h-full overflow-visible">
+        <div className="absolute top-[10%] md:top-[15%] -translate-y-1/2 left-0 w-full pointer-events-none select-none z-0 flex justify-center overflow-visible">
+          <svg viewBox="0 -100 1600 700" className="w-full max-w-[1200px] overflow-visible">
             <defs>
               {/* Volumetric foggy glow layer */}
               <filter id="team-glow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="30" result="blur1" />
-                <feGaussianBlur stdDeviation="15" result="blur2" />
+                <feGaussianBlur stdDeviation="15" result="blur1" />
+                <feGaussianBlur stdDeviation="8" result="blur2" />
                 <feMerge>
                   <feMergeNode in="blur1" />
                   <feMergeNode in="blur2" />
@@ -170,12 +170,13 @@ export default function TeamSection({ settings = {} }) {
             <text 
               filter="url(#team-glow)"
               className="font-black uppercase"
+              fontSize="350"
+              transform="scale(1, 1.3)"
+              transformOrigin="center bottom"
+              opacity="0.5"
               style={{ 
                 fontFamily: 'Outfit, sans-serif',
-                fontSize: '22rem',
                 letterSpacing: '0.15em',
-                transform: 'scaleY(1.3)',
-                transformOrigin: 'bottom'
               }}
               fill="url(#glow-grad)"
             >
@@ -187,12 +188,12 @@ export default function TeamSection({ settings = {} }) {
             {/* Sharp core layer */}
             <text 
               className="font-black uppercase"
+              fontSize="350"
+              transform="scale(1, 1.3)"
+              transformOrigin="center bottom"
               style={{ 
                 fontFamily: 'Outfit, sans-serif',
-                fontSize: '22rem',
                 letterSpacing: '0.15em',
-                transform: 'scaleY(1.3)',
-                transformOrigin: 'bottom'
               }}
               fill="url(#glow-grad)"
             >

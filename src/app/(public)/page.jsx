@@ -22,9 +22,9 @@ export const revalidate = 0
 
 // ------------------- SEO Metadata -------------------
 export const metadata = {
-  title: 'Monkey — แพลตฟอร์มจัดการโปรดักซ์ยุคใหม่',
+  title: 'Monkey — แพลตฟอร์มจัดการโปรดักซ์',
   description:
-    'แพลตฟอร์มจัดการโปรดักซ์สำหรับธุรกิจยุคใหม่ พร้อม Admin Dashboard ' +
+    'แพลตฟอร์มจัดการโปรดักซ์ พร้อม Admin Dashboard ' +
     'ที่ครบครัน อัปโหลดรูปภาพสู่ Cloudflare R2 อัตโนมัติ และ A/B Testing',
   alternates: {
     canonical: process.env.NEXT_PUBLIC_APP_URL,
