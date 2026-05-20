@@ -120,7 +120,7 @@ export default function Sidebar({ user, logoUrl, siteName }) {
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="px-6 py-8 border-b border-white/5">
-        <Link href="/" className="flex items-center gap-4 group">
+        <Link href="/#hero" className="flex items-center gap-4 group">
           <div className="relative h-12 flex items-center">
             {logoUrl ? (
               <img
@@ -139,7 +139,7 @@ export default function Sidebar({ user, logoUrl, siteName }) {
               {siteName || 'Monkey'} <span className="gradient-text">Admin</span>
             </span>
             <span className="text-[10px] uppercase tracking-[0.2em] text-brand-400 font-bold opacity-80">
-              Control Panel
+              Control
             </span>
           </div>
         </Link>

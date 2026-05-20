@@ -11,6 +11,7 @@ import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import BrandLogo from './BrandLogo'
 import EditableBlock from '../admin/EditableBlock'
+import { MdSearch } from 'react-icons/md'
 
 // Navigation links สำหรับ smooth scroll ไปแต่ละ section
 const NAV_LINKS = [
@@ -139,7 +140,7 @@ export default function Navbar({ settings = {} }) {
           {/* ------------------- Left: Logo ------------------- */}
           <div className="flex items-center shrink-0 w-auto lg:w-1/4">
             <BrandLogo
-              href="/"
+              href="/#hero"
               logoUrl={logoUrl}
               siteName={siteName}
               className="flex items-center gap-2 sm:gap-3"
@@ -153,7 +154,7 @@ export default function Navbar({ settings = {} }) {
             {/* Global Search Bar (Responsive) with Autocomplete */}
             <div id="navbar-search-container" className="relative w-full max-w-[160px] sm:max-w-xs md:max-w-xs">
               <form onSubmit={handleSearch} className="relative group">
-                <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-brand-500 transition-colors">🔍</span>
+                <MdSearch size={20} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-brand-500 transition-colors" />
                 <input 
                   type="text" 
                   placeholder="ค้นหา..." 

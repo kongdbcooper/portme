@@ -14,8 +14,8 @@ import AdminHeader from '@/components/admin/AdminHeader'
 
 export const metadata = {
   title: {
-    default: 'Admin Dashboard | PortMe',
-    template: '%s | Admin — PortMe',
+    default: 'Admin Dashboard | Monkey',
+    template: '%s | Admin — Monkey',
   },
   robots: { index: false, follow: false }, // ไม่ให้ Google index หน้า admin
 }

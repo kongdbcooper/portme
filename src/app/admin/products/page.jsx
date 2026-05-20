@@ -12,6 +12,7 @@ import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import Image from 'next/image'
 import DeleteProductButton from './DeleteProductButton'
+import { FaBox } from 'react-icons/fa6'
 
 export const metadata = {
   title: 'จัดการโปรดักซ์',
@@ -93,7 +94,7 @@ export default async function AdminProductsPage({ searchParams }) {
       <div className="glass-card overflow-hidden">
         {products.length === 0 ? (
           <div className="py-16 text-center">
-            <div className="text-5xl mb-3">📦</div>
+            <div className="text-5xl mb-3 flex justify-center text-gray-700"><FaBox /></div>
             <p className="text-gray-500">
               {q ? `ไม่พบโปรดักซ์ที่ตรงกับ "${q}"` : 'ยังไม่มีโปรดักซ์'}
             </p>
@@ -133,7 +134,7 @@ export default async function AdminProductsPage({ searchParams }) {
                               className="w-full h-full object-cover"
                             />
                           ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-600 text-sm">📦</div>
+                            <div className="w-full h-full flex items-center justify-center text-gray-600 text-sm"><FaBox /></div>
                           )}
                         </div>
                       </td>

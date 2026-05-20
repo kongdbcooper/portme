@@ -101,14 +101,6 @@ export default function ProfileSection({ settings = {}, banners = [], loading = 
               <>
                 {/* Left Side — Content */}
                 <div className="space-y-12 lg:space-y-20" style={{ fontFamily: 'Outfit, sans-serif' }}>
-                  <div className="inline-block mb-1">
-                    <EditableBlock 
-                      settingKey="prod_badge" 
-                      defaultText={settings.prod_badge || "Personal Showcase"} 
-                      className="inline-flex items-center gap-4 px-6 py-3 rounded-full bg-brand-500/20 border border-brand-500/40 backdrop-blur-3xl text-brand-300 text-sm font-black uppercase tracking-[0.3em] shadow-2xl empty:hidden"
-                    />
-                  </div>
-
                   <div className="space-y-8 lg:space-y-12">
                     {/* Intro Text - Dynamic per Banner Image */}
                     <div className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black uppercase tracking-tighter leading-none">
@@ -206,8 +198,8 @@ export default function ProfileSection({ settings = {}, banners = [], loading = 
                     )}
                   </div>
 
-                   {/* Consolidated Navigation & CTA Block */}
-                   <div className="relative w-full max-w-sm p-4 rounded-2xl bg-surface-900/80 backdrop-blur-3xl border border-white/10 shadow-3xl z-50">
+                   {/* Navigation Controls - no background frame */}
+                   <div className="relative w-full max-w-sm z-50">
                     <div className="flex justify-between items-center gap-6">
                       {/* Prev Button */}
                       <button

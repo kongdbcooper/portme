@@ -135,18 +135,18 @@ export default function TeamSection({ settings = {} }) {
   }
 
   return (
-    <div className="relative w-full mt-24 py-12 overflow-visible">
+    <div className="relative w-full mt-40 md:mt-64 pt-12 md:pt-24 pb-12 overflow-visible" id="team">
       {/* Cards container containing the absolute background text TEAM */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6">
         
         {/* Background text "TEAM" - curved arc path positioned directly behind the cards */}
-        <div className="absolute top-[5%] -translate-y-1/2 left-1/2 -translate-x-1/2 pointer-events-none select-none z-0 w-full max-w-[1200px] aspect-[1200/400] overflow-visible">
-          <svg viewBox="0 0 1200 400" className="w-full h-full overflow-visible">
+        <div className="absolute top-[15%] -translate-y-1/2 left-1/2 -translate-x-1/2 pointer-events-none select-none z-0 w-full md:w-[120%] max-w-[1600px] aspect-[1600/600] overflow-visible">
+          <svg viewBox="0 0 1600 600" className="w-full h-full overflow-visible">
             <defs>
               {/* Volumetric foggy glow layer */}
               <filter id="team-glow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="25" result="blur1" />
-                <feGaussianBlur stdDeviation="12" result="blur2" />
+                <feGaussianBlur stdDeviation="30" result="blur1" />
+                <feGaussianBlur stdDeviation="15" result="blur2" />
                 <feMerge>
                   <feMergeNode in="blur1" />
                   <feMergeNode in="blur2" />
@@ -155,14 +155,14 @@ export default function TeamSection({ settings = {} }) {
               </filter>
               
               {/* Path for the arched text */}
-              <path id="curve-path" d="M 50,350 Q 600,70 1150,350" fill="none" />
+              <path id="curve-path" d="M -100,500 Q 800,50 1700,500" fill="none" />
               
               <linearGradient id="glow-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#ffffff" stopOpacity="0.05" />
-                <stop offset="25%" stopColor="#ffffff" stopOpacity="0.8" />
+                <stop offset="0%" stopColor="#ffffff" stopOpacity="0.02" />
+                <stop offset="25%" stopColor="#ffffff" stopOpacity="0.9" />
                 <stop offset="50%" stopColor="#ffffff" stopOpacity="1" />
-                <stop offset="75%" stopColor="#ffffff" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="#ffffff" stopOpacity="0.05" />
+                <stop offset="75%" stopColor="#ffffff" stopOpacity="0.9" />
+                <stop offset="100%" stopColor="#ffffff" stopOpacity="0.02" />
               </linearGradient>
             </defs>
             
@@ -172,8 +172,10 @@ export default function TeamSection({ settings = {} }) {
               className="font-black uppercase"
               style={{ 
                 fontFamily: 'Outfit, sans-serif',
-                fontSize: '11.5rem',
-                letterSpacing: '0.12em',
+                fontSize: '20rem',
+                letterSpacing: '0.15em',
+                transform: 'scaleY(1.1)',
+                transformOrigin: 'bottom'
               }}
               fill="url(#glow-grad)"
             >
@@ -187,8 +189,10 @@ export default function TeamSection({ settings = {} }) {
               className="font-black uppercase"
               style={{ 
                 fontFamily: 'Outfit, sans-serif',
-                fontSize: '11.5rem',
-                letterSpacing: '0.12em',
+                fontSize: '20rem',
+                letterSpacing: '0.15em',
+                transform: 'scaleY(1.1)',
+                transformOrigin: 'bottom'
               }}
               fill="url(#glow-grad)"
             >

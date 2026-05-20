@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
+import { FaUsers } from 'react-icons/fa6'
 
 export default function TeamCard({ imageUrl, name, role, desc, index, isActive = true }) {
   const cardRef = useRef(null)
@@ -99,7 +100,7 @@ export default function TeamCard({ imageUrl, name, role, desc, index, isActive =
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-brand-500/10 via-surface-900 to-orange-500/10 flex flex-col items-center justify-center p-6 text-center select-none">
-            <span className="text-5xl mb-3 opacity-20">👥</span>
+            <FaUsers className="text-5xl mb-3 opacity-20 text-white" />
             <p className="text-gray-500 text-xs font-semibold">No Image</p>
           </div>
         )}

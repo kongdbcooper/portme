@@ -2,6 +2,7 @@
 
 import { useRef, useState, useEffect } from 'react'
 import EditableBlock from '../admin/EditableBlock'
+import { MdEmail, MdPhone, MdAccessTime } from 'react-icons/md'
 
 export default function ContactSection({ settings = {} }) {
   return (
@@ -23,9 +24,6 @@ export default function ContactSection({ settings = {} }) {
         <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="text-center mb-16 animate-fade-in">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-300 text-xs font-medium mb-4">
-              <EditableBlock settingKey="contact_badge" defaultText={settings.contact_badge || "Contact Me"} />
-            </div>
             <h2 className="text-4xl font-black text-white mb-6">
               <EditableBlock as="span" settingKey="contact_title_1" defaultText={settings.contact_title_1 || "สนใจร่วมงานกับเรา "} />
               <EditableBlock as="span" className="text-brand-500" settingKey="contact_title_2" defaultText={settings.contact_title_2 || "ติดต่อได้ทันที"} />
@@ -45,8 +43,8 @@ export default function ContactSection({ settings = {} }) {
             {/* Email Card */}
             <div className="bg-surface-800/40 backdrop-blur-md border border-white/5 p-8 rounded-[2rem] text-center hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl hover:shadow-brand-500/10 group">
              <a href="https://line.me/ti/p/Mbh0j2qwAH" target="_blank" rel="noopener noreferrer">
-               <div className="w-16 h-16 bg-brand-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                 <span className="text-3xl">📧</span>
+               <div className="w-16 h-16 bg-brand-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform text-brand-500">
+                 <MdEmail size={32} />
                </div>
                <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">
                  <EditableBlock settingKey="contact_label_1" defaultText={settings.contact_label_1 || "Line"} />
@@ -60,8 +58,8 @@ export default function ContactSection({ settings = {} }) {
             {/* Line Card */}
             <div className="bg-surface-800/40 backdrop-blur-md border border-white/5 p-8 rounded-[2rem] text-center hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl hover:shadow-brand-500/10 group">
               <a href="tel:+66838218423">
-               <div className="w-16 h-16 bg-brand-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                 <span className="text-3xl">📱</span>
+               <div className="w-16 h-16 bg-brand-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform text-brand-500">
+                 <MdPhone size={32} />
                </div>
                <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">
                  <EditableBlock settingKey="contact_label_2" defaultText={settings.contact_label_2 || "Phone"} />
@@ -74,8 +72,8 @@ export default function ContactSection({ settings = {} }) {
 
             {/* Hours Card */}
             <div className="bg-surface-800/40 backdrop-blur-md border border-white/5 p-8 rounded-[2rem] text-center hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl hover:shadow-brand-500/10 group">
-              <div className="w-16 h-16 bg-brand-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform">
-                <span className="text-3xl">🕐</span>
+              <div className="w-16 h-16 bg-brand-500/10 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform text-brand-500">
+                <MdAccessTime size={32} />
               </div>
               <div className="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">
                 <EditableBlock settingKey="contact_label_3" defaultText={settings.contact_label_3 || "Business Hours"} />

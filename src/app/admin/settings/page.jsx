@@ -235,7 +235,6 @@ export default function AdminSettingsPage() {
 
     try {
       const current = settings.about_team_images ? JSON.parse(settings.about_team_images) : []
-      const memberToRemove = current.find(m => m.id === id)
       const updated = current.filter(m => m.id !== id)
 
       const res = await fetch('/api/admin/settings', {
@@ -392,8 +391,6 @@ export default function AdminSettingsPage() {
     }
   }
 
-
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -441,7 +438,6 @@ export default function AdminSettingsPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-          {/* Uploader Block */}
           <div className="glass-card p-6 border-brand-500/10">
             <label className="block text-sm font-medium text-gray-300 mb-4">เปลี่ยนโลโก้ไซต์</label>
             <ImageUploader
@@ -452,7 +448,6 @@ export default function AdminSettingsPage() {
             <p className="text-xs text-gray-500 italic mt-3">แนะนำ: ขนาด 512x512px (จัตุรัส) หรือแบบแนวยาว (ความสูง 128px) เพื่อความคมชัดและการแสดงผลที่สมบูรณ์ 100%</p>
           </div>
 
-          {/* Current Display Block (Seamless) */}
           <div className="p-6">
             <label className="block text-sm font-medium text-gray-400 mb-6">โลโก้ปัจจุบันที่ใช้งานอยู่</label>
             {settings.site_logo ? (
@@ -503,7 +498,6 @@ export default function AdminSettingsPage() {
         </div>
 
         <div className="space-y-6">
-          {/* Uploader Dropzone */}
           <div className="glass-card p-6 border-brand-500/10 max-w-xl">
             <label className="block text-sm font-medium text-gray-300 mb-4">เพิ่มสมาชิกทีมคนใหม่ (อัปโหลดรูปภาพ)</label>
             <ImageUploader
@@ -512,7 +506,6 @@ export default function AdminSettingsPage() {
             />
           </div>
 
-          {/* Current Team Members Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {settings.about_team_images && JSON.parse(settings.about_team_images).length > 0 ? (
               JSON.parse(settings.about_team_images).map((member) => (
@@ -526,30 +519,60 @@ export default function AdminSettingsPage() {
                       unoptimized
                     />
                   </div>
-                  <div className="space-y-3">
-                    <TeamMemberField
-                      label="ชื่อสมาชิก"
-                      value={member.name}
-                      onSave={(newVal) => updateTeamMember(member.id, { name: newVal })}
-                    />
-                    <TeamMemberField
-                      label="ตำแหน่ง"
-                      value={member.role}
-                      onSave={(newVal) => updateTeamMember(member.id, { role: newVal })}
-                    />
-                    <TeamMemberField
-                      label="คำอธิบาย"
-                      value={member.desc}
-                      isTextarea={true}
-                      onSave={(newVal) => updateTeamMember(member.id, { desc: newVal })}
-                    />
+                  
+                  <div className="space-y-3 flex-1">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">ชื่อสมาชิก</label>
+                      <input
+                        type="text"
+                        value={member.name || ''}
+                        onChange={(e) => updateTeamMember(member.id, { name: e.target.value })}
+                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:border-brand-500 focus:outline-none transition-colors"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">ตำแหน่ง</label>
+                      <input
+                        type="text"
+                        value={member.role || ''}
+                        onChange={(e) => updateTeamMember(member.id, { role: e.target.value })}
+                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:border-brand-500 focus:outline-none transition-colors"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">คำอธิบาย</label>
+                      <textarea
+                        value={member.desc || ''}
+                        onChange={(e) => updateTeamMember(member.id, { desc: e.target.value })}
+                        rows={2}
+                        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:border-brand-500 focus:outline-none transition-colors resize-none"
+                      />
+                    </div>
+
+                    {/* เพิ่มกลุ่มปุ่มกดควบคุม: บันทึก และ ลบสมาชิก */}
+                    <div className="flex gap-2 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => updateTeamMember(member.id, { name: member.name, role: member.role, desc: member.desc })}
+                        disabled={isSaving}
+                        className="flex-1 py-2 rounded-lg bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white border border-emerald-500/20 text-xs font-bold transition-all disabled:opacity-50"
+                      >
+                        {isSaving ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => removeTeamMember(member.id)}
+                        disabled={isSaving}
+                        className="flex-1 py-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/20 text-xs font-bold transition-all disabled:opacity-50"
+                      >
+                        ลบสมาชิก
+                      </button>
+                    </div>
+
                   </div>
-                  <button
-                    onClick={() => removeTeamMember(member.id)}
-                    className="mt-2 w-full py-2 rounded-lg bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/20 text-xs font-bold transition-all"
-                  >
-                    ลบสมาชิกทีม
-                  </button>
                 </div>
               ))
             ) : (
@@ -664,33 +687,6 @@ export default function AdminSettingsPage() {
           </div>
         </div>
       </section>
-    </div>
-  )
-}
-
-function TeamMemberField({ label, value, onSave, isTextarea = false }) {
-  const [localVal, setLocalVal] = useState(value || '')
-
-  useEffect(() => {
-    setLocalVal(value || '')
-  }, [value])
-
-  const Element = isTextarea ? 'textarea' : 'input'
-
-  return (
-    <div>
-      <label className="block text-xs font-semibold text-gray-400 uppercase tracking-widest mb-1">{label}</label>
-      <Element
-        value={localVal}
-        onChange={(e) => setLocalVal(e.target.value)}
-        onBlur={() => {
-          if (localVal !== value) {
-            onSave(localVal)
-          }
-        }}
-        rows={isTextarea ? 2 : undefined}
-        className="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:border-brand-500 focus:outline-none transition-colors resize-none"
-      />
     </div>
   )
 }

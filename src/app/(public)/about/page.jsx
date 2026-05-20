@@ -5,7 +5,7 @@ import TeamSection from '@/components/sections/TeamSection'
 export const dynamic = 'force-dynamic'
 
 export const metadata = {
-  title: 'About Me | PortMe',
+  title: 'About Me | Monkey Portfolio',
   description: 'รู้จักกับเราให้มากขึ้น ประวัติและวิสัยทัศน์',
 }
 
@@ -27,7 +27,7 @@ export default async function AboutPage() {
             รู้จักกับ<span className="gradient-text">เรา</span>
           </h1>
           <p className="text-gray-400 max-w-2xl mx-auto text-lg">
-            เราคือผู้นำในการสร้างสรรค์และนำเสนอผลิตภัณฑ์ที่มีคุณภาพ มุ่งเน้นความพึงพอใจของลูกค้าและนวัตกรรม
+            เราคือผู้พัฒนาและนำเสนอผลิตภัณฑ์ที่มีคุณภาพ มุ่งเน้นความพึงพอใจของลูกค้า
           </p>
         </div>
 
@@ -48,7 +48,7 @@ export default async function AboutPage() {
               <h2 className="text-3xl font-bold text-white mb-4" style={{ fontFamily: 'Outfit, sans-serif' }}>วิสัยทัศน์ของเรา</h2>
               <p className="text-gray-400 leading-relaxed">
                 เป้าหมายของเราคือการส่งมอบผลิตภัณฑ์และบริการที่ตอบโจทย์ความต้องการของผู้คนในยุคดิจิทัล 
-                เราคัดสรรสินค้าอย่างพิถีพิถัน และมุ่งหวังให้ลูกค้าทุกคนได้รับประสบการณ์ที่ดีที่สุด
+                เราพัฒนาอย่างต่อเนื่องเพื่อตอบสนองความต้องการของผู้คน และมุ่งหวังให้ผู้ใช้งานได้รับประสบการณ์ที่ดีที่สุด
               </p>
             </div>
             
@@ -56,7 +56,6 @@ export default async function AboutPage() {
               <h3 className="text-xl font-bold text-white mb-3" style={{ fontFamily: 'Outfit, sans-serif' }}>ทำไมต้องเลือกเรา?</h3>
               <ul className="space-y-3">
                 {[
-                  'สินค้าคุณภาพที่ผ่านการคัดกรองมาอย่างดี',
                   'บริการด้วยความใส่ใจและรวดเร็ว',
                   'การพัฒนาอย่างต่อเนื่องเพื่อตอบสนองความต้องการ',
                 ].map((item, index) => (

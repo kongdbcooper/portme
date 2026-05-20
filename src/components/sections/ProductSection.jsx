@@ -163,18 +163,21 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
     const isMobile = windowWidth < 640
     const isTablet = windowWidth >= 640 && windowWidth < 1024
     
-    let xOffset = 300
-    let scaleStep = 0.15
-    let rotateYDeg = 30
+    let xOffset = 320
+    let scaleStep = 0.2
+    let rotateYDeg = 35
+    let zOffset = 120
     
     if (isMobile) {
-      xOffset = 100
-      scaleStep = 0.15
-      rotateYDeg = 15
+      xOffset = 140
+      scaleStep = 0.25
+      rotateYDeg = 35
+      zOffset = 150
     } else if (isTablet) {
-      xOffset = 210
-      scaleStep = 0.15
-      rotateYDeg = 25
+      xOffset = 220
+      scaleStep = 0.2
+      rotateYDeg = 30
+      zOffset = 130
     }
     
     const absOffset = Math.abs(offset)
@@ -193,10 +196,13 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
     const scale = 1 - absOffset * scaleStep
     const rotateY = -offset * rotateYDeg
     const opacity = absOffset === 0 ? 1 : absOffset === 1 ? 0.85 : 0.4
-    const zIndex = 30 - absOffset * 10
+    
+    // Ensure center card is strictly in front by boosting its translateZ and zIndex
+    const translateZ = absOffset === 0 ? 50 : -absOffset * zOffset
+    const zIndex = 50 - absOffset * 10
     
     return {
-      transform: `translateX(${translateX}px) scale(${scale}) rotateY(${rotateY}deg) translateZ(${-absOffset * 100}px)`,
+      transform: `translateX(${translateX}px) scale(${scale}) rotateY(${rotateY}deg) translateZ(${translateZ}px)`,
       opacity,
       zIndex,
       pointerEvents: 'auto',
@@ -279,13 +285,6 @@ export default function ProductSection({ abVariant, settings = {}, initialProduc
       <div className="container mx-auto px-6">
         {/* ================= Section Heading ================= */}
         <div className="text-center mb-16">
-          <div className="flex justify-center mb-6">
-            <EditableBlock 
-              settingKey="prod_badge_label" 
-              defaultText="Product Collection" 
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-sm font-bold uppercase tracking-widest empty:hidden"
-            />
-          </div>
           <h2 className="text-3xl sm:text-5xl font-black text-white mb-6 tracking-tight">
             <EditableBlock as="span" settingKey="prod_section_title_1" defaultText="Explore " />
             <EditableBlock as="span" className="gradient-text" settingKey="prod_section_title_2" defaultText="Our Collection" />

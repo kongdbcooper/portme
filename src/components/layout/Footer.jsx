@@ -2,6 +2,7 @@
 
 import BrandLogo from './BrandLogo'
 import EditableBlock from '../admin/EditableBlock'
+import { FaFacebookF, FaXTwitter, FaInstagram, FaLine } from 'react-icons/fa6'
 
 const FOOTER_LINKS = {
   'Menu': [
@@ -41,18 +42,18 @@ export default function Footer({ settings = {} }) {
             {/* Social Icons */}
             <div className="flex items-center gap-3 pt-2">
               {[
-                { label: 'Facebook', icon: 'F', href: 'https://www.facebook.com/share/1BCib8bJRz/?mibextid=wwXIfr' },
-                { label: 'Twitter/X', icon: 'X', href: '#' },
-                { label: 'Instagram', icon: 'IG', href: 'https://www.instagram.com/k.xnq_?igsh=MXE3OHB4emd6Nzc4Nw%3D%3D&utm_source=qr' },
-                { label: 'Line', icon: 'L', href: 'https://line.me/ti/p/Mbh0j2qwAH' },
-              ].map(({ label, icon, href }) => (
+                { label: 'Facebook', Icon: FaFacebookF, href: 'https://www.facebook.com/share/1BCib8bJRz/?mibextid=wwXIfr' },
+                { label: 'Twitter/X', Icon: FaXTwitter, href: '#' },
+                { label: 'Instagram', Icon: FaInstagram, href: 'https://www.instagram.com/k.xnq_?igsh=MXE3OHB4emd6Nzc4Nw%3D%3D&utm_source=qr' },
+                { label: 'Line', Icon: FaLine, href: 'https://line.me/ti/p/Mbh0j2qwAH' },
+              ].map(({ label, Icon, href }) => (
                 <a
                   key={label}
                   href={href}
                   aria-label={label}
-                  className="w-9 h-9 rounded-lg border border-white/10 flex items-center justify-center text-xs font-bold text-gray-400 hover:text-white hover:border-brand-500/50 hover:bg-brand-500/10 transition-all duration-200"
+                  className="w-9 h-9 rounded-lg border border-white/10 flex items-center justify-center text-sm text-gray-400 hover:text-white hover:border-brand-500/50 hover:bg-brand-500/10 transition-all duration-200"
                 >
-                  {icon}
+                  <Icon />
                 </a>
               ))}
             </div>
