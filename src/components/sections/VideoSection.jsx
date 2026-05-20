@@ -1,7 +1,9 @@
 'use client'
 
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import EditableBlock from '../admin/EditableBlock'
+import { MdShare, MdCheck } from 'react-icons/md'
 
 // ------------------- 3D Tilt Card Component -------------------
 function TiltCard({ children, className, style, onClick }) {
@@ -70,58 +72,38 @@ function TiltCard({ children, className, style, onClick }) {
 
 // ------------------- VideoThumbnail Component -------------------
 function VideoThumbnail({ video }) {
-  const [isPlaying, setIsPlaying] = useState(false)
   const videoRef = useRef(null)
 
-  const handleMouseEnter = () => {
-    setIsPlaying(true)
+  useEffect(() => {
     if (videoRef.current) {
       videoRef.current.play().catch(() => {})
     }
-  }
-
-  const handleMouseLeave = () => {
-    setIsPlaying(false)
-    if (videoRef.current) {
-      videoRef.current.pause()
-      videoRef.current.currentTime = 0
-    }
-  }
+  }, [])
 
   return (
-    <div
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className="relative aspect-video w-full overflow-hidden bg-black/40"
-    >
-      {video.thumbnail ? (
-        <img
-          src={video.thumbnail}
-          alt={video.title}
-          className={`w-full h-full object-cover transition-transform duration-700 ${isPlaying ? 'scale-105 opacity-0' : 'scale-100 opacity-100'}`}
-        />
-      ) : null}
-      
+    <div className="relative aspect-video w-full overflow-hidden bg-black/40">
       <video
         ref={videoRef}
         src={video.videoUrl}
+        poster={video.thumbnail}
         muted
         playsInline
         loop
+        autoPlay
         preload="metadata"
-        className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${isPlaying ? 'opacity-100' : 'opacity-0'}`}
+        className="absolute inset-0 w-full h-full object-cover"
       />
       
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-brand-500/80 backdrop-blur-md flex items-center justify-center hover:bg-brand-500 transition-all shadow-lg shadow-brand-500/30">
+        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-brand-500/80 backdrop-blur-md flex items-center justify-center group-hover:bg-brand-500 transition-all shadow-lg shadow-brand-500/30 group-hover:scale-110">
           <svg className="w-6 h-6 sm:w-8 sm:h-8 text-white fill-white ml-0.5 sm:ml-1" viewBox="0 0 24 24">
             <path d="M8 5v14l11-7z" />
           </svg>
         </div>
       </div>
       <div className="absolute top-4 right-4 bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full text-[10px] text-white font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-        ▶ Preview
+        ▶ Playing
       </div>
     </div>
   )
@@ -129,12 +111,15 @@ function VideoThumbnail({ video }) {
 
 // ------------------- Main VideoSection Component -------------------
 export default function VideoSection({ initialVideos = [] }) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [videos, setVideos] = useState(initialVideos)
   const [loading, setLoading] = useState(initialVideos.length === 0)
   const [selectedVideo, setSelectedVideo] = useState(initialVideos[0] || null)
   const [showRelated, setShowRelated] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [copied, setCopied] = useState(false)
   
   const [centerIndex, setCenterIndex] = useState(0)
   const [windowWidth, setWindowWidth] = useState(1200)
@@ -152,14 +137,14 @@ export default function VideoSection({ initialVideos = [] }) {
     }
   }, [])
 
-  // Sync videos if initialVideos changes
+  // Sync videos if initialVideos changes, also handle ?video= URL param
   useEffect(() => {
     if (initialVideos.length > 0) {
       setVideos(initialVideos)
       setCenterIndex(Math.floor(initialVideos.length / 2))
-      if (!selectedVideo) {
-        setSelectedVideo(initialVideos[0])
-      }
+      const videoParam = searchParams?.get('video')
+      const target = videoParam ? initialVideos.find(v => v.id === videoParam) : initialVideos[0]
+      if (target) setSelectedVideo(target)
     }
   }, [initialVideos])
 
@@ -175,9 +160,9 @@ export default function VideoSection({ initialVideos = [] }) {
           const activeVideos = (data.videos || []).filter(v => v.isActive)
           setVideos(activeVideos)
           setCenterIndex(Math.floor(activeVideos.length / 2))
-          if (activeVideos.length > 0 && !selectedVideo) {
-            setSelectedVideo(activeVideos[0])
-          }
+          const videoParam = searchParams?.get('video')
+          const target = videoParam ? activeVideos.find(v => v.id === videoParam) : activeVideos[0]
+          if (target) setSelectedVideo(target)
         }
       } catch (err) {
         console.error('Failed to fetch videos', err)
@@ -228,18 +213,21 @@ export default function VideoSection({ initialVideos = [] }) {
     const isMobile = windowWidth < 640
     const isTablet = windowWidth >= 640 && windowWidth < 1024
     
-    let xOffset = 300
-    let scaleStep = 0.15
-    let rotateYDeg = 30
+    let xOffset = 320
+    let scaleStep = 0.2
+    let rotateYDeg = 35
+    let zOffset = 120
     
     if (isMobile) {
-      xOffset = 100
-      scaleStep = 0.15
-      rotateYDeg = 15
+      xOffset = 140
+      scaleStep = 0.25
+      rotateYDeg = 35
+      zOffset = 150
     } else if (isTablet) {
-      xOffset = 210
-      scaleStep = 0.15
-      rotateYDeg = 25
+      xOffset = 220
+      scaleStep = 0.2
+      rotateYDeg = 30
+      zOffset = 130
     }
     
     const absOffset = Math.abs(offset)
@@ -258,10 +246,13 @@ export default function VideoSection({ initialVideos = [] }) {
     const scale = 1 - absOffset * scaleStep
     const rotateY = -offset * rotateYDeg
     const opacity = absOffset === 0 ? 1 : absOffset === 1 ? 0.85 : 0.4
-    const zIndex = 30 - absOffset * 10
+    
+    // Ensure center card is strictly in front by boosting its translateZ and zIndex
+    const translateZ = absOffset === 0 ? 50 : -absOffset * zOffset
+    const zIndex = 50 - absOffset * 10
     
     return {
-      transform: `translateX(${translateX}px) scale(${scale}) rotateY(${rotateY}deg) translateZ(${-absOffset * 100}px)`,
+      transform: `translateX(${translateX}px) scale(${scale}) rotateY(${rotateY}deg) translateZ(${translateZ}px)`,
       opacity,
       zIndex,
       pointerEvents: 'auto',
@@ -280,6 +271,10 @@ export default function VideoSection({ initialVideos = [] }) {
     setSelectedVideo(video)
     setShowRelated(false)
     setIsPlaying(false)
+    // Update URL for shareable link
+    const url = new URL(window.location.href)
+    url.searchParams.set('video', video.id)
+    window.history.replaceState({}, '', url.toString())
     if (playerRef.current) {
       playerRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' })
     }
@@ -289,6 +284,19 @@ export default function VideoSection({ initialVideos = [] }) {
     if (videoElementRef.current) {
       videoElementRef.current.play().catch((e) => console.log('Play blocked:', e))
     }
+  }
+
+  const handleShare = () => {
+    const url = new URL(window.location.href)
+    url.searchParams.set('video', selectedVideo.id)
+    url.hash = 'videos'
+    navigator.clipboard.writeText(url.toString()).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    }).catch(() => {
+      // Fallback: prompt user
+      prompt('คัดลอกลิงค์วิดีโอ:', url.toString())
+    })
   }
 
   const handleVideoEnd = () => {
@@ -315,13 +323,6 @@ export default function VideoSection({ initialVideos = [] }) {
       <div className="container mx-auto px-4">
         {/* ================= 1. THE COLLECTION AREA ================= */}
         <div className="text-center mb-16">
-          <div className="flex justify-center mb-6">
-            <EditableBlock 
-              settingKey="video_badge" 
-              defaultText="Video Showcase" 
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-400 text-sm font-bold uppercase tracking-widest empty:hidden"
-            />
-          </div>
           <h2 className="text-4xl md:text-5xl font-black text-white mb-6 tracking-tight">
             <EditableBlock as="span" settingKey="video_title_1" defaultText="My " />
             <EditableBlock as="span" className="gradient-text" settingKey="video_title_2" defaultText="Video Collection" />
@@ -382,13 +383,7 @@ export default function VideoSection({ initialVideos = [] }) {
                       }
                     }}
                   >
-                    <div
-                      style={{
-                        animation: 'breathScale 6s ease-in-out infinite',
-                        animationDelay: `${idx * 0.5}s`
-                      }}
-                      className="w-full h-full"
-                    >
+                    <div className="w-full h-full">
                       <TiltCard
                         onClick={() => {}}
                         isActive={selectedVideo?.id === video.id}
@@ -445,19 +440,34 @@ export default function VideoSection({ initialVideos = [] }) {
           </div>
 
           {selectedVideo && (
-            <div className="relative w-full max-w-[95%] lg:max-w-[85%] mx-auto group">
-              <div className="relative w-full bg-[#0a0a0f]/60 rounded-[2rem] md:rounded-[4rem] overflow-hidden shadow-[0_0_120px_rgba(90,107,255,0.15)] border border-white/10 animate-fade-in flex items-center justify-center">
+            <div className="relative w-full group mt-8">
+              <div className="relative w-full bg-[#0a0a0f]/60 rounded-none overflow-hidden shadow-[0_0_120px_rgba(90,107,255,0.15)] border-y border-white/10 animate-fade-in flex items-center justify-center">
                 
                 <video
                   ref={videoElementRef}
                   key={selectedVideo.id}
                   src={selectedVideo.videoUrl}
+                  poster={selectedVideo.thumbnail}
                   controls={!showRelated && isPlaying}
                   onPlay={() => setIsPlaying(true)}
                   onPause={() => setIsPlaying(false)}
                   onEnded={handleVideoEnd}
-                  className={`w-full h-auto max-h-[75vh] md:max-h-[85vh] object-contain ${showRelated ? 'opacity-30 scale-95' : 'opacity-100 scale-100'} transition-all duration-700`}
+                  playsInline
+                  className={`w-full h-auto object-contain ${showRelated ? 'opacity-30 scale-95' : 'opacity-100 scale-100'} transition-all duration-700`}
+                  style={{ imageRendering: 'high-quality' }}
                 />
+
+                {/* Share button */}
+                {!showRelated && (
+                  <button
+                    onClick={handleShare}
+                    className="absolute top-4 right-4 z-30 flex items-center gap-2 px-3 py-2 rounded-xl bg-black/60 backdrop-blur-md border border-white/10 text-white text-xs font-bold hover:bg-brand-500/80 transition-all duration-200 group"
+                    title="แชร์ลิงค์วิดีโอนี้"
+                  >
+                    {copied ? <MdCheck size={16} className="text-green-400" /> : <MdShare size={16} />}
+                    <span>{copied ? 'คัดลอกแล้ว!' : 'แชร์'}</span>
+                  </button>
+                )}
 
                 {/* Play button overlay — visible when video is NOT playing */}
                 {!isPlaying && !showRelated && (
@@ -494,26 +504,19 @@ export default function VideoSection({ initialVideos = [] }) {
                           className="cursor-pointer group/item flex flex-col"
                         >
                           <div className="aspect-video bg-white/5 rounded-lg md:rounded-xl overflow-hidden mb-2 ring-1 ring-white/10 group-hover/item:ring-brand-500 transition-all shadow-xl relative">
-                             {video.thumbnail ? (
-                               <img 
-                                 src={video.thumbnail} 
-                                 alt="" 
-                                 className="w-full h-full object-cover transition-transform group-hover/item:scale-110" 
-                               />
-                             ) : (
-                               <video 
-                                 src={video.videoUrl}
-                                 muted
-                                 playsInline
-                                 preload="metadata"
-                                 className="w-full h-full object-cover transition-transform group-hover/item:scale-110"
-                                 onMouseOver={(e) => e.currentTarget.play()}
-                                 onMouseOut={(e) => {
-                                   e.currentTarget.pause();
-                                   e.currentTarget.currentTime = 0;
-                                 }}
-                                />
-                             )}
+                             <video 
+                               src={video.videoUrl}
+                               poster={video.thumbnail}
+                               muted
+                               playsInline
+                               loop
+                               autoPlay
+                               preload="metadata"
+                               className="w-full h-full object-cover transition-transform group-hover/item:scale-110"
+                               onLoadedData={(e) => {
+                                 e.currentTarget.play().catch(() => {})
+                               }}
+                              />
                              <div className="absolute inset-0 bg-black/20 group-hover/item:bg-transparent transition-colors" />
                              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-opacity">
                                 <div className="w-8 h-8 rounded-full bg-brand-500 flex items-center justify-center shadow-lg">

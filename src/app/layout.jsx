@@ -15,27 +15,27 @@ import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 // แต่ละ page สามารถ override ด้วย generateMetadata()
 export const metadata = {
   title: {
-    default: 'PortMe — แพลตฟอร์มจัดการโปรดักซ์ยุคใหม่',
-    template: '%s | PortMe', // format: "ชื่อหน้า | PortMe"
+    default: 'Monkey Portfolios',
+    template: '%s | Monkey Portfolios', // format: "ชื่อหน้า | Monkey Portfolios"
   },
   description:
     'Admin Dashboard ' +
-    'และระบบจัดการรูปภาพบน Cloudflare R2 อัตโนมัติ',
-  keywords: ['PortMe', 'admin dashboard', 'product management', 'e-commerce', 'Thailand'],
+    'และระบบจัดการรูปภาพบน Cloudflare R2 อัตโนมัติ พร้อมด้วยระบบคลังสินค้าตัดเบิกจ่ายในกลูเกิ้ลชีท และ สติ๊กเกอร์บาร์โค๊ด',
+  keywords: ['Monkey', 'admin dashboard', 'product management', 'e-commerce', 'Thailand'],
   authors: [{ name: 'PortMe Team' }],
-  creator: 'PortMe',
+  creator: 'Monkey',
   openGraph: {
     type: 'website',
     locale: 'th_TH',
     url: process.env.NEXT_PUBLIC_APP_URL,
-    siteName: 'PortMe',
-    title: 'PortMe — แพลตฟอร์มจัดการโปรดักซ์ยุคใหม่',
-    description: 'แพลตฟอร์มจัดการโปรดักซ์สำหรับธุรกิจยุคใหม่',
+    siteName: 'Monkey Portfolios',
+    title: 'Monkey Portfolios',
+    description: 'Admin Dashboard และระบบจัดการรูปภาพบน Cloudflare R2 อัตโนมัติ พร้อมด้วยระบบคลังสินค้าตัดเบิกจ่ายในกลูเกิ้ลชีท และ สติ๊กเกอร์บาร์โค๊ด',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'PortMe',
-    description: 'แพลตฟอร์มจัดการโปรดักซ์สำหรับธุรกิจยุคใหม่',
+    title: 'Monkey Portfolios',
+    description: 'Admin Dashboard และระบบจัดการรูปภาพบน Cloudflare R2 อัตโนมัติ พร้อมด้วยระบบคลังสินค้าตัดเบิกจ่ายในกลูเกิ้ลชีท และ สติ๊กเกอร์บาร์โค๊ด',
   },
   robots: {
     index: true,

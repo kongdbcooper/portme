@@ -9,6 +9,8 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
+import { MdWavingHand } from 'react-icons/md'
+import { FaBox, FaCircleCheck, FaCirclePause, FaVial, FaChartBar, FaBoxArchive, FaTriangleExclamation, FaBan, FaPlus, FaClipboardList } from 'react-icons/fa6'
 
 // Stats Card Component
 function StatsCard({ label, value, icon, color, change }) {
@@ -76,27 +78,27 @@ export default async function AdminDashboardPage() {
       {/* Page Header */}
       <div>
         <h2 className="text-2xl font-bold text-white mb-1" style={{ fontFamily: 'Outfit, sans-serif' }}>
-          ยินดีต้อนรับ 👋
+          ยินดีต้อนรับ <MdWavingHand className="inline text-yellow-400 mb-1" />
         </h2>
         <p className="text-gray-500">นี่คือภาพรวมของเว็บไซต์คุณ</p>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5">
-        <StatsCard label="โปรดักซ์ทั้งหมด" value={totalProducts} icon="📦" color="bg-brand-500/20" change={12} />
-        <StatsCard label="โปรดักซ์ที่ใช้งาน" value={activeProducts} icon="✅" color="bg-green-500/20" />
-        <StatsCard label="โปรดักซ์ปิดการใช้งาน" value={totalProducts - activeProducts} icon="⏸" color="bg-yellow-500/20" />
-        <StatsCard label="A/B Test Events" value={totalABEvents.toLocaleString()} icon="🧪" color="bg-accent-500/20" change={8} />
+        <StatsCard label="โปรดักซ์ทั้งหมด" value={totalProducts} icon={<FaBox />} color="bg-brand-500/20" change={12} />
+        <StatsCard label="โปรดักซ์ที่ใช้งาน" value={activeProducts} icon={<FaCircleCheck />} color="bg-green-500/20" />
+        <StatsCard label="โปรดักซ์ปิดการใช้งาน" value={totalProducts - activeProducts} icon={<FaCirclePause />} color="bg-yellow-500/20" />
+        <StatsCard label="A/B Test Events" value={totalABEvents.toLocaleString()} icon={<FaVial />} color="bg-accent-500/20" change={8} />
       </div>
 
       {/* Inventory Stats (แสดงเฉพาะเมื่อเชื่อม Google Sheets แล้ว) */}
       {inventoryStats && (
         <div>
-          <h3 className="text-white font-semibold mb-4">📊 สรุปคลังสินค้า <span className="text-xs text-gray-600 font-normal ml-1">(Google Sheets · real-time)</span></h3>
+          <h3 className="text-white font-semibold mb-4"><FaChartBar className="inline mr-2 text-brand-400" /> สรุปคลังสินค้า <span className="text-xs text-gray-600 font-normal ml-1">(Google Sheets · real-time)</span></h3>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <StatsCard label="วัสดุทั้งหมด"  value={inventoryStats.total} icon="🗄️" color="bg-brand-500/20" />
-            <StatsCard label="ใกล้หมด"       value={inventoryStats.low}   icon="⚠️" color="bg-yellow-500/20" />
-            <StatsCard label="หมดสต็อก"      value={inventoryStats.out}   icon="🚫" color="bg-red-500/20" />
+            <StatsCard label="วัสดุทั้งหมด"  value={inventoryStats.total} icon={<FaBoxArchive />} color="bg-brand-500/20" />
+            <StatsCard label="ใกล้หมด"       value={inventoryStats.low}   icon={<FaTriangleExclamation />} color="bg-yellow-500/20" />
+            <StatsCard label="หมดสต็อก"      value={inventoryStats.out}   icon={<FaBan />} color="bg-red-500/20" />
           </div>
         </div>
       )}
@@ -111,7 +113,7 @@ export default async function AdminDashboardPage() {
             className="glass-card p-5 flex items-center gap-4 hover:border-brand-500/30 transition-all group"
           >
             <div className="w-10 h-10 rounded-xl bg-brand-500/20 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
-              ➕
+              <FaPlus />
             </div>
             <div>
               <p className="text-white font-medium text-sm">เพิ่มโปรดักซ์ใหม่</p>
@@ -124,7 +126,7 @@ export default async function AdminDashboardPage() {
             className="glass-card p-5 flex items-center gap-4 hover:border-brand-500/30 transition-all group"
           >
             <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
-              📋
+              <FaClipboardList />
             </div>
             <div>
               <p className="text-white font-medium text-sm">จัดการโปรดักซ์</p>
@@ -137,7 +139,7 @@ export default async function AdminDashboardPage() {
             className="glass-card p-5 flex items-center gap-4 hover:border-brand-500/30 transition-all group"
           >
             <div className="w-10 h-10 rounded-xl bg-accent-500/20 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
-              🧪
+              <FaVial />
             </div>
             <div>
               <p className="text-white font-medium text-sm">A/B Testing</p>
@@ -150,7 +152,7 @@ export default async function AdminDashboardPage() {
             className="glass-card p-5 flex items-center gap-4 hover:border-brand-500/30 transition-all group"
           >
             <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
-              🗄️
+              <FaBoxArchive />
             </div>
             <div>
               <p className="text-white font-medium text-sm">คลังสินค้า</p>
@@ -171,7 +173,7 @@ export default async function AdminDashboardPage() {
         <div className="glass-card overflow-x-auto">
           {recentProducts.length === 0 ? (
             <div className="p-8 text-center text-gray-600">
-              <div className="text-4xl mb-2">📦</div>
+              <div className="text-4xl mb-3 flex justify-center text-gray-700"><FaBox /></div>
               <p>ยังไม่มีโปรดักซ์ — <Link href="/admin/products/new" className="text-brand-400">เพิ่มโปรดักซ์แรก</Link></p>
             </div>
           ) : (

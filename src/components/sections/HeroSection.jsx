@@ -153,9 +153,9 @@ export default function HeroSection({ settings = {}, banners = [] }) {
       <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-0" style={{ opacity: heroImages.length > 0 ? 0.4 : 0.6 }} />
 
       {/* Hero Content */}
-      <div className="relative z-10 w-full text-center px-4 flex flex-col items-center">
-        {/* Badge - Dynamic per Banner Image */}
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-brand-500/30 bg-brand-500/10 text-brand-300 text-sm font-medium mb-8 animate-fade-in">
+      <div className="relative z-10 w-full text-center px-4 flex flex-col items-center pt-24 md:pt-32">
+        {/* Badge text only - no border frame */}
+        <div className="text-brand-300 text-sm font-medium mb-6 animate-fade-in tracking-wide">
           {currentBanner?.subtitle ? (
             <div className="whitespace-pre-wrap">{currentBanner.subtitle}</div>
           ) : (
