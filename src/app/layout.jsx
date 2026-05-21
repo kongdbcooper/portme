@@ -20,7 +20,7 @@ export const metadata = {
   },
   description:
     'Admin Dashboard ' +
-    'และระบบจัดการรูปภาพบน Cloudflare R2 อัตโนมัติ พร้อมด้วยระบบคลังสินค้าตัดเบิกจ่ายในกลูเกิ้ลชีท และ สติ๊กเกอร์บาร์โค๊ด',
+    'และระบบจัดการรูปภาพบน Cloudflare R2 อัตโนมัติ พร้อมด้วยระบบคลังสินค้าตัดเบิกจ่าย Real-time จากกลูเกิ้ลชีท และ สติ๊กเกอร์บาร์โค๊ด',
   keywords: ['Monkey', 'admin dashboard', 'product management', 'e-commerce', 'Thailand'],
   authors: [{ name: 'PortMe Team' }],
   creator: 'Monkey',
@@ -30,12 +30,12 @@ export const metadata = {
     url: process.env.NEXT_PUBLIC_APP_URL,
     siteName: 'Monkey Portfolios',
     title: 'Monkey Portfolios',
-    description: 'Admin Dashboard และระบบจัดการรูปภาพบน Cloudflare R2 อัตโนมัติ พร้อมด้วยระบบคลังสินค้าตัดเบิกจ่ายในกลูเกิ้ลชีท และ สติ๊กเกอร์บาร์โค๊ด',
+    description: 'Admin Dashboard และระบบจัดการรูปภาพบน Cloudflare R2 อัตโนมัติ พร้อมด้วยระบบคลังสินค้าตัดเบิกจ่าย Real-time จากกลูเกิ้ลชีท และ สติ๊กเกอร์บาร์โค๊ด',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Monkey Portfolios',
-    description: 'Admin Dashboard และระบบจัดการรูปภาพบน Cloudflare R2 อัตโนมัติ พร้อมด้วยระบบคลังสินค้าตัดเบิกจ่ายในกลูเกิ้ลชีท และ สติ๊กเกอร์บาร์โค๊ด',
+    description: 'Admin Dashboard และระบบจัดการรูปภาพบน Cloudflare R2 อัตโนมัติ พร้อมด้วยระบบคลังสินค้าตัดเบิกจ่าย Real-time จากกลูเกิ้ลชีท และ สติ๊กเกอร์บาร์โค๊ด',
   },
   robots: {
     index: true,
