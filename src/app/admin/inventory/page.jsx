@@ -36,7 +36,10 @@ function AddItemModal({ headers, sheetName, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false)
   const [error, setError]   = useState('')
 
-  const displayHeaders = headers.filter(h => h !== '_rowIndex')
+  const displayHeaders =
+    headers && headers.length > 0
+      ? headers.filter(h => h !== '_rowIndex')
+      : []
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -141,7 +144,7 @@ function DeleteDialog({ item, sheetGid, onClose, onSuccess }) {
           <div className="text-4xl mb-3">🗑️</div>
           <h3 className="text-white font-bold text-lg" style={{ fontFamily:'Outfit,sans-serif' }}>ลบรายการ</h3>
           <p className="text-gray-400 text-sm mt-2">
-            คุณต้องการลบ <span className="text-white font-semibold">"{name}"</span> ออกจาก Google Sheet ใช่หรือไม่?
+            คุณต้องการลบ <span className="text-white font-semibold">{name}</span> ออกจาก Google Sheet ใช่หรือไม่?
           </p>
           <p className="text-red-400/70 text-xs mt-1">การกระทำนี้ไม่สามารถย้อนกลับได้</p>
         </div>
@@ -193,35 +196,99 @@ export default function InventoryPage() {
   }
 
   // ─── ดึงรายชื่อ Sheets ─────────────────────────────────────────────────────
-  const fetchSheets = useCallback(async () => {
+const fetchSheets = useCallback(async () => {
+  try {
+    const res = await fetch('/api/inventory', {
+      method: 'POST',
+    })
+
+    const text = await res.text()
+
+    let data
     try {
-      const res = await fetch('/api/inventory', { method: 'POST' })
-      const data = await res.json()
-      if (data.success && data.sheets?.length) {
-        setSheets(data.sheets)
-        const current = data.sheets.find(s => s.title === sheetName)
-        if (current) setSheetGid(current.id)
-      }
-    } catch { /* ไม่สำคัญ */ }
-  }, [sheetName])
+      data = JSON.parse(text)
+    } catch (e) {
+      console.error('POST /api/inventory not JSON:', text)
+      throw new Error('API returned invalid JSON')
+    }
+
+    if (data.success && data.sheets?.length) {
+      setSheets(data.sheets)
+
+      const current = data.sheets.find(s => s.title === sheetName)
+      if (current) setSheetGid(current.id)
+    }
+
+  } catch (err) {
+    console.error(err)
+  }
+}, [sheetName])
 
   // ─── ดึงข้อมูล Inventory ──────────────────────────────────────────────────
-  const fetchInventory = useCallback(async (name = sheetName) => {
-    setLoading(true); setError(null)
+const fetchInventory = useCallback(async (name = sheetName) => {
+  setLoading(true)
+  setError(null)
+
+  try {
+    const res = await fetch(
+      `/api/inventory?sheet=${encodeURIComponent(name)}&t=${Date.now()}`
+    )
+
+    const text = await res.text()
+
+    let data
     try {
-      const res = await fetch(`/api/inventory?sheet=${encodeURIComponent(name)}&t=${Date.now()}`)
-      const data = await res.json()
-      if (!data.success) throw new Error(data.error || 'โหลดข้อมูลล้มเหลว')
-      setItems(data.items || [])
-      setStats(data.stats)
-      setLastFetch(new Date(data.fetchedAt))
-      if (data.items?.length) setHeaders(Object.keys(data.items[0]))
+      data = JSON.parse(text)
     } catch (e) {
-      setError(e.message)
-    } finally {
-      setLoading(false); setCountdown(30)
+      console.error('GET inventory not JSON:', text)
+      throw new Error('API returned invalid JSON')
     }
-  }, [sheetName])
+
+    if (!data.success) throw new Error(data.error || 'โหลดข้อมูลล้มเหลว')
+
+    const items = data.items || []
+    setItems(items)
+    setStats(data.stats)
+    setLastFetch(new Date(data.fetchedAt))
+
+    // 🔥 FIX สำคัญตรงนี้
+    if (items.length > 0) {
+      setHeaders(Object.keys(items[0]))
+    } else {
+      setHeaders([
+        'สาขา',
+        'เลขบาร์โค๊ด',
+        'ชื่อสินค้า',
+        'ราคาสินค้า',
+        'จำนวนคงเหลือ',
+        'นำเข้าทั้งหมด',
+        'วันที่นำเข้า',
+        'ผู้รับเข้า',
+        'วันที่ขายสินค้า',
+        'ผู้จำหน่ายสินค้า'
+      ])
+    }
+
+  } catch (e) {
+    setError(e.message)
+  } finally {
+    setLoading(false)
+    setCountdown(30)
+  }
+}, [sheetName])
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+      await fetchSheets()
+      await fetchInventory()
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  init()
+}, [fetchSheets, fetchInventory])
 
   // ─── Auto-refresh ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -231,8 +298,6 @@ export default function InventoryPage() {
     }
     return () => { clearInterval(intervalRef.current); clearInterval(countdownRef.current) }
   }, [autoRefresh, sheetName, fetchInventory])
-
-  useEffect(() => { fetchSheets(); fetchInventory() }, [])
 
   const handleSheetChange = (name) => {
     setSheetName(name)
@@ -255,42 +320,40 @@ export default function InventoryPage() {
 
   // ─── Barcode & Sell ─────────────────────────────────────────────────────────
   const handleSell = async (item) => {
-    if (isSelling) return
-    const qty = getQty(item)
-    if (qty <= 0) {
-      showToast('❌ สินค้าหมดสต็อก ไม่สามารถขายได้', 'error')
-      return
-    }
+  if (isSelling) return
 
-    const qtyIndex = headers.findIndex(h => QTY_KEYS.includes(h))
-    if (qtyIndex === -1) {
-      showToast('❌ ไม่พบคอลัมน์จำนวนคงเหลือ', 'error')
-      return
-    }
+  setIsSelling(true)
 
-    setIsSelling(true)
-    const newQty = qty - 1
-    const colLetter = String.fromCharCode(65 + qtyIndex) // A=0, B=1, ...
-    const cellRange = `${colLetter}${item._rowIndex}`
-
-    try {
-      const res = await fetch('/api/inventory', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sheet: sheetName, range: cellRange, value: newQty })
+  try {
+    const res = await fetch('/api/inventory', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        sheet: sheetName,
+        rowIndex: item._rowIndex
       })
-      const data = await res.json()
-      if (!data.success) throw new Error(data.error)
-      
-      showToast(`🛒 ขาย ${getVal(item, NAME_KEYS) || getVal(item, CODE_KEYS)} สำเร็จ! (-1)`, 'success')
-      // Update local state temporarily so UI is snappy
-      setItems(prev => prev.map(p => p._rowIndex === item._rowIndex ? { ...p, [headers[qtyIndex]]: newQty.toString() } : p))
-    } catch (err) {
-      showToast(`❌ ตัดสต็อกล้มเหลว: ${err.message}`, 'error')
-    } finally {
-      setIsSelling(false)
-    }
+    })
+
+    const data = await res.json()
+
+    if (!data.success) throw new Error(data.error)
+
+    showToast(`🛒 ขายสำเร็จ เหลือ ${data.newValue}`, 'success')
+
+    setItems(prev =>
+      prev.map(p =>
+        p._rowIndex === item._rowIndex
+          ? { ...p, 'จำนวนคงเหลือ': String(data.newValue) }
+          : p
+      )
+    )
+
+  } catch (err) {
+    showToast('❌ ตัดสต็อกล้มเหลว: ' + err.message, 'error')
+  } finally {
+    setIsSelling(false)
   }
+}
 
   const handleBarcodeSubmit = (e) => {
     e.preventDefault()
