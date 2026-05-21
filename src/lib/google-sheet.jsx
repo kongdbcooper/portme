@@ -8,7 +8,7 @@ export async function getAccessToken() {
     scope: 'https://www.googleapis.com/auth/spreadsheets',
     aud: 'https://oauth2.googleapis.com/token',
     exp: now + 3600,
-    iat: now
+    iat: now,
   }
 
   const token = jwt.sign(
@@ -19,13 +19,11 @@ export async function getAccessToken() {
 
   const res = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
       grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-      assertion: token
-    })
+      assertion: token,
+    }),
   })
 
   const data = await res.json()
