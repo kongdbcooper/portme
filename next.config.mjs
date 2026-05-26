@@ -72,6 +72,33 @@ const nextConfig = {
               "frame-ancestors 'none'",
               "form-action 'self'",
               "base-uri 'self'",
+              {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+
+              // ✅ FIX: เพิ่ม Cloudflare Turnstile
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://www.googletagmanager.com https://www.google-analytics.com https://www.gstatic.com https://challenges.cloudflare.com",
+
+              "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+              "font-src 'self' data: https://fonts.gstatic.com",
+
+              // ✅ เผื่อ widget render
+              "img-src 'self' data: blob: https://*.r2.dev https://*.r2.cloudflarestorage.com https://www.google-analytics.com https://images.unsplash.com",
+
+              "media-src 'self' blob: https://*.r2.dev https://*.r2.cloudflarestorage.com",
+
+              // ✅ FIX: Turnstile ใช้ connect
+              "connect-src 'self' https://*.r2.dev https://*.r2.cloudflarestorage.com https://www.google-analytics.com https://analytics.google.com https://www.googletagmanager.com https://challenges.cloudflare.com",
+
+              // ✅ FIX: Turnstile iframe
+              "frame-src https://challenges.cloudflare.com",
+
+              "frame-ancestors 'none'",
+              "form-action 'self'",
+              "base-uri 'self'",
+              ].join('; '),
+             }
             ].join('; '),
           },
         ],
@@ -79,5 +106,6 @@ const nextConfig = {
     ]
   },
 }
+
 
 export default nextConfig

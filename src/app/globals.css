@@ -5,7 +5,7 @@
 
 /* ------------------- Google Fonts Import ------------------- */
 /* @import ต้องอยู่ก่อน @tailwind directives เสมอ (CSS spec) */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap');
 
 /* Tailwind CSS v3 directives */
 @tailwind base;
@@ -14,8 +14,10 @@
 
 /* ------------------- CSS Variables (Design Tokens) ------------------- */
 :root {
-  --font-inter: 'Inter', sans-serif;
-  --font-outfit: 'Outfit', sans-serif;
+  --font-inter: 'Inter', 'Noto Sans Thai', sans-serif;
+  --font-outfit: 'Outfit', 'Noto Sans Thai', sans-serif;
+  --font-thai: 'Noto Sans Thai', 'Inter', sans-serif;
+  --font-eng: 'Inter', 'Noto Sans Eng', sans-serif;
 
   /* Brand gradient */
   --gradient-brand: linear-gradient(135deg, #5a6bff 0%, #7c4dff 50%, #f97316 100%);

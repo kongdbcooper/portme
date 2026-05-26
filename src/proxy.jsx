@@ -1,5 +1,23 @@
 import { NextResponse } from 'next/server'
 import { decrypt } from './lib/session'
+import { Ratelimit } from '@upstash/ratelimit'
+import { Redis } from '@upstash/redis'
+
+// Create a new ratelimiter, that allows 5 requests per 10 seconds
+let ratelimit = null;
+if (process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN) {
+  try {
+    ratelimit = new Ratelimit({
+      redis: Redis.fromEnv(),
+      limiter: Ratelimit.slidingWindow(5, '10 s'),
+      analytics: true,
+    })
+  } catch (e) {
+    console.warn("Upstash Redis initialization failed. Rate limiting is disabled.")
+  }
+} else {
+  console.warn("Upstash Redis credentials missing in .env. Rate limiting is disabled.")
+}
 
 // กำหนดเส้นทางต่างๆ ในระบบ
 const PUBLIC_ROUTES = ['/login', '/signup']
@@ -43,6 +61,52 @@ function validateCSRF(req) {
  */
 export async function proxy(req) {
   const { pathname } = req.nextUrl
+  const origin = req.headers.get('origin')
+  const host = req.headers.get('host')
+  
+  // Basic origin check: allow localhost for dev, and any vercel.app domain
+  const isAllowedOrigin = !origin || origin.includes('localhost') || origin.endsWith('.vercel.app')
+
+  // --- NEW: Security and Rate Limiting for /api routes ---
+  if (pathname.startsWith('/api')) {
+    // 1. CORS Preflight
+    if (req.method === 'OPTIONS') {
+      const preflightHeaders = {
+        'Access-Control-Allow-Origin': isAllowedOrigin ? origin : '',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      }
+      return NextResponse.json({}, { headers: preflightHeaders })
+    }
+
+    // 2. CORS Block unauthorized origins
+    if (origin && !isAllowedOrigin) {
+      return NextResponse.json({ error: 'Origin not allowed' }, { status: 403 })
+    }
+
+    // 3. Rate Limiting Logic
+    if (ratelimit) {
+      const ip = req.headers.get('x-forwarded-for') ?? '127.0.0.1'
+      
+      try {
+        const { success, limit, reset, remaining } = await ratelimit.limit(ip)
+        if (!success) {
+          return NextResponse.json({ error: 'Too Many Requests' }, { 
+            status: 429,
+            headers: {
+              'X-RateLimit-Limit': limit.toString(),
+              'X-RateLimit-Remaining': remaining.toString(),
+              'X-RateLimit-Reset': reset.toString(),
+            }
+          })
+        }
+      } catch (err) {
+        console.error('Rate limit error:', err.message)
+      }
+    }
+  }
+  // --------------------------------------------------------
+
   const response = NextResponse.next()
 
   // 1. CSRF Protection สำหรับ POST Request (เช่น Login, Logout)
@@ -120,7 +184,14 @@ export async function proxy(req) {
   }
 
   // 4. Security Enhancements (Headers)
-  response.headers.set('X-Frame-Options', 'DENY')
+  if (origin && isAllowedOrigin) {
+    response.headers.set('Access-Control-Allow-Origin', origin)
+  }
+  
+  response.headers.set('X-DNS-Prefetch-Control', 'on')
+  response.headers.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload')
+  response.headers.set('X-XSS-Protection', '1; mode=block')
+  response.headers.set('X-Frame-Options', 'SAMEORIGIN')
   response.headers.set('X-Content-Type-Options', 'nosniff')
   response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
   

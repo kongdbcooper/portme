@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { prisma } from '@/lib/prisma'
 import TeamSection from '@/components/sections/TeamSection'
+import AnonymousReportForm from '@/components/forms/AnonymousReportForm'
 
 export const dynamic = 'force-dynamic'
 
@@ -77,6 +78,11 @@ export default async function AboutPage() {
 
         {/* Team Preview Section */}
         <TeamSection settings={settings} />
+
+        {/* Report Section */}
+        <div className="mt-20">
+          <AnonymousReportForm />
+        </div>
       </div>
     </div>
   )

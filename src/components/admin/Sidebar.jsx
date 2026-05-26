@@ -87,6 +87,15 @@ const MENU_ITEMS = [
     ),
   },
   {
+    label: 'รายงานจากผู้ใช้',
+    href: '/admin/reports',
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+      </svg>
+    ),
+  },
+  {
     label: 'ตั้งค่าเว็บไซต์',
     href: '/admin/settings',
     icon: (
@@ -104,7 +113,6 @@ export default function Sidebar({ user, logoUrl, siteName }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
   const [isMobileOpen, setIsMobileOpen] = useState(false)
 
-  // Logout function
   const handleLogout = async () => {
     setIsLoggingOut(true)
     try {
@@ -119,29 +127,43 @@ export default function Sidebar({ user, logoUrl, siteName }) {
   const sidebarContent = (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="px-6 py-8 border-b border-white/5">
+      <div className="px-4 py-6 border-b border-white/5">
         <Link href="/#hero" className="flex items-center gap-4 group">
-          <div className="relative h-12 flex items-center">
+          
+          <div className="relative h-12 w-[120px] flex items-center">
             {logoUrl ? (
-              <img
+              <Image
                 src={logoUrl}
                 alt="Logo"
-                className="h-full w-auto object-contain drop-shadow-[0_4px_12px_rgba(90,107,255,0.3)] transition-transform group-hover:scale-110 duration-300"
+                fill
+                sizes="120px"
+                className="object-contain drop-shadow-[0_4px_12px_rgba(90,107,255,0.3)] transition-transform group-hover:scale-110 duration-300"
+                priority
               />
             ) : (
               <div className="w-11 h-11 rounded-xl bg-gradient-brand flex items-center justify-center shadow-lg shadow-brand-500/20">
-                <span className="text-white font-bold text-xl" style={{ fontFamily: 'Outfit, sans-serif' }}>M</span>
+                <span
+                  className="text-white font-bold text-xl"
+                  style={{ fontFamily: 'Outfit, sans-serif' }}
+                >
+                  M
+                </span>
               </div>
             )}
           </div>
+
           <div className="flex flex-col">
-            <span className="text-lg font-bold text-white leading-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
+            <span
+              className="text-lg font-bold text-white leading-tight"
+              style={{ fontFamily: 'Outfit, sans-serif' }}
+            >
               {siteName || 'Monkey'} <span className="gradient-text">Admin</span>
             </span>
             <span className="text-[10px] uppercase tracking-[0.2em] text-brand-400 font-bold opacity-80">
               Control
             </span>
           </div>
+
         </Link>
       </div>
 
@@ -150,6 +172,7 @@ export default function Sidebar({ user, logoUrl, siteName }) {
         <p className="text-xs font-semibold text-gray-600 uppercase tracking-wider px-4 mb-3">
           <EditableBlock as="span" settingKey="sidebar_main_menu" defaultText="เมนูหลัก" />
         </p>
+
         {MENU_ITEMS.map(({ label, href, icon }) => {
           const isActive = pathname === href || (href !== '/admin' && pathname.startsWith(href))
           return (
@@ -160,14 +183,20 @@ export default function Sidebar({ user, logoUrl, siteName }) {
               className={`sidebar-link ${isActive ? 'active' : ''}`}
             >
               {icon}
-              <span><EditableBlock as="span" settingKey={`sidebar_menu_${href.replace(/[^a-zA-Z0-9]/g,'_')}_label`} defaultText={label} /></span>
+              <span>
+                <EditableBlock
+                  as="span"
+                  settingKey={`sidebar_menu_${href.replace(/[^a-zA-Z0-9]/g, '_')}_label`}
+                  defaultText={label}
+                />
+              </span>
               {isActive && <span className="ml-auto w-1.5 h-1.5 rounded-full bg-brand-400" />}
             </Link>
           )
         })}
       </nav>
 
-      {/* User info + Logout */}
+      {/* User */}
       <div className="px-4 py-4 border-t border-white/5">
         <div className="glass-card p-3 mb-3">
           <div className="flex items-center gap-3">
@@ -175,13 +204,17 @@ export default function Sidebar({ user, logoUrl, siteName }) {
               {user?.email?.[0]?.toUpperCase() || 'A'}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-medium truncate">{user?.email || 'Admin'}</p>
-              <p className="text-brand-400 text-xs"><EditableBlock as="span" settingKey="sidebar_user_role" defaultText="Administrator" /></p>
+              <p className="text-white text-sm font-medium truncate">
+                {user?.email || 'Admin'}
+              </p>
+              <p className="text-brand-400 text-xs">
+                <EditableBlock as="span" settingKey="sidebar_user_role" defaultText="Administrator" />
+              </p>
             </div>
           </div>
         </div>
+
         <button
-          id="sidebar-logout-btn"
           onClick={handleLogout}
           disabled={isLoggingOut}
           className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-500 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 text-sm font-medium disabled:opacity-50"
@@ -189,7 +222,11 @@ export default function Sidebar({ user, logoUrl, siteName }) {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          {isLoggingOut ? <EditableBlock as="span" settingKey="sidebar_logout_in_progress" defaultText="กำลังออก..." /> : <EditableBlock as="span" settingKey="sidebar_logout" defaultText="ออกจากระบบ" />}
+
+          {isLoggingOut
+            ? <EditableBlock as="span" settingKey="sidebar_logout_in_progress" defaultText="กำลังออก..." />
+            : <EditableBlock as="span" settingKey="sidebar_logout" defaultText="ออกจากระบบ" />
+          }
         </button>
       </div>
     </div>
@@ -197,38 +234,28 @@ export default function Sidebar({ user, logoUrl, siteName }) {
 
   return (
     <>
-      {/* Desktop Sidebar */}
+      {/* Desktop */}
       <aside className="hidden lg:flex flex-col w-64 h-screen fixed left-0 top-0 z-40 border-r border-white/5"
         style={{ background: 'linear-gradient(180deg, #111118 0%, #0d0d18 100%)' }}>
         {sidebarContent}
       </aside>
 
-      {/* Mobile Toggle Button */}
+      {/* Mobile Toggle */}
       <button
-        id="sidebar-mobile-toggle"
         className="lg:hidden fixed top-4 left-4 z-50 w-10 h-10 rounded-xl bg-surface-800 border border-white/10 flex items-center justify-center text-gray-400 hover:text-white"
         onClick={() => setIsMobileOpen(!isMobileOpen)}
-        aria-label="Toggle sidebar"
       >
-        {isMobileOpen ? (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        ) : (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        )}
+        {isMobileOpen ? '✕' : '☰'}
       </button>
 
-      {/* Mobile Sidebar Overlay */}
+      {/* Mobile Sidebar */}
       {isMobileOpen && (
         <>
           <div
-            className="lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+            className="lg:hidden fixed inset-0 z-40 bg-black/60"
             onClick={() => setIsMobileOpen(false)}
           />
-          <aside className="lg:hidden fixed left-0 top-0 bottom-0 z-50 w-64 border-r border-white/5 animate-slide-in-left"
+          <aside className="lg:hidden fixed left-0 top-0 bottom-0 z-50 w-64 border-r border-white/5"
             style={{ background: 'linear-gradient(180deg, #111118 0%, #0d0d18 100%)' }}>
             {sidebarContent}
           </aside>
