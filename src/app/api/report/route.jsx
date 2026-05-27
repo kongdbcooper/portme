@@ -1,5 +1,3 @@
-'s'
-
 import { NextResponse } from 'next/server'
 import { SignJWT } from 'jose'
 import { createPrivateKey } from 'crypto'
@@ -67,17 +65,24 @@ async function sheetsFetch(url, options) {
   return data
 }
 
-// ================= TURNSTILE =================
-async function verifyTurnstile(token) {
+async function verifyTurnstile(token, ip) {
   const secret = process.env.TURNSTILE_SECRET_KEY
   if (!secret) return true
+
+  const params = new URLSearchParams({
+    secret,
+    response: token,
+  })
+  if (ip) {
+    params.append('remoteip', ip)
+  }
 
   const res = await fetch(
     'https://challenges.cloudflare.com/turnstile/v0/siteverify',
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `secret=${secret}&response=${token}`,
+      body: params.toString(),
     }
   )
 
@@ -98,7 +103,8 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Missing CAPTCHA' }, { status: 400 })
     }
 
-    const captchaOk = await verifyTurnstile(token)
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip')
+    const captchaOk = await verifyTurnstile(token, ip)
     if (!captchaOk) {
       return NextResponse.json({ error: 'Invalid CAPTCHA' }, { status: 400 })
     }
@@ -111,9 +117,7 @@ export async function POST(req) {
     const googleToken = await getServiceAccountToken()
 
     const sheet = 'store'
-    const timestamp = new Date().toLocaleString('th-TH', {
-      timeZone: 'Asia/Bangkok',
-    })
+    const timestamp = new Date().toISOString()
 
     const values = [timestamp, clean]
 

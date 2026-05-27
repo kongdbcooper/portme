@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
 
@@ -25,7 +25,7 @@ function StatCard({ label, value, icon, color }) {
     <div className="glass-card p-5">
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-xl ${color} mb-3`}>{icon}</div>
       <p className="text-gray-500 text-sm">{label}</p>
-      <p className="text-2xl font-black text-white mt-1" style={{ fontFamily:'Outfit,sans-serif' }}>{value}</p>
+      <p className="text-2xl font-black text-white mt-1" style={{ fontFamily: 'Noto Serif Thai, serif' }}>{value}</p>
     </div>
   )
 }
@@ -67,7 +67,7 @@ function AddItemModal({ headers, sheetName, onClose, onSuccess }) {
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-lg glass-card p-6 border-brand-500/30 z-10 max-h-[85vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-5">
-          <h3 className="text-white font-bold text-lg" style={{ fontFamily:'Outfit,sans-serif' }}>
+          <h3 className="text-white font-bold text-lg" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
             ➕ เพิ่มรายการวัสดุ
           </h3>
           <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors text-xl">✕</button>
@@ -142,7 +142,7 @@ function DeleteDialog({ item, sheetGid, onClose, onSuccess }) {
       <div className="relative w-full max-w-sm glass-card p-6 border-red-500/30 z-10">
         <div className="text-center mb-4">
           <div className="text-4xl mb-3">🗑️</div>
-          <h3 className="text-white font-bold text-lg" style={{ fontFamily:'Outfit,sans-serif' }}>ลบรายการ</h3>
+          <h3 className="text-white font-bold text-lg" style={{ fontFamily: 'Noto Serif Thai, serif' }}>ลบรายการ</h3>
           <p className="text-gray-400 text-sm mt-2">
             คุณต้องการลบ <span className="text-white font-semibold">{name}</span> ออกจาก Google Sheet ใช่หรือไม่?
           </p>
@@ -409,7 +409,7 @@ const fetchInventory = useCallback(async (name = sheetName) => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white" style={{ fontFamily:'Outfit,sans-serif' }}>
+          <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
             🗄️ คลังสินค้า / วัสดุ
           </h2>
           <p className="text-gray-500 text-sm mt-0.5">

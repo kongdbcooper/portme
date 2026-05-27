@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // src/app/not-found.js — Custom 404 Page
 // แสดงผลเมื่อหาหน้าที่ต้องการไม่พบ (Premium Design)
 // =============================================================================
@@ -17,7 +17,7 @@ export default function NotFound() {
           404
         </h1>
         <div className="-mt-12 space-y-6">
-          <h2 className="text-4xl font-bold text-white tracking-tight" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <h2 className="text-4xl font-bold text-white tracking-tight" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
             Oops! ไม่พบหน้านี้
           </h2>
           <p className="text-gray-500 text-lg">

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState, useRef } from 'react'
 import TeamCard from './TeamCard'
@@ -175,7 +175,7 @@ export default function TeamSection({ settings = {} }) {
               transformOrigin="center bottom"
               opacity="0.5"
               style={{ 
-                fontFamily: 'Outfit, sans-serif',
+                fontFamily: 'Noto Serif Thai, serif',
                 letterSpacing: '0.15em',
               }}
               fill="url(#glow-grad)"
@@ -192,7 +192,7 @@ export default function TeamSection({ settings = {} }) {
               transform="scale(1, 1.3)"
               transformOrigin="center bottom"
               style={{ 
-                fontFamily: 'Outfit, sans-serif',
+                fontFamily: 'Noto Serif Thai, serif',
                 letterSpacing: '0.15em',
               }}
               fill="url(#glow-grad)"
@@ -284,7 +284,7 @@ export default function TeamSection({ settings = {} }) {
           <div 
             className="relative w-full max-w-4xl bg-surface-950/90 border border-white/10 rounded-[2.5rem] overflow-hidden shadow-3xl flex flex-col md:flex-row items-stretch animate-[scaleIn_0.4s_cubic-bezier(0.34,1.56,0.64,1)]"
             onClick={(e) => e.stopPropagation()}
-            style={{ fontFamily: 'Outfit, sans-serif' }}
+            style={{ fontFamily: 'Noto Serif Thai, serif' }}
           >
             {/* Close Button */}
             <button

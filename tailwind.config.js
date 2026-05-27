@@ -57,8 +57,8 @@ module.exports = {
 
       // ------------------- Typography -------------------
       fontFamily: {
-        sans: ['var(--font-inter)', 'Inter', 'system-ui', 'sans-serif'],
-        display: ['var(--font-outfit)', 'Outfit', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-serif-thai)', 'Noto Serif Thai', 'Inter', 'system-ui', 'serif'],
+        display: ['var(--font-serif-thai)', 'Noto Serif Thai', 'Inter', 'system-ui', 'serif'],
       },
 
       // ------------------- Animations -------------------

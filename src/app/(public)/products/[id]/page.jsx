@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // src/app/(public)/products/[id]/page.jsx — Public Single Product Detail Page
 // แสดงรายละเอียดรูปภาพเพิ่มเติม ข้อความอธิบายแบบจัดรูปประโยค และปุ่มสนใจสินค้า
 // =============================================================================
@@ -95,7 +95,7 @@ export default async function ProductDetailPage({ params }) {
             {/* Product Name */}
             <h1 
               className="text-3xl sm:text-4xl lg:text-5xl font-black text-white leading-tight" 
-              style={{ fontFamily: 'Outfit, sans-serif' }}
+              style={{ fontFamily: 'Noto Serif Thai, serif' }}
             >
               {product.name}
             </h1>
@@ -110,7 +110,7 @@ export default async function ProductDetailPage({ params }) {
 
             {/* Detailed Description */}
             <div className="space-y-3">
-              <h3 className="text-lg font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
+              <h3 className="text-lg font-bold text-white" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
                 รายละเอียดสินค้า
               </h3>
               <p className="text-gray-300 leading-relaxed text-base whitespace-pre-wrap">

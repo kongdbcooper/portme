@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // src/app/admin/products/new/page.js — Add New Product Page
 // หน้าเพิ่มโปรดักซ์ใหม่ + อัปโหลดรูปไปยัง R2
 // ใช้งานร่วมกับ: src/components/admin/ProductForm.js
@@ -29,7 +29,7 @@ export default function NewProductPage() {
 
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
           เพิ่มโปรดักซ์ใหม่
         </h2>
         <p className="text-gray-500 text-sm mt-1">

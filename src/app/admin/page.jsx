@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // src/app/admin/page.js — Admin Dashboard Overview
 // หน้าหลัก dashboard แสดง stats card, recent products
 // ใช้งานร่วมกับ: src/lib/prisma.js, src/app/admin/layout.js
@@ -29,7 +29,7 @@ function StatsCard({ label, value, icon, color, change }) {
         )}
       </div>
       <p className="text-gray-500 text-sm">{label}</p>
-      <p className="text-3xl font-black text-white mt-1" style={{ fontFamily: 'Outfit, sans-serif' }}>
+      <p className="text-3xl font-black text-white mt-1" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
         {value}
       </p>
     </div>
@@ -77,7 +77,7 @@ export default async function AdminDashboardPage() {
     <div className="space-y-8">
       {/* Page Header */}
       <div>
-        <h2 className="text-2xl font-bold text-white mb-1" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <h2 className="text-2xl font-bold text-white mb-1" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
           ยินดีต้อนรับ <MdWavingHand className="inline text-yellow-400 mb-1" />
         </h2>
         <p className="text-gray-500">นี่คือภาพรวมของเว็บไซต์คุณ</p>

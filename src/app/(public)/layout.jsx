@@ -6,6 +6,7 @@
 
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
+import GlobalImageZoom from '@/components/layout/GlobalImageZoom'
 import { getFreshSettings } from '@/lib/settings'
 
 export const dynamic = 'force-dynamic'
@@ -18,6 +19,7 @@ export default async function PublicLayout({ children }) {
       <Navbar settings={settings} />
       <main>{children}</main>
       <Footer settings={settings} />
+      <GlobalImageZoom />
     </>
   )
 }

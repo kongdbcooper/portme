@@ -52,7 +52,7 @@ export default async function SearchResultsPage({ searchParams }) {
       <div className="max-w-7xl mx-auto">
         <div className="mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
-            ผลการค้นหาสำหรับ: <span className="text-brand-400">"{query}"</span>
+            ผลการค้นหาสำหรับ: <span className="text-brand-400">{query}</span>
           </h1>
           <p className="text-gray-400">
             พบสินค้า {products.length} รายการ และวิดีโอ {videos.length} รายการ
@@ -62,7 +62,7 @@ export default async function SearchResultsPage({ searchParams }) {
         {products.length === 0 && videos.length === 0 ? (
           <div className="text-center py-20 glass-card">
             <div className="text-6xl mb-4 opacity-50">🔍</div>
-            <h3 className="text-xl text-gray-300 font-medium">ไม่พบผลลัพธ์ที่ตรงกับ "{query}"</h3>
+            <h3 className="text-xl text-gray-300 font-medium">ไม่พบผลลัพธ์ที่ตรงกับ {query}</h3>
             <p className="text-gray-500 mt-2">ลองใช้คำค้นหาอื่นดูอีกครั้ง</p>
           </div>
         ) : (

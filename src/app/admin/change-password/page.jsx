@@ -1,10 +1,10 @@
-import ChangePasswordForm from '@/components/admin/ChangePasswordForm'
+﻿import ChangePasswordForm from '@/components/admin/ChangePasswordForm'
 
 export default function AdminChangePasswordPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <h1 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
           Change Password
         </h1>
         <p className="text-gray-400">Update the admin account password from this page only.</p>

@@ -1,4 +1,4 @@
-export const runtime = 'nodejs';
+﻿export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 import Link from 'next/link'
@@ -18,7 +18,7 @@ export default async function VideosPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white mb-1" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <h2 className="text-2xl font-bold text-white mb-1" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
             จัดการวิดีโอ
           </h2>
           <p className="text-gray-500 text-sm">จัดการวิดีโอแนะนำและผลงาน</p>

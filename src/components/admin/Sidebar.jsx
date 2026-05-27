@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // src/components/admin/Sidebar.js — Admin Dashboard Sidebar
 // แสดงเมนู navigation สำหรับ Admin พร้อม logout
 // ใช้งานร่วมกับ: src/app/admin/layout.js, src/app/api/auth/logout/route.js
@@ -144,7 +144,7 @@ export default function Sidebar({ user, logoUrl, siteName }) {
               <div className="w-11 h-11 rounded-xl bg-gradient-brand flex items-center justify-center shadow-lg shadow-brand-500/20">
                 <span
                   className="text-white font-bold text-xl"
-                  style={{ fontFamily: 'Outfit, sans-serif' }}
+                  style={{ fontFamily: 'Noto Serif Thai, serif' }}
                 >
                   M
                 </span>
@@ -155,7 +155,7 @@ export default function Sidebar({ user, logoUrl, siteName }) {
           <div className="flex flex-col">
             <span
               className="text-lg font-bold text-white leading-tight"
-              style={{ fontFamily: 'Outfit, sans-serif' }}
+              style={{ fontFamily: 'Noto Serif Thai, serif' }}
             >
               {siteName || 'Monkey'} <span className="gradient-text">Admin</span>
             </span>

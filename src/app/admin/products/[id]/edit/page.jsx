@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // src/app/admin/products/[id]/edit/page.js — Edit Product Page
 // หน้าแก้ไขโปรดักซ์ รวมถึงเปลี่ยนรูปภาพ (ลบรูปเก่าจาก R2 อัตโนมัติ)
 // ใช้งานร่วมกับ: src/lib/prisma.js, src/components/admin/ProductForm.js
@@ -53,7 +53,7 @@ export default async function EditProductPage({ params }) {
 
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
           แก้ไขโปรดักซ์
         </h2>
         <p className="text-gray-500 text-sm mt-1">

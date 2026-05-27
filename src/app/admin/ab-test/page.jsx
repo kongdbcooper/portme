@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // src/app/admin/ab-test/page.js — A/B Test Analytics Page
 // แสดงสถิติ A/B testing สำหรับแต่ละโปรดักซ์
 // ใช้งานร่วมกับ: src/lib/prisma.js, src/lib/ab-test.js
@@ -65,7 +65,7 @@ export default async function ABTestPage() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
           A/B Testing Dashboard
         </h2>
         <p className="text-gray-500 text-sm mt-1">
@@ -77,13 +77,13 @@ export default async function ABTestPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="glass-card p-5 text-center">
           <p className="text-gray-500 text-sm">Total Events</p>
-          <p className="text-3xl font-black text-white mt-1" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <p className="text-3xl font-black text-white mt-1" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
             {totalEvents.toLocaleString()}
           </p>
         </div>
         <div className="glass-card p-5 text-center">
           <p className="text-brand-400 text-sm font-medium">Variant A Events</p>
-          <p className="text-3xl font-black text-white mt-1" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <p className="text-3xl font-black text-white mt-1" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
             {variantACounts.toLocaleString()}
           </p>
           <p className="text-gray-600 text-xs mt-1">
@@ -92,7 +92,7 @@ export default async function ABTestPage() {
         </div>
         <div className="glass-card p-5 text-center">
           <p className="text-accent-400 text-sm font-medium">Variant B Events</p>
-          <p className="text-3xl font-black text-white mt-1" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <p className="text-3xl font-black text-white mt-1" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
             {variantBCounts.toLocaleString()}
           </p>
           <p className="text-gray-600 text-xs mt-1">

@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // src/app/admin/analytics/page.jsx — Admin Analytics Page
 // แสดงสถิติว่าลูกค้าสนใจสินค้าไหนบ้าง หรือหมวดหมู่ไหนกำลังฮิต
 // =============================================================================
@@ -71,7 +71,7 @@ export default async function AnalyticsPage() {
     <div className="space-y-8 pb-20">
       {/* Header */}
       <div>
-        <h2 className="text-2xl font-bold text-white mb-1" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <h2 className="text-2xl font-bold text-white mb-1" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
           📈 การวิเคราะห์ข้อมูล (Analytics)
         </h2>
         <p className="text-gray-500">ข้อมูลความสนใจสินค้าและการค้นหาจากลูกค้า</p>
@@ -84,7 +84,7 @@ export default async function AnalyticsPage() {
             🖱️
           </div>
           <p className="text-gray-500 text-sm">จำนวนการกด "สนใจ" ทั้งหมด</p>
-          <p className="text-3xl font-black text-white mt-1" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <p className="text-3xl font-black text-white mt-1" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
             {totalClicks.toLocaleString()}
           </p>
         </div>
@@ -94,7 +94,7 @@ export default async function AnalyticsPage() {
             🔥
           </div>
           <p className="text-gray-500 text-sm">สินค้าที่ได้รับความสนใจสูงสุด</p>
-          <p className="text-xl font-bold text-white mt-1 truncate" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <p className="text-xl font-bold text-white mt-1 truncate" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
             {sortedProducts[0]?.name || 'ยังไม่มีข้อมูล'}
           </p>
         </div>
@@ -104,7 +104,7 @@ export default async function AnalyticsPage() {
             🔍
           </div>
           <p className="text-gray-500 text-sm">คำค้นหายอดฮิต</p>
-          <p className="text-xl font-bold text-white mt-1 truncate" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <p className="text-xl font-bold text-white mt-1 truncate" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
             {searchLogs[0]?.query ? `"${searchLogs[0].query}"` : 'ยังไม่มีข้อมูล'}
           </p>
         </div>
