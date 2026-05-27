@@ -14,7 +14,7 @@ export async function PATCH(request, { params }) {
     const body = await request.json()
     const { title, subtitle, description } = body
     
-    // Update using Prisma (more robust for partial updates)
+      // Update using Prisma (more robust for partial updates)
     const banner = await prisma.banner.update({
       where: { id },
       data: {
