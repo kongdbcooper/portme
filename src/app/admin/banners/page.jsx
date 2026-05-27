@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -12,12 +12,7 @@ function BannerItem({ banner, onUpdate, onDelete }) {
   const [isSaving, setIsSaving] = useState(false)
   const [hasChanged, setHasChanged] = useState(false)
 
-  useEffect(() => {
-    setTitle(banner.title || '')
-    setSubtitle(banner.subtitle || '')
-    setDescription(banner.description || '')
-    setHasChanged(false)
-  }, [banner])
+
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -121,7 +116,6 @@ export default function AdminBannersPage() {
   const [message, setMessage] = useState({ type: '', text: '' })
   const router = useRouter()
 
-  useEffect(() => { fetchBanners() }, [])
 
   const fetchBanners = async () => {
     try {
@@ -175,7 +169,7 @@ export default function AdminBannersPage() {
     <div className="max-w-7xl mx-auto space-y-16 pb-32">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-black text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>Banner Management</h1>
+          <h1 className="text-3xl font-black text-white" style={{ fontFamily: 'Noto Serif Thai, serif' }}>Banner Management</h1>
           <p className="text-gray-400 text-sm">จัดการรูปภาพและข้อความสำหรับสไลด์หน้าเว็บ</p>
         </div>
         {message.text && (

@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // src/app/admin/reports/page.jsx — Admin Reports Page
 // หน้าจัดการรายงานจากผู้ใช้ ดึงข้อมูลจาก Google Sheets
 // =============================================================================
@@ -14,7 +14,7 @@ export default function AdminReportsPage() {
     <div className="space-y-8">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold text-white mb-1" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <h1 className="text-2xl font-bold text-white mb-1" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
           📩 รายงานจากผู้ใช้
         </h1>
         <p className="text-gray-500">ข้อเสนอแนะและรายงานปัญหาจากผู้ใช้ (Anonymous) — ดึงจาก Google Sheets แบบ Real-time</p>

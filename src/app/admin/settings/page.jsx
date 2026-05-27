@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -519,7 +519,7 @@ export default function AdminSettingsPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <h1 className="text-3xl font-bold text-white mb-2" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
           Site Settings
         </h1>
         <p className="text-gray-400">Manage website media and core display settings.</p>

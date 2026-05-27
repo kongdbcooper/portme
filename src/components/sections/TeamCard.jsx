@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useRef, useEffect } from 'react'
 import { FaUsers } from 'react-icons/fa6'
@@ -120,7 +120,7 @@ export default function TeamCard({ imageUrl, name, role, desc, index, isActive =
           <div className="w-1.5 h-1.5 rounded-full bg-brand-500 animate-pulse" />
           <span className="text-brand-300 text-[10px] font-bold uppercase tracking-[0.2em]">{role || 'Team Member'}</span>
         </div>
-        <h3 className="text-lg sm:text-xl font-black text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <h3 className="text-lg sm:text-xl font-black text-white" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
           {name || 'ชื่อสมาชิก'}
         </h3>
         <p className="text-gray-400 text-xs mt-2 line-clamp-2 leading-relaxed font-medium">

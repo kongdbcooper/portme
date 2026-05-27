@@ -1,4 +1,4 @@
-export const runtime = 'nodejs';
+﻿export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 import { notFound } from 'next/navigation'
@@ -25,7 +25,7 @@ export default async function EditVideoPage({ params }) {
           <Link href="/admin/videos" className="text-brand-400 text-sm hover:text-brand-300 mb-2 inline-block">
             ← กลับไปหน้ารายการวิดีโอ
           </Link>
-          <h2 className="text-2xl font-bold text-white mb-1" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <h2 className="text-2xl font-bold text-white mb-1" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
             แก้ไขวิดีโอ
           </h2>
           <p className="text-gray-500 text-sm">ปรับปรุงรายละเอียดของวิดีโอ</p>

@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // src/components/admin/ProductForm.js — Create/Edit Product Form
 // ฟอร์มสำหรับสร้างและแก้ไขโปรดักซ์ รวม MultiImageUploader
 // =============================================================================
@@ -152,7 +152,7 @@ export default function ProductForm({ product = null, mode = 'create' }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </div>
-          <h3 className="text-lg font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>อัลบั้มรูปภาพโปรดักซ์</h3>
+          <h3 className="text-lg font-bold text-white" style={{ fontFamily: 'Noto Serif Thai, serif' }}>อัลบั้มรูปภาพโปรดักซ์</h3>
         </div>
         
         <div className="glass-card p-4 border-brand-500/10">
@@ -184,7 +184,7 @@ export default function ProductForm({ product = null, mode = 'create' }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
           </div>
-          <h3 className="text-lg font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>รายละเอียดข้อมูล</h3>
+          <h3 className="text-lg font-bold text-white" style={{ fontFamily: 'Noto Serif Thai, serif' }}>รายละเอียดข้อมูล</h3>
         </div>
 
         {/* Product Name */}

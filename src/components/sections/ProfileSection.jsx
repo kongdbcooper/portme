@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
@@ -100,7 +100,7 @@ export default function ProfileSection({ settings = {}, banners = [], loading = 
             return (
               <>
                 {/* Left Side — Content */}
-                <div className="space-y-12 lg:space-y-20" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                <div className="space-y-12 lg:space-y-20" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
                   <div className="space-y-8 lg:space-y-12">
                     {/* Intro Text - Dynamic per Banner Image */}
                     <div className="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black uppercase tracking-tighter leading-none">
@@ -174,7 +174,7 @@ export default function ProfileSection({ settings = {}, banners = [], loading = 
                 </div>
 
                 {/* Right Side — Showcase & Navigation */}
-                <div className="relative space-y-6 flex flex-col items-center w-full" style={{ fontFamily: 'Outfit, sans-serif' }}>
+                <div className="relative space-y-6 flex flex-col items-center w-full" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
                   {/* Background Glow */}
                   <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-brand-500/10 rounded-full blur-[150px] scale-90 group-hover:scale-110 transition-transform duration-1000 pointer-events-none" />
                   

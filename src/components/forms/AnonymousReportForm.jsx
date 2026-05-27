@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { FiSend, FiCheckCircle, FiAlertCircle } from 'react-icons/fi'
@@ -55,7 +55,7 @@ export default function AnonymousReportForm() {
       <div className="absolute inset-0 bg-gradient-to-br from-brand-500/10 to-orange-500/10 z-0 opacity-50"></div>
       
       <div className="relative z-10">
-        <h3 className="text-2xl font-bold text-white mb-2" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <h3 className="text-2xl font-bold text-white mb-2" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
           ส่งข้อเสนอแนะ / แจ้งปัญหา
         </h3>
         <p className="text-gray-400 mb-6 text-sm">

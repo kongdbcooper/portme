@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // src/components/admin/AdminHeader.js — Admin Dashboard Header
 // Header สำหรับ admin dashboard พร้อม logout button
 // =============================================================================
@@ -31,7 +31,7 @@ export default function AdminHeader() {
       <div className="lg:hidden w-10" /> 
       <div className="flex-1 lg:flex-none">
         {/* Static title to avoid inline-edit interaction on dashboard */}
-        <div className="text-white font-semibold text-lg" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <div className="text-white font-semibold text-lg" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
           Admin Dashboard
         </div>
       </div>

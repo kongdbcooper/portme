@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // src/components/sections/HeroSection.js — Hero Section (Section 1)
 // ส่วนแรกของ landing page: headline, CTA, animated background
 // ใช้งานร่วมกับ: src/app/page.js, src/app/globals.css, tailwind.config.js
@@ -164,7 +164,7 @@ export default function HeroSection({ settings = {}, banners = [] }) {
         </div>
 
         {/* Main Headline - Dynamic Sync with Banner Image */}
-        <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black mb-6 animate-fade-up leading-[1.05] sm:leading-none flex flex-col items-center" style={{ fontFamily: 'Outfit, sans-serif' }}>
+        <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black mb-6 animate-fade-up leading-[1.05] sm:leading-none flex flex-col items-center" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
           {currentBanner.title ? (
             <span className="animated-gradient-text block text-center py-2 break-words whitespace-pre-wrap">{currentBanner.title}</span>
           ) : (

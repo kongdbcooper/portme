@@ -1,4 +1,4 @@
-// =============================================================================
+﻿// =============================================================================
 // src/app/admin/products/page.js — Admin Product List Page
 // แสดงรายการโปรดักซ์ทั้งหมดสำหรับ Admin พร้อม delete/edit
 // ใช้งานร่วมกับ: src/lib/prisma.js, src/app/api/products/[id]/route.js
@@ -50,7 +50,7 @@ export default async function AdminProductsPage({ searchParams }) {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>
+          <h2 className="text-2xl font-bold text-white" style={{ fontFamily: 'Noto Serif Thai, serif' }}>
             โปรดักซ์ทั้งหมด
           </h2>
           <p className="text-gray-500 text-sm mt-1">พบ {total} รายการ</p>
