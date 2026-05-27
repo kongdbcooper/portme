@@ -1,3 +1,5 @@
+'s'
+
 import { NextResponse } from 'next/server'
 import { SignJWT } from 'jose'
 import { createPrivateKey } from 'crypto'
@@ -11,10 +13,10 @@ const SHEET_ID = process.env.GOOGLE_SHEET_ID
 const SA_EMAIL = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL
 const SA_KEY   = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY
 
-// ================= GUARD =================
 function ensureEnv() {
-  if (!SHEET_ID) throw new Error('Missing GOOGLE_SHEET_ID')
-  if (!SA_EMAIL || !SA_KEY) throw new Error('Missing SERVICE ACCOUNT ENV')
+  if (!SHEET_ID || !SA_EMAIL || !SA_KEY) {
+    throw new Error('Missing Google Sheets ENV')
+  }
 }
 
 // ================= TOKEN =================
@@ -50,13 +52,13 @@ async function getServiceAccountToken() {
   return JSON.parse(text).access_token
 }
 
-// ================= SAFE FETCH =================
-async function sheetsFetch(url, options = {}) {
+// ================= SAFE SHEETS =================
+async function sheetsFetch(url, options) {
   const res = await fetch(url, options)
   const text = await res.text()
 
   if (!text.trim().startsWith('{')) {
-    throw new Error(`Google API invalid response: ${text.slice(0, 200)}`)
+    throw new Error('Invalid Google API response')
   }
 
   const data = JSON.parse(text)
@@ -65,72 +67,73 @@ async function sheetsFetch(url, options = {}) {
   return data
 }
 
-// ================= TURNSTILE VERIFICATION =================
-async function verifyTurnstileToken(token) {
-  const secretKey = process.env.TURNSTILE_SECRET_KEY
-  if (!secretKey) {
-    console.warn('TURNSTILE_SECRET_KEY is not set. Skipping verification (Dev mode only).')
-    return true
-  }
+// ================= TURNSTILE =================
+async function verifyTurnstile(token) {
+  const secret = process.env.TURNSTILE_SECRET_KEY
+  if (!secret) return true
 
-  const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
-    body: `secret=${encodeURIComponent(secretKey)}&response=${encodeURIComponent(token)}`,
-  })
+  const res = await fetch(
+    'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `secret=${secret}&response=${token}`,
+    }
+  )
 
   const data = await res.json()
   return data.success
 }
 
-export async function POST(request) {
+// ================= POST =================
+export async function POST(req) {
   try {
-    const { report, token } = await request.json()
+    const { report, token } = await req.json()
 
     if (!report) {
-      return NextResponse.json({ error: 'Report content is required' }, { status: 400 })
-    }
-
-    if (report.length > 2000) {
-      return NextResponse.json({ error: 'Report is too long (max 2000 characters)' }, { status: 400 })
+      return NextResponse.json({ error: 'Missing report' }, { status: 400 })
     }
 
     if (!token) {
-      return NextResponse.json({ error: 'CAPTCHA token is required' }, { status: 400 })
+      return NextResponse.json({ error: 'Missing CAPTCHA' }, { status: 400 })
     }
 
-    const isValidCaptcha = await verifyTurnstileToken(token)
-    if (!isValidCaptcha) {
+    const captchaOk = await verifyTurnstile(token)
+    if (!captchaOk) {
       return NextResponse.json({ error: 'Invalid CAPTCHA' }, { status: 400 })
     }
 
-    // Sanitize input to prevent XSS
-    const sanitizedReport = sanitizeHtml(report, {
-      allowedTags: [], // Strip all HTML tags
-      allowedAttributes: {}
+    const clean = sanitizeHtml(report, {
+      allowedTags: [],
+      allowedAttributes: {},
     })
 
     const googleToken = await getServiceAccountToken()
-    const sheet = 'store' // ระบุชื่อชีตที่ต้องการบันทึก
-    const timestamp = new Date().toISOString()
-    const values = [timestamp, sanitizedReport] // บันทึกลง 2 คอลัมน์
 
-    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/'${sheet}'!A1:append?valueInputOption=USER_ENTERED`
+    const sheet = 'store'
+    const timestamp = new Date().toLocaleString('th-TH', {
+      timeZone: 'Asia/Bangkok',
+    })
+
+    const values = [timestamp, clean]
+
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${sheet}!A1:append?valueInputOption=USER_ENTERED`
 
     await sheetsFetch(url, {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${googleToken}`,
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ values: [values] })
+      body: JSON.stringify({ values: [values] }),
     })
 
     return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error('Error in report API:', error)
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 })
+  } catch (err) {
+    console.error(err)
+    return NextResponse.json(
+      { error: err.message || 'Server error' },
+      { status: 500 }
+    )
   }
 }

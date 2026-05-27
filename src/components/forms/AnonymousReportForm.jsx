@@ -29,8 +29,10 @@ export default function AnonymousReportForm() {
         body: JSON.stringify({ report, token }),
       })
 
+      const data = await response.json()
       if (!response.ok) {
-        throw new Error('Failed to submit report')
+        console.error('SERVER ERROR:', data)
+        throw new Error(data.error || 'Failed to submit report')
       }
 
       setStatus('success')
@@ -44,7 +46,7 @@ export default function AnonymousReportForm() {
     } catch (error) {
       console.error('Error submitting report:', error)
       setStatus('error')
-      setErrorMessage('เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง')
+      setErrorMessage(error.message || 'เกิดข้อผิดพลาดในการส่งข้อมูล กรุณาลองใหม่อีกครั้ง')
     }
   }
 
@@ -97,12 +99,19 @@ export default function AnonymousReportForm() {
 
             <div className="flex justify-center my-4">
               <Turnstile
-                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA'} // Test key if env is missing
+                siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '0x4AAAAAADW0ibaqoVTNIVT6'} 
                 onSuccess={(token) => {
                   setToken(token)
                   setErrorMessage('')
                 }}
-                onError={() => setErrorMessage('CAPTCHA Error. Please refresh.')}
+                onExpire={() => {
+                  setToken('')
+                  setErrorMessage('กรุณายืนยันใหม่อีกครั้ง')
+                }}
+                onError={() => {
+                  setToken('')
+                  setErrorMessage('CAPTCHA Error. Please refresh.')
+                }}
                 options={{
                   theme: 'dark',
                 }}

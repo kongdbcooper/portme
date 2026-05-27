@@ -2,19 +2,37 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
-// ✅ custom hook กัน Date.now impure
+// ================= SAFE CLOCK =================
 function useNow(interval = 60000) {
   const [now, setNow] = useState(() => Date.now())
 
   useEffect(() => {
-    const id = setInterval(() => {
-      setNow(Date.now())
-    }, interval)
-
+    const id = setInterval(() => setNow(Date.now()), interval)
     return () => clearInterval(id)
   }, [interval])
 
   return now
+}
+
+// ================= DATE PARSER (SaaS FIX) =================
+function parseDateSafe(iso) {
+  if (!iso) return null
+
+  let date = new Date(iso)
+  if (!isNaN(date.getTime())) return date
+
+  if (iso.includes('/')) {
+    const [d, t] = iso.split(' ')
+    if (!d || !t) return null
+
+    const [day, month, year] = d.split('/')
+    const y = Number(year) - 543
+
+    date = new Date(`${y}-${month}-${day}T${t}`)
+    if (!isNaN(date.getTime())) return date
+  }
+
+  return null
 }
 
 export default function ReportsClient() {
@@ -22,76 +40,97 @@ export default function ReportsClient() {
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
 
-  // ✅ ใช้ hook ที่ pure แล้ว
   const now = useNow()
 
-  // ✅ fetch function (ไม่มี setState)
+  // ================= FETCH =================
   const fetchReports = async () => {
     const res = await fetch('/api/admin/reports', { cache: 'no-store' })
     const json = await res.json()
     return json.reports || []
   }
 
-  // ✅ effect แบบถูกต้อง
+  // ================= INIT + SYNC (SaaS realtime-lite) =================
   useEffect(() => {
-    let ignore = false
+    let alive = true
 
     const load = async () => {
       try {
         const data = await fetchReports()
-
-        if (!ignore) {
-          setReports(data)
-        }
+        if (alive) setReports(data)
       } catch (err) {
         console.error(err)
       } finally {
-        if (!ignore) {
-          setLoading(false)
-        }
+        if (alive) setLoading(false)
       }
     }
 
     load()
 
+    // 🔥 auto sync (ลบแล้วหาย / เพิ่มแล้วขึ้น)
+    const interval = setInterval(load, 5000)
+
     return () => {
-      ignore = true
+      alive = false
+      clearInterval(interval)
     }
   }, [])
 
-  // ✅ filter
+  // ================= SORT (NEW FIRST) =================
+  const sorted = useMemo(() => {
+    return [...reports].sort((a, b) => {
+      const ta = parseDateSafe(a.timestamp)?.getTime() || 0
+      const tb = parseDateSafe(b.timestamp)?.getTime() || 0
+      return tb - ta
+    })
+  }, [reports])
+
+  // ================= FILTER =================
   const filtered = useMemo(() => {
     const q = search.toLowerCase()
 
-    return reports.filter((r) => {
+    return sorted.filter((r) => {
       return (
         (r.content || '').toLowerCase().includes(q) ||
         (r.timestamp || '').toLowerCase().includes(q)
       )
     })
-  }, [reports, search])
+  }, [sorted, search])
 
-  // ✅ timeAgo (pure เพราะใช้ now จาก hook)
+  // ================= TIME AGO =================
   const timeAgo = (iso) => {
-    try {
-      const diff = now - new Date(iso).getTime()
-      const mins = Math.floor(diff / 60000)
+    const date = parseDateSafe(iso)
+    if (!date) return '-'
 
-      if (mins < 1) return 'เมื่อสักครู่'
-      if (mins < 60) return `${mins} นาทีที่แล้ว`
+    const diff = now - date.getTime()
+    const mins = Math.floor(diff / 60000)
 
-      const hours = Math.floor(mins / 60)
-      if (hours < 24) return `${hours} ชั่วโมงที่แล้ว`
+    if (mins < 1) return 'เมื่อสักครู่'
+    if (mins < 60) return `${mins} นาทีที่แล้ว`
 
-      const days = Math.floor(hours / 24)
-      return `${days} วันที่แล้ว`
-    } catch {
-      return '-'
-    }
+    const hours = Math.floor(mins / 60)
+    if (hours < 24) return `${hours} ชั่วโมงที่แล้ว`
+
+    const days = Math.floor(hours / 24)
+    return `${days} วันที่แล้ว`
   }
 
-  // ================= UI =================
+  // ================= DATE FORMAT (UI unchanged) =================
+  function formatThaiDateTime(iso) {
+    const date = parseDateSafe(iso)
+    if (!date) return '-'
 
+    return new Intl.DateTimeFormat('th-TH', {
+      timeZone: 'Asia/Bangkok',
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).format(date)
+  }
+
+  // ================= UI (UNCHANGED STYLE) =================
   if (loading) {
     return <div className="p-4">กำลังโหลด...</div>
   }
@@ -108,11 +147,8 @@ export default function ReportsClient() {
 
       <div className="space-y-2">
         {filtered.map((r) => (
-          <div
-            key={r.id}
-            className="border p-3 rounded bg-white shadow-sm"
-          >
-            <div className="text-sm text-gray-500">
+          <div key={r.id} className="border p-3 rounded bg-black shadow-sm">
+            <div className="text-sm text-white-500">
               {timeAgo(r.timestamp)}
             </div>
 
