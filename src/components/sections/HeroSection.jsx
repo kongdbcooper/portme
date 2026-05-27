@@ -66,7 +66,7 @@ export default function HeroSection({ settings = {}, banners = [] }) {
     if (heroImages.length <= 1) return
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % heroImages.length)
-    }, 8000) // เปลี่ยนรูปทุก 8 วินาที
+    }, 5000) // เปลี่ยนรูปทุก 5 วินาที
     return () => clearInterval(interval)
   }, [heroImages.length])
 

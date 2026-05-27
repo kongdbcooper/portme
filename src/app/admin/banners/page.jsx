@@ -12,7 +12,12 @@ function BannerItem({ banner, onUpdate, onDelete }) {
   const [isSaving, setIsSaving] = useState(false)
   const [hasChanged, setHasChanged] = useState(false)
 
-
+  useEffect(() => {
+    setTitle(banner.title || '')
+    setSubtitle(banner.subtitle || '')
+    setDescription(banner.description || '')
+    setHasChanged(false)
+  }, [banner])
 
   const handleSave = async () => {
     setIsSaving(true)
@@ -53,22 +58,22 @@ function BannerItem({ banner, onUpdate, onDelete }) {
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1">
             <label className="text-[9px] font-black uppercase tracking-widest text-brand-400 px-1">Title</label>
-            <textarea
+            <input
+              type="text"
               value={title}
               onChange={(e) => { setTitle(e.target.value); setHasChanged(true); }}
               placeholder="หัวข้อ..."
-              rows={1}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500/50 resize-none"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500/50"
             />
           </div>
           <div className="space-y-1">
             <label className="text-[9px] font-black uppercase tracking-widest text-brand-400 px-1">Subtitle</label>
-            <textarea
+            <input
+              type="text"
               value={subtitle}
               onChange={(e) => { setSubtitle(e.target.value); setHasChanged(true); }}
               placeholder="รายละเอียด 1..."
-              rows={1}
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500/50 resize-none"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm focus:outline-none focus:border-brand-500/50"
             />
           </div>
         </div>
@@ -116,6 +121,7 @@ export default function AdminBannersPage() {
   const [message, setMessage] = useState({ type: '', text: '' })
   const router = useRouter()
 
+  useEffect(() => { fetchBanners() }, [])
 
   const fetchBanners = async () => {
     try {
@@ -169,7 +175,7 @@ export default function AdminBannersPage() {
     <div className="max-w-7xl mx-auto space-y-16 pb-32">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-black text-white" style={{ fontFamily: 'Noto Serif Thai, serif' }}>Banner Management</h1>
+          <h1 className="text-3xl font-black text-white" style={{ fontFamily: 'Outfit, sans-serif' }}>Banner Management</h1>
           <p className="text-gray-400 text-sm">จัดการรูปภาพและข้อความสำหรับสไลด์หน้าเว็บ</p>
         </div>
         {message.text && (
@@ -188,7 +194,7 @@ export default function AdminBannersPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           <div className="glass-card p-8 border-white/5 bg-white/2 sticky top-24">
             <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest opacity-50">Upload New Hero</h3>
-            <ImageUploader folder="hero" onUploadSuccess={({ url, key }) => addBanner('HERO', url, key)} />
+            <ImageUploader folder="banners" onUploadSuccess={({ url, key }) => addBanner('HERO', url, key)} />
           </div>
           <div className="space-y-6">
             <h3 className="text-sm font-bold text-white mb-2 uppercase tracking-widest opacity-50">Active Banners</h3>
@@ -214,7 +220,7 @@ export default function AdminBannersPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
           <div className="glass-card p-8 border-white/5 bg-white/2 sticky top-24">
             <h3 className="text-sm font-bold text-white mb-6 uppercase tracking-widest opacity-50">Upload New Profile</h3>
-            <ImageUploader folder="profile" onUploadSuccess={({ url, key }) => addBanner('PROFILE', url, key)} />
+            <ImageUploader folder="banners" onUploadSuccess={({ url, key }) => addBanner('PROFILE', url, key)} />
           </div>
           <div className="space-y-6">
             <h3 className="text-sm font-bold text-white mb-2 uppercase tracking-widest opacity-50">Active Banners</h3>
