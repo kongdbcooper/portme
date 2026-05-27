@@ -80,8 +80,6 @@ export default function Navbar({ settings = {} }) {
   // ------------------- Autocomplete / Live Search Suggestions -------------------
   useEffect(() => {
     if (!searchQuery.trim()) {
-      setSuggestions([])
-      setShowDropdown(false)
       return
     }
 
@@ -186,7 +184,7 @@ export default function Navbar({ settings = {} }) {
                       >
                         <div className="w-10 h-10 rounded-lg overflow-hidden bg-surface-800 shrink-0 border border-white/5">
                           {product.imageUrl ? (
-                            <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+                            <image src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-xs font-bold text-white/20">
                               {product.name.charAt(0)}
@@ -218,7 +216,7 @@ export default function Navbar({ settings = {} }) {
                       }}
                       className="w-full text-center py-2.5 text-[11px] text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 transition-colors border-t border-white/5 font-medium"
                     >
-                      ดูผลลัพธ์ทั้งหมดสำหรับ "{searchQuery}"
+                      ดูผลลัพธ์ทั้งหมดสำหรับ {searchQuery}
                     </button>
                   )}
                 </div>
@@ -228,10 +226,10 @@ export default function Navbar({ settings = {} }) {
             {/* Desktop Nav Links — right next to search bar */}
             <ul className="hidden lg:flex items-center gap-0.5 shrink-0">
               <li>
-                <a href="/#hero" className={`relative px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 ${pathname === '/' ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
+                <Link href="/#hero" className={`relative px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 ${pathname === '/' ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
                   <EditableBlock settingKey="nav_link_1" defaultText="Home" />
                   {pathname === '/' && <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 bg-brand-500 rounded-full" />}
-                </a>
+                </Link>
               </li>
               <li>
                 <Link href="/products" className={`relative px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 ${pathname.startsWith('/products') ? 'text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}>
@@ -291,7 +289,7 @@ export default function Navbar({ settings = {} }) {
           <div className="bg-surface-900/98 backdrop-blur-3xl border border-white/10 rounded-2xl p-4 mt-2 space-y-1 shadow-2xl">
             
             {/* Note: Mobile search is now in the main header, but we can keep a larger one here if needed, or remove it. I'll remove it to avoid duplicate states or keep it simple. */}
-            <a
+            <Link
               href="/#hero"
               onClick={() => setIsMobileMenuOpen(false)}
               className={`block px-4 py-3 rounded-xl transition-all duration-300 font-medium ${
@@ -301,7 +299,7 @@ export default function Navbar({ settings = {} }) {
               }`}
             >
               <EditableBlock settingKey="nav_link_1" defaultText="Home" />
-            </a>
+            </Link>
             <Link
               href="/products"
               onClick={() => setIsMobileMenuOpen(false)}

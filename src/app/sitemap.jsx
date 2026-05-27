@@ -13,11 +13,13 @@ export default async function sitemap() {
   // 1. Static routes
   const routes = [
     '',
+    '/about',
+    '/search',
     '/login',
   ].map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
-    changeFrequency: 'daily',
+    changeFrequency: route === '' ? 'daily' : 'weekly',
     priority: route === '' ? 1 : 0.8,
   }))
 
